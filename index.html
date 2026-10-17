@@ -260,8 +260,8 @@ var DEFAULTS = {
   rechMode: 'pct', partPublic: '20', rechKwh: '200', rechDur: '45', rechDurU: 'min', rechPow: '150',
   rechFreq: '1', rechFreqU: 'jour', pPublic: '0,55', pPublicBase: 'ttc',
   coutChauf: '35',
-  modeE: 'achat', prixE: '290000', loyE: '5200', durLocE: '5', durLocUE: 'ans', optE: '2900',
-  modeD: 'achat', prixD: '115000', loyD: '2100', durLocD: '5', durLocUD: 'ans', optD: '1150',
+  modeE: 'achat', prixE: '290000', loyE: '5200', durLocE: '5', durLocUE: 'ans', optE: '2900', cbTauxE: '5', cbPremierE: 'non', cbPremierMontantE: '0', cbResE: '10', cbResUE: 'pct',
+  modeD: 'achat', prixD: '115000', loyD: '2100', durLocD: '5', durLocUD: 'ans', optD: '1150', cbTauxD: '5', cbPremierD: 'non', cbPremierMontantD: '0', cbResD: '10', cbResUD: 'pct',
   aideAchat: '0', aideBorne: '0',
   finPartE: '80', finTauxE: '5', finDureeE: '5', finUE: 'ans',
   finPartD: '80', finTauxD: '5', finDureeD: '5', finUD: 'ans',
@@ -319,8 +319,8 @@ function ownsS(s, X) {
   return ownsAtEnd(s['mode' + X], leaseMonthsS(s, X), n);
 }
 function priceUsed(s, o, X) {
-  if (s['mode' + X] === 'achat') { return true; }
-  return s['mode' + X] === 'cbail' && !!o.revente && s.resU === 'pct' && ownsS(s, X);
+  if (s['mode' + X] === 'achat' || s['mode' + X] === 'cbail') { return true; }
+  return false;
 }
 
 var GROUPS = [
@@ -382,21 +382,27 @@ var GROUPS = [
     { sep: 'Tracteur électrique' },
     { k: 'modeE', l: 'Mode d’acquisition', ctx: 'électrique', select: U_ACQ },
     { k: 'prixE', l: 'Prix d’achat', ctx: 'électrique', u: '€ HT', pos: true, vis: function (s, o) { return priceUsed(s, o, 'E'); } },
-    { k: 'loyE', l: 'Loyer mensuel', ctx: 'électrique', u: '€ HT/mois', pos: true, vis: function (s) { return s.modeE !== 'achat'; } },
+    { k: 'loyE', l: 'Loyer mensuel', ctx: 'électrique', u: '€ HT/mois', pos: true, vis: function (s) { return s.modeE !== 'achat'; }, readonly: function (s) { return s.modeE === 'cbail'; } },
     { k: 'durLocE', l: 'Durée du contrat', ctx: 'électrique', unitKey: 'durLocUE', units: U_DUREE, pos: true, vis: function (s) { return s.modeE !== 'achat'; } },
-    { k: 'optE', l: 'Option d’achat en fin de contrat', ctx: 'électrique', u: '€ HT', vis: function (s) { return s.modeE === 'cbail'; } },
+    { k: 'cbTauxE', l: 'Taux annuel du crédit-bail', ctx: 'électrique', u: '%/an', vis: function (s) { return s.modeE === 'cbail'; } },
+    { k: 'cbPremierE', l: 'Premier loyer majoré', ctx: 'électrique', select: [['non', 'Non'], ['oui', 'Oui']], vis: function (s) { return s.modeE === 'cbail'; } },
+    { k: 'cbPremierMontantE', l: 'Montant du premier loyer majoré', ctx: 'électrique', u: '€ HT', pos: true, vis: function (s) { return s.modeE === 'cbail' && s.cbPremierE === 'oui'; } },
+    { k: 'cbResE', l: 'Valeur résiduelle du crédit-bail', ctx: 'électrique', unitKey: 'cbResUE', units: U_RES, max: function (s) { return s.cbResUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE === 'cbail'; } },
     { info: 'acqE' },
     { sep: 'Tracteur diesel' },
     { k: 'modeD', l: 'Mode d’acquisition', ctx: 'diesel', select: U_ACQ },
     { k: 'prixD', l: 'Prix d’achat', ctx: 'diesel', u: '€ HT', pos: true, vis: function (s, o) { return priceUsed(s, o, 'D'); } },
-    { k: 'loyD', l: 'Loyer mensuel', ctx: 'diesel', u: '€ HT/mois', pos: true, vis: function (s) { return s.modeD !== 'achat'; } },
+    { k: 'loyD', l: 'Loyer mensuel', ctx: 'diesel', u: '€ HT/mois', pos: true, vis: function (s) { return s.modeD !== 'achat'; }, readonly: function (s) { return s.modeD === 'cbail'; } },
     { k: 'durLocD', l: 'Durée du contrat', ctx: 'diesel', unitKey: 'durLocUD', units: U_DUREE, pos: true, vis: function (s) { return s.modeD !== 'achat'; } },
-    { k: 'optD', l: 'Option d’achat en fin de contrat', ctx: 'diesel', u: '€ HT', vis: function (s) { return s.modeD === 'cbail'; } },
+    { k: 'cbTauxD', l: 'Taux annuel du crédit-bail', ctx: 'diesel', u: '%/an', vis: function (s) { return s.modeD === 'cbail'; } },
+    { k: 'cbPremierD', l: 'Premier loyer majoré', ctx: 'diesel', select: [['non', 'Non'], ['oui', 'Oui']], vis: function (s) { return s.modeD === 'cbail'; } },
+    { k: 'cbPremierMontantD', l: 'Montant du premier loyer majoré', ctx: 'diesel', u: '€ HT', pos: true, vis: function (s) { return s.modeD === 'cbail' && s.cbPremierD === 'oui'; } },
+    { k: 'cbResD', l: 'Valeur résiduelle du crédit-bail', ctx: 'diesel', unitKey: 'cbResUD', units: U_RES, max: function (s) { return s.cbResUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD === 'cbail'; } },
     { info: 'acqD' }
   ]},
-  { id: 'aides', on: 'aides', cx: true, title: 'Aides', note: 'Déduites de l’investissement. En location ou crédit-bail, l’aide est en général intégrée au loyer.', fields: [
+  { id: 'aides', on: 'aides', cx: true, title: 'Aides', note: 'Les aides sont indépendantes du mode de financement du tracteur. L’aide à l’achat du véhicule ne s’applique qu’en cas d’achat ; l’aide à l’installation de la borne réduit le coût de la borne, quel que soit le financement du véhicule.', fields: [
     { k: 'aideAchat', l: 'Aide à l’achat du tracteur électrique', u: '€', vis: function (s, o) { return !!o.achat && s.modeE === 'achat'; } },
-    { k: 'aideBorne', l: 'Aide à l’installation de la borne', u: '€', vis: function (s, o) { return !!o.borne; } }
+    { k: 'aideBorne', l: 'Aide à l’installation de la borne (indépendante du financement du tracteur)', u: '€', vis: function (s, o) { return !!o.borne; } }
   ]},
   { id: 'fin', on: 'fin', cx: true, req: 'achat', title: 'Financement par crédit', note: 'Intérêts d’un crédit amortissable mensuellement, pour les tracteurs achetés.', fields: [
     { sep: 'Tracteur électrique' },
@@ -523,6 +529,8 @@ function readData(s) {
       d[k] = isText(k) ? s[k] : num(s[k]);
     }
   }
+  if (s.modeE === 'cbail') { d.loyE = creditLeaseMonthly(s, 'E'); d.optE = creditLeaseResidual(s, 'E'); }
+  if (s.modeD === 'cbail') { d.loyD = creditLeaseMonthly(s, 'D'); d.optD = creditLeaseResidual(s, 'D'); }
   return d;
 }
 function copyObj(o) {
@@ -567,6 +575,24 @@ function leaseMonths(d, X) {
   var dur = d['durLoc' + X];
   return Math.max(0, Math.round(d['durLocU' + X] === 'mois' ? dur : dur * 12));
 }
+function creditLeaseResidual(s, X) {
+  var price = Math.max(0, num(s['prix' + X]));
+  var value = Math.max(0, num(s['cbRes' + X]));
+  return s['cbResU' + X] === 'eur' ? value : price * value / 100;
+}
+function creditLeaseMonthly(s, X) {
+  var price = Math.max(0, num(s['prix' + X]));
+  var months = leaseMonths(s, X);
+  var rate = Math.max(0, num(s['cbTaux' + X])) / 100 / 12;
+  var first = s['cbPremier' + X] === 'oui' ? Math.max(0, num(s['cbPremierMontant' + X])) : 0;
+  var residual = creditLeaseResidual(s, X);
+  var payments = months - (first > 0 ? 1 : 0);
+  if (months <= 0 || price <= 0 || first >= price || residual >= price || first + residual >= price || payments <= 0) { return 0; }
+  if (rate === 0) { return Math.max(0, (price - first - residual) / payments); }
+  var pvResidual = residual / Math.pow(1 + rate, months);
+  var financed = price - first - pvResidual;
+  return Math.max(0, financed * rate / (1 - Math.pow(1 + rate, -payments)));
+}
 
 function loanInterestByYear(P, ratePct, term, termUnit, n) {
   var arr = [];
@@ -585,7 +611,7 @@ function loanInterestByYear(P, ratePct, term, termUnit, n) {
   }
   return arr;
 }
-function rentInYear(mode, rent, months, opt, y) {
+function rentInYear(mode, rent, months, opt, y, first) {
   if (mode === 'achat' || months <= 0) { return 0; }
   var from = 12 * (y - 1) + 1;
   var to = 12 * y;
@@ -595,6 +621,7 @@ function rentInYear(mode, rent, months, opt, y) {
   if (mode === 'location') { return rent * Math.min(12, Math.max(0, to - from + 1)); }
   var cnt = Math.max(0, Math.min(to, months) - from + 1);
   var c = rent * cnt;
+  if (mode === 'cbail' && y === 1 && first > 0) { c += Math.max(0, first) - rent; }
   if (mode === 'cbail' && months >= from && months <= to) { c += opt; }
   return c;
 }
@@ -779,8 +806,8 @@ function compute(d, on) {
     pegDY = on.regl ? d.pegD * fA : 0;
     certY = (on.fisc && eOn) ? depY * d.certif : 0;
     fiscY = (on.fisc && y === 1) ? d.fiscGain : 0;
-    rEY = acqOn ? rentInYear(d.modeE, d.loyE, lmE, d.optE, y) : 0;
-    rDY = acqOn ? rentInYear(d.modeD, d.loyD, lmD, d.optD, y) : 0;
+    rEY = acqOn ? rentInYear(d.modeE, d.loyE, lmE, d.optE, y, d.modeE === 'cbail' && d.cbPremierE === 'oui' ? d.cbPremierMontantE : 0) : 0;
+    rDY = acqOn ? rentInYear(d.modeD, d.loyD, lmD, d.optD, y, d.modeD === 'cbail' && d.cbPremierD === 'oui' ? d.cbPremierMontantD : 0) : 0;
     rc = bat ? bat.repl[y] : 0;
     costE = eHT + oc.entE * fA + oc.assE * fA + oc.borneAbo * fA + intE[y] + rc + chY + pegEY + rEY - certY - fiscY;
     costD = dHT + oc.entD * fA + oc.adb * fA + oc.assD * fA + intD[y] + carbY + pegDY + rDY;
@@ -1255,7 +1282,7 @@ function blockReason(g) {
   if (!g.on || !ons[g.on] || o[g.on]) { return ''; }
   if (g.cx && state.mode === 'conso') { return ''; }
   if (g.req && !o[g.req]) { return 'Inactif : active d’abord « ' + GROUP_BY_ON[g.req].title + ' ».'; }
-  if (g.on === 'aides') { return 'Inactif : aucun tracteur électrique en achat et borne désactivée.'; }
+  if (g.on === 'aides') { return 'Inactif : ni achat du tracteur électrique ni investissement dans une borne activé.'; }
   if (g.on === 'fin') { return 'Inactif : aucun tracteur n’est en achat.'; }
   if (g.on === 'revente') { return 'Inactif : le client n’est propriétaire d’aucun tracteur en fin de période.'; }
   return '';
@@ -1945,7 +1972,7 @@ function fieldHtml(f, gid, idx) {
     for (i = 0; i < f.select.length; i++) { h += '<option value="' + f.select[i][0] + '">' + esc(f.select[i][1]) + '</option>'; }
     h += '</select>';
   } else {
-    h += '<input id="f_' + f.k + '" data-key="' + f.k + '" type="text" autocomplete="off" ' + (f.text ? 'inputmode="text"' : 'inputmode="decimal"') + ' value="' + esc(state[f.k]) + '">';
+    h += '<input id="f_' + f.k + '" data-key="' + f.k + '" type="text" autocomplete="off" ' + (f.text ? 'inputmode="text"' : 'inputmode="decimal"') + (f.readonly && f.readonly(state) ? ' readonly aria-readonly="true"' : '') + ' value="' + esc(state[f.k]) + '">';
     if (f.unitKey) {
       h += '<select class="usel" data-key="' + f.unitKey + '" aria-label="Unité">';
       for (i = 0; i < f.units.length; i++) { h += '<option value="' + f.units[i][0] + '">' + esc(f.units[i][1]) + '</option>'; }
@@ -2088,8 +2115,8 @@ function updateInfos(r) {
     if (state.rechMode === 'auto' && !eo.batterie) { setInfo('rech', 'Le calcul automatique utilise l’autonomie et le temps de recharge de la carte Batterie : active-la en étude complète.', true); }
     else { setInfo('rech', 'Année 1 : <b>' + fmt(r.an.pub, 0) + ' kWh</b> en borne publique (' + fmt(r.share1 * 100, 0) + ' % de l’énergie)' + (eo.chauf ? ', ' + fmt(r.yr.hours[1], 0) + ' h de chauffeur' : '') + '. Prix moyen : ' + fmt(r.pVar1, 3) + ' €/kWh HT.', false); }
   } else { setInfo('rech', '', false); }
-  setInfo('acqE', (eo.achat && r.leaseShortE) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : '', true);
-  setInfo('acqD', (eo.achat && r.leaseShortD) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : '', true);
+  setInfo('acqE', (state.modeE === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du premier loyer éventuel et de la valeur résiduelle. Valeur résiduelle due en fin de contrat : <b>' + eur(r.d.optE) + '</b>. ' : '') + ((eo.achat && r.leaseShortE) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state.modeE === 'cbail' || (eo.achat && r.leaseShortE));
+  setInfo('acqD', (state.modeD === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du premier loyer éventuel et de la valeur résiduelle. Valeur résiduelle due en fin de contrat : <b>' + eur(r.d.optD) + '</b>. ' : '') + ((eo.achat && r.leaseShortD) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state.modeD === 'cbail' || (eo.achat && r.leaseShortD));
 }
 
 function updateLive() {
@@ -2121,6 +2148,11 @@ function updateLive() {
 }
 
 function refreshAll() {
+  var le, ld;
+  if (state.modeE === 'cbail') { le = document.getElementById('f_loyE'); if (le) { le.value = fmt(creditLeaseMonthly(state, 'E'), 2).replace(/\u202f/g, ' '); le.readOnly = true; } }
+  else { le = document.getElementById('f_loyE'); if (le) { le.readOnly = false; le.value = state.loyE; } }
+  if (state.modeD === 'cbail') { ld = document.getElementById('f_loyD'); if (ld) { ld.value = fmt(creditLeaseMonthly(state, 'D'), 2).replace(/\u202f/g, ' '); ld.readOnly = true; } }
+  else { ld = document.getElementById('f_loyD'); if (ld) { ld.readOnly = false; ld.value = state.loyD; } }
   applyModeUI();
   applyVisibility();
   refreshMissing();
