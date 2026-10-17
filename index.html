@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Comparateur tracteur électrique vs diesel</title>
+<style>
+:root{
+  --brand:#00529b;
+  --green:#1a9b6c;
+  --orange:#e0642a;
+  --bg:#f3f5f8;
+  --card:#ffffff;
+  --text:#1b2430;
+  --muted:#6b7683;
+  --line:#dde2e9;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.4}
+#app{max-width:760px;margin:0 auto;padding-bottom:40px}
+.top{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 0}
+.top h1{margin:0 0 8px;font-size:17px;font-weight:700}
+.tabs{display:flex;gap:6px}
+.tab{flex:1;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:15px;font-weight:600;padding:10px 6px;border-radius:10px 10px 0 0;cursor:pointer;font-family:inherit}
+.tab.on{background:var(--bg);color:var(--brand)}
+.view{padding:14px}
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.chead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.card h2{margin:0;font-size:16px;color:var(--brand)}
+.card .note{margin:4px 0 0;font-size:13px;color:var(--muted)}
+.cbody{margin-top:4px;transition:opacity .15s}
+.card.off .cbody{opacity:.4}
+.card.off h2{color:var(--muted)}
+.sep{margin-top:14px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.field{margin-top:10px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+.field .hint{font-weight:400;color:var(--muted)}
+.exb{display:none;margin-left:6px;font-size:11px;font-weight:700;background:#fff0d9;color:#a35a00;border-radius:6px;padding:1px 6px}
+.inp{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+.inp:focus-within{border-color:var(--brand)}
+.inp input,.inp select{flex:1;min-width:0;border:0;outline:0;font-size:16px;padding:11px 12px;background:transparent;color:var(--text);font-family:inherit}
+.inp input:disabled,.inp select:disabled{color:var(--muted)}
+.inp .unit{padding:0 12px;font-size:13px;color:var(--muted);white-space:nowrap;background:#f6f8fa;align-self:stretch;display:flex;align-items:center;border-left:1px solid var(--line)}
+.sw{flex:none;width:52px;height:30px;border-radius:15px;border:0;background:#c5ccd6;position:relative;cursor:pointer;padding:0;transition:background .15s}
+.sw span{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .15s}
+.sw.on{background:var(--green)}
+.sw.on span{left:25px}
+.live{background:linear-gradient(135deg,#0b3d91,#00529b);color:#fff}
+.live h2{color:#fff}
+.lgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.lbox{background:rgba(255,255,255,.14);border-radius:10px;padding:10px}
+.lbox .t{font-size:12px;opacity:.85}
+.lbox .v{font-size:18px;font-weight:700;margin-top:2px}
+.btns{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.btn{border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn.main{background:var(--brand);color:#fff}
+.btn.sec{background:#e6edf5;color:var(--brand)}
+.btn.danger{background:#fdeaea;color:#b42318}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row2{display:flex;gap:8px}
+.row2 .btn{flex:1}
+.warn{background:#fff4e5;border:1px solid #f5c98b;color:#8a4b00;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px}
+.toolbar{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.pgwrap{margin:0 auto 14px;overflow:hidden;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.15);background:#fff}
+.pgscale{transform-origin:top left;width:794px}
+#modal{position:fixed;inset:0;background:rgba(10,20,35,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+#modal.on{display:flex}
+.mbox{background:#fff;border-radius:16px;padding:18px;max-width:380px;width:100%}
+.mbox h3{margin:0 0 6px;font-size:17px}
+.mbox p{margin:0 0 14px;color:var(--muted)}
+/* Pages A4 (96 dpi) */
+.page{width:794px;height:1122px;padding:38px 44px 52px;background:#fff;color:#1b2430;position:relative;overflow:hidden;font-size:13px;line-height:1.35;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--brand);padding-bottom:12px;margin-bottom:16px}
+.ph-t{font-size:23px;font-weight:800;color:var(--brand);line-height:1.15}
+.ph-s{font-size:13px;color:#6b7683;margin-top:3px}
+.ph-r{text-align:right;font-size:12px;color:#6b7683}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.kpi{border-radius:12px;padding:12px 16px;color:#fff}
+.kpi.g{background:var(--green)}
+.kpi.b{background:var(--brand)}
+.kpi.d{background:#3f4d5e}
+.kpi .k1{font-size:12px;opacity:.92;text-transform:uppercase;letter-spacing:.4px}
+.kpi .k2{font-size:30px;font-weight:800;margin-top:2px}
+.kpi .k3{font-size:12px;opacity:.9}
+.basis{font-size:11.5px;color:#6b7683;margin:6px 0 10px}
+.st{font-size:15px;font-weight:700;color:var(--brand);margin:14px 0 6px;border-left:4px solid var(--brand);padding-left:8px}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px}
+table.t th{background:#eef3f9;color:#00386b;text-align:right;padding:6px 8px;font-weight:700}
+table.t th:first-child,table.t td:first-child{text-align:left}
+table.t td{padding:5px 8px;text-align:right;border-bottom:1px solid #e6eaf0}
+table.t tr.hl td{font-weight:800;background:#eaf7f1;color:#0d6b49}
+.foot{position:absolute;left:44px;right:44px;bottom:20px;display:flex;justify-content:space-between;font-size:11px;color:#8a94a1;border-top:1px solid #e6eaf0;padding-top:6px}
+.assump{margin:0;padding-left:18px;font-size:12px;color:#3a4552}
+.assump li{margin-bottom:3px}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pill{display:inline-block;border-radius:10px;padding:2px 9px;font-size:11.5px;font-weight:600;margin:0 5px 5px 0}
+.pill.y{background:#e3f5ec;color:#0d6b49}
+.pill.n{background:#eef0f3;color:#6b7683;text-decoration:line-through}
+.callout{background:#eaf2fb;border-left:4px solid var(--brand);padding:9px 12px;border-radius:6px;font-size:12.5px;margin:10px 0}
+#stage{position:absolute;left:-10000px;top:0;width:794px}
+#printArea{display:none}
+@media print{
+  body{background:#fff}
+  #app,#modal{display:none !important}
+  #printArea{display:block}
+  #printArea .page{break-after:page;page-break-after:always}
+  #printArea .page:last-child{break-after:auto;page-break-after:auto}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <h1>Comparateur tracteur électrique vs diesel</h1>
+    <div class="tabs">
+      <button class="tab on" type="button" data-action="tab" data-tab="saisie" id="tab-saisie">Données</button>
+      <button class="tab" type="button" data-action="tab" data-tab="rapport" id="tab-rapport">Rapport</button>
+    </div>
+  </header>
+
+  <section class="view" id="view-saisie">
+    <div id="formHost"></div>
+    <div class="card live" id="liveBox"></div>
+    <div class="btns">
+      <button class="btn main" type="button" data-action="go-rapport">Voir le rapport</button>
+      <div class="row2">
+        <button class="btn sec" type="button" data-action="reset">Réinitialiser</button>
+        <button class="btn danger" type="button" data-action="clear">Tout effacer</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-rapport" style="display:none">
+    <div id="reportWarn"></div>
+    <div class="toolbar">
+      <button class="btn main" type="button" data-action="pdf" id="btnPdf">Télécharger le rapport en PDF (4 pages)</button>
+      <button class="btn sec" type="button" data-action="tab" data-tab="saisie">Modifier les données</button>
+    </div>
+    <div id="pagesHost"></div>
+  </section>
+</div>
+
+<div id="stage"></div>
+<div id="printArea"></div>
+
+<div id="modal">
+  <div class="mbox">
+    <h3 id="mTitle"></h3>
+    <p id="mText"></p>
+    <div class="row2">
+      <button class="btn sec" type="button" data-action="modal-cancel">Annuler</button>
+      <button class="btn danger" type="button" data-action="modal-ok" id="mOk">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ===================== CŒUR : données et calculs ===================== */
+var STORAGE_KEY = 'ecoCamionData_v2';
+var OLD_STORAGE_KEY = 'ecoCamionData_v1';
+
+var DEFAULTS = {
+  titre: 'Tracteur 44 t : électrique vs diesel',
+  client: '',
+  auteur: 'GCA Trucks Marseille',
+  kmAn: '100000',
+  annees: '5',
+  km: '368,4',
+  kwh: '319',
+  pElec: '0,20',
+  tvaElec: '20',
+  cDiesel: '25',
+  pDiesel: '2,50',
+  tvaDiesel: '20',
+  ticpe: '0,594',
+  partPublic: '20',
+  pPublic: '0,55',
+  rembTicpe: '0',
+  prixE: '290000',
+  prixD: '115000',
+  aideAchat: '0',
+  aideBorne: '0',
+  finPart: '80',
+  finTaux: '5',
+  finDuree: '5',
+  resE: '30',
+  resD: '35',
+  borneInv: '45000',
+  borneNb: '1',
+  borneAbo: '1500',
+  perEntretien: 'an',
+  entE: '6000',
+  entD: '11000',
+  adbL: '1,3',
+  adbP: '0,85',
+  assE: '7500',
+  assD: '7000',
+  evElec: '0',
+  evDiesel: '0',
+  evAutres: '0',
+  co2D: '2,65',
+  co2E: '0,06'
+};
+
+var DEFAULT_ON = {
+  energie: true, recharge: false, remb: false, achat: true, aides: false, fin: false,
+  revente: true, borne: true, entretien: true, adblue: true, assur: true, evol: true, co2: true
+};
+
+/* Valeurs d'exemple à remplacer par les vraies données */
+var EX_KEYS = {
+  partPublic: 1, pPublic: 1, prixE: 1, prixD: 1, finPart: 1, finTaux: 1, finDuree: 1,
+  resE: 1, resD: 1, borneInv: 1, borneAbo: 1, entE: 1, entD: 1, adbL: 1, adbP: 1,
+  assE: 1, assD: 1, co2D: 1, co2E: 1
+};
+
+var GROUPS = [
+  { id: 'proj', title: 'Projection', note: 'Durée et kilométrage de la comparaison.', fields: [
+    { k: 'kmAn', l: 'Kilométrage annuel', u: 'km/an' },
+    { k: 'annees', l: 'Durée de la comparaison', u: 'ans' }
+  ]},
+  { id: 'energie', on: 'energie', title: 'Consommation et prix de l\'énergie', note: 'Base du calcul. Désactive pour ne pas compter l\'énergie.', fields: [
+    { sep: 'Essai de référence' },
+    { k: 'km', l: 'Distance parcourue', u: 'km' },
+    { k: 'kwh', l: 'Énergie consommée', u: 'kWh' },
+    { sep: 'Électricité' },
+    { k: 'pElec', l: 'Prix du kWh au dépôt (TTC)', u: '€/kWh' },
+    { k: 'tvaElec', l: 'TVA', u: '%' },
+    { sep: 'Gazole (camion thermique)' },
+    { k: 'cDiesel', l: 'Consommation', u: 'L/100 km' },
+    { k: 'pDiesel', l: 'Prix du gazole (TTC)', u: '€/L' },
+    { k: 'tvaDiesel', l: 'TVA', u: '%' },
+    { k: 'ticpe', l: 'TICPE comprise dans le prix', u: '€/L', hint: 'taux à vérifier' }
+  ]},
+  { id: 'recharge', on: 'recharge', title: 'Recharge en borne publique', note: 'Une partie des kWh est rechargée hors dépôt, à un prix plus élevé.', fields: [
+    { k: 'partPublic', l: 'Part de l\'énergie rechargée en borne publique', u: '%' },
+    { k: 'pPublic', l: 'Prix du kWh en borne publique (TTC)', u: '€/kWh' }
+  ]},
+  { id: 'remb', on: 'remb', title: 'Remboursement partiel de TICPE', note: 'Déduit du coût HT du gazole.', fields: [
+    { k: 'rembTicpe', l: 'Remboursement', u: '€/L', hint: 'HT' }
+  ]},
+  { id: 'achat', on: 'achat', title: 'Prix d\'achat du matériel neuf', note: 'Désactive pour comparer uniquement les consommations. Prix HT.', fields: [
+    { k: 'prixE', l: 'Tracteur électrique', u: '€ HT' },
+    { k: 'prixD', l: 'Tracteur diesel', u: '€ HT' }
+  ]},
+  { id: 'aides', on: 'aides', title: 'Aides', note: 'Déduites de l\'investissement.', fields: [
+    { k: 'aideAchat', l: 'Aide à l\'achat du tracteur électrique', u: '€' },
+    { k: 'aideBorne', l: 'Aide à l\'installation de la borne', u: '€' }
+  ]},
+  { id: 'fin', on: 'fin', title: 'Financement', note: 'Intérêts d\'un crédit amortissable, appliqué aux deux tracteurs.', fields: [
+    { k: 'finPart', l: 'Part financée', u: '%' },
+    { k: 'finTaux', l: 'Taux d\'intérêt annuel', u: '%' },
+    { k: 'finDuree', l: 'Durée du crédit', u: 'ans' }
+  ]},
+  { id: 'revente', on: 'revente', title: 'Valeur de revente', note: 'En % du prix d\'achat, à la fin de la durée de comparaison.', fields: [
+    { k: 'resE', l: 'Tracteur électrique', u: '%' },
+    { k: 'resD', l: 'Tracteur diesel', u: '%' }
+  ]},
+  { id: 'borne', on: 'borne', title: 'Borne de recharge', note: 'Investissement et coûts annuels, répartis entre les camions qui l\'utilisent.', fields: [
+    { k: 'borneInv', l: 'Achat et installation', u: '€ HT' },
+    { k: 'borneNb', l: 'Nombre de camions utilisant la borne', u: 'camions' },
+    { k: 'borneAbo', l: 'Abonnement et maintenance', u: '€/an' }
+  ]},
+  { id: 'entretien', on: 'entretien', title: 'Entretien', note: 'Contrat ou coût d\'entretien par camion.', fields: [
+    { k: 'perEntretien', l: 'Période de saisie', select: [['an', 'Par an'], ['mois', 'Par mois']] },
+    { k: 'entE', l: 'Tracteur électrique', u: '€ HT' },
+    { k: 'entD', l: 'Tracteur diesel', u: '€ HT' }
+  ]},
+  { id: 'adblue', on: 'adblue', title: 'AdBlue (diesel uniquement)', note: '', fields: [
+    { k: 'adbL', l: 'Consommation', u: 'L/100 km' },
+    { k: 'adbP', l: 'Prix de l\'AdBlue', u: '€/L HT' }
+  ]},
+  { id: 'assur', on: 'assur', title: 'Assurance et taxes', note: 'Assurance, carte grise, taxes annuelles : total par camion.', fields: [
+    { k: 'assE', l: 'Tracteur électrique', u: '€/an' },
+    { k: 'assD', l: 'Tracteur diesel', u: '€/an' }
+  ]},
+  { id: 'evol', on: 'evol', title: 'Évolution des prix', note: 'Appliquée à partir de la 2e année.', fields: [
+    { k: 'evElec', l: 'Prix de l\'électricité', u: '%/an' },
+    { k: 'evDiesel', l: 'Prix du gazole', u: '%/an' },
+    { k: 'evAutres', l: 'Autres coûts (entretien, assurance, AdBlue, borne)', u: '%/an' }
+  ]},
+  { id: 'co2', on: 'co2', title: 'Émissions de CO₂', note: 'Émissions à l\'usage (combustion ou électricité).', fields: [
+    { k: 'co2D', l: 'Gazole', u: 'kg CO₂/L' },
+    { k: 'co2E', l: 'Électricité', u: 'kg CO₂/kWh' }
+  ]},
+  { id: 'info', title: 'Informations du rapport', note: '', fields: [
+    { k: 'titre', l: 'Titre', u: '', text: true },
+    { k: 'client', l: 'Client / référence', u: '', text: true },
+    { k: 'auteur', l: 'Établi par', u: '', text: true }
+  ]}
+];
+
+var TEXT_KEYS = { titre: 1, client: 1, auteur: 1, perEntretien: 1 };
+
+function num(v) {
+  var s = String(v === undefined || v === null ? '' : v).replace(/\s/g, '').replace(',', '.');
+  var n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+function fmt(n, d) {
+  if (!isFinite(n)) { return '0'; }
+  return n.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+function eur(n, d) { return fmt(n, d === undefined ? 0 : d) + ' €'; }
+function ans(n) { return n + (n > 1 ? ' ans' : ' an'); }
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function readData(s) {
+  var d = {};
+  var k;
+  for (k in s) {
+    if (Object.prototype.hasOwnProperty.call(s, k)) {
+      d[k] = TEXT_KEYS[k] ? s[k] : num(s[k]);
+    }
+  }
+  return d;
+}
+
+function loanInterest(P, rate, term, n) {
+  var arr = [];
+  var y;
+  for (y = 0; y <= n; y++) { arr.push(0); }
+  if (P <= 0 || rate <= 0) { return arr; }
+  var m = Math.max(1, Math.round(term));
+  var pay = P * rate / (1 - Math.pow(1 + rate, -m));
+  var bal = P;
+  var it;
+  for (y = 1; y <= n; y++) {
+    if (y <= m) {
+      it = bal * rate;
+      arr[y] = it;
+      bal = bal - (pay - it);
+    }
+  }
+  return arr;
+}
+
+function compute(d, on) {
+  var n = Math.round(d.annees);
+  if (n < 1) { n = 1; }
+  if (n > 15) { n = 15; }
+  var eOn = on.energie ? 1 : 0;
+
+  var conso100 = d.km > 0 ? d.kwh / d.km * 100 : 0;
+  var pp = Math.min(100, Math.max(0, d.partPublic));
+  var pElecEff = on.recharge ? (1 - pp / 100) * d.pElec + pp / 100 * d.pPublic : d.pElec;
+  var pElecHT = pElecEff / (1 + d.tvaElec / 100);
+  var pDieHT = d.pDiesel / (1 + d.tvaDiesel / 100);
+  var rembU = on.remb ? d.rembTicpe : 0;
+  var pDieHTnet = pDieHT - rembU;
+
+  var LRef = d.cDiesel * d.km / 100;
+  var ref = {
+    L: LRef,
+    eleTTC: eOn * d.kwh * pElecEff,
+    dieTTC: eOn * LRef * d.pDiesel,
+    eleHT: eOn * d.kwh * pElecHT,
+    dieHT: eOn * LRef * pDieHTnet,
+    ticpe: eOn * LRef * d.ticpe
+  };
+  ref.ecoTTC = ref.dieTTC - ref.eleTTC;
+  ref.ecoHT = ref.dieHT - ref.eleHT;
+
+  var kwhAn = conso100 * d.kmAn / 100;
+  var LAn = d.cDiesel * d.kmAn / 100;
+  var an = {
+    kwh: kwhAn,
+    L: LAn,
+    eleTTC: eOn * kwhAn * pElecEff,
+    dieTTC: eOn * LAn * d.pDiesel,
+    eleHT: eOn * kwhAn * pElecHT,
+    dieHT: eOn * LAn * pDieHTnet,
+    ticpe: eOn * LAn * d.ticpe,
+    remb: eOn * LAn * rembU
+  };
+  an.ecoTTC = an.dieTTC - an.eleTTC;
+  an.ecoHT = an.dieHT - an.eleHT;
+  an.pctTTC = an.dieTTC > 0 ? an.ecoTTC / an.dieTTC * 100 : 0;
+  an.pctHT = an.dieHT > 0 ? an.ecoHT / an.dieHT * 100 : 0;
+
+  /* Autres coûts annuels (HT, par camion) */
+  var mult = d.perEntretien === 'mois' ? 12 : 1;
+  var nb = d.borneNb >= 1 ? d.borneNb : 1;
+  var adbLitres = d.adbL * d.kmAn / 100;
+  var oc = {
+    entE: on.entretien ? d.entE * mult : 0,
+    entD: on.entretien ? d.entD * mult : 0,
+    adbLitres: adbLitres,
+    adb: on.adblue ? adbLitres * d.adbP : 0,
+    assE: on.assur ? d.assE : 0,
+    assD: on.assur ? d.assD : 0,
+    borneAbo: on.borne ? d.borneAbo / nb : 0
+  };
+
+  /* Investissements (année 0) */
+  var achatE = on.achat ? d.prixE : 0;
+  var achatD = on.achat ? d.prixD : 0;
+  var aideA = (on.achat && on.aides) ? d.aideAchat : 0;
+  var netE = achatE - aideA;
+  var aideB = (on.borne && on.aides) ? d.aideBorne : 0;
+  var borneNet = on.borne ? (d.borneInv - aideB) / nb : 0;
+
+  /* Valeur de revente */
+  var resE = (on.revente && on.achat) ? d.prixE * d.resE / 100 : 0;
+  var resD = (on.revente && on.achat) ? d.prixD * d.resD / 100 : 0;
+
+  /* Financement */
+  var finOn = on.fin && on.achat;
+  var intE = loanInterest(finOn ? netE * d.finPart / 100 : 0, d.finTaux / 100, d.finDuree, n);
+  var intD = loanInterest(finOn ? achatD * d.finPart / 100 : 0, d.finTaux / 100, d.finDuree, n);
+
+  /* Boucle annuelle */
+  var cumE = [netE + borneNet];
+  var cumD = [achatD];
+  var cE = { achat: netE, borne: borneNet, ene: 0, ent: 0, adb: 0, ass: 0, fin: 0 };
+  var cD = { achat: achatD, borne: 0, ene: 0, ent: 0, adb: 0, ass: 0, fin: 0 };
+  var y, fE, fD, fA, eneE, eneD, costE, costD;
+  for (y = 1; y <= n; y++) {
+    fE = on.evol ? Math.pow(1 + d.evElec / 100, y - 1) : 1;
+    fD = on.evol ? Math.pow(1 + d.evDiesel / 100, y - 1) : 1;
+    fA = on.evol ? Math.pow(1 + d.evAutres / 100, y - 1) : 1;
+    eneE = an.eleHT * fE;
+    eneD = an.dieHT * fD;
+    costE = eneE + oc.entE * fA + oc.assE * fA + oc.borneAbo * fA + intE[y];
+    costD = eneD + oc.entD * fA + oc.adb * fA + oc.assD * fA + intD[y];
+    cE.ene += eneE; cE.ent += oc.entE * fA; cE.ass += oc.assE * fA; cE.borne += oc.borneAbo * fA; cE.fin += intE[y];
+    cD.ene += eneD; cD.ent += oc.entD * fA; cD.adb += oc.adb * fA; cD.ass += oc.assD * fA; cD.fin += intD[y];
+    cumE.push(cumE[y - 1] + costE);
+    cumD.push(cumD[y - 1] + costD);
+  }
+  var stackE = cE.achat + cE.borne + cE.ene + cE.ent + cE.adb + cE.ass + cE.fin;
+  var stackD = cD.achat + cD.borne + cD.ene + cD.ent + cD.adb + cD.ass + cD.fin;
+  var tcoE = stackE - resE;
+  var tcoD = stackD - resD;
+
+  /* Économie annuelle d'exploitation (année 1, hors capital et financement) */
+  var opE1 = an.eleHT + oc.entE + oc.assE + oc.borneAbo;
+  var opD1 = an.dieHT + oc.entD + oc.adb + oc.assD;
+
+  /* Retour sur investissement (flux de trésorerie, hors revente) */
+  var be = null;
+  var be0 = (cumD[0] - cumE[0]) >= 0;
+  var s0, s1;
+  if (be0) { be = 0; }
+  else {
+    for (y = 1; y <= n; y++) {
+      s0 = cumD[y - 1] - cumE[y - 1];
+      s1 = cumD[y] - cumE[y];
+      if (s1 >= 0) { be = (y - 1) + (-s0) / (s1 - s0); break; }
+    }
+  }
+
+  /* CO2 */
+  var kgD = on.co2 ? LAn * d.co2D : 0;
+  var kgE = on.co2 ? kwhAn * d.co2E : 0;
+
+  return {
+    n: n,
+    km: d.km,
+    kwh: d.kwh,
+    conso100: conso100,
+    pElecEff: pElecEff,
+    p: { elecHT: pElecHT, dieHT: pDieHT, dieHTnet: pDieHTnet },
+    ref: ref,
+    an: an,
+    oc: oc,
+    cE: cE, cD: cD,
+    stackE: stackE, stackD: stackD,
+    resE: resE, resD: resD,
+    tcoE: tcoE, tcoD: tcoD,
+    tcoSav: tcoD - tcoE,
+    opSav: opD1 - opE1,
+    opE1: opE1, opD1: opD1,
+    cumE: cumE, cumD: cumD,
+    be: be, be0: be0,
+    kgD: kgD, kgE: kgE,
+    co2Year: (kgD - kgE) / 1000,
+    valid: d.kmAn > 0 && (on.energie ? (d.km > 0 && d.kwh > 0) : true)
+  };
+}
+/*END_CORE*/
+
+/* ===================== Graphiques SVG ===================== */
+function niceStep(x) {
+  if (x <= 0) { return 1; }
+  var e = Math.floor(Math.log(x) / Math.LN10);
+  var p = Math.pow(10, e);
+  var f = x / p;
+  var nf = f <= 1 ? 1 : (f <= 2 ? 2 : (f <= 5 ? 5 : 10));
+  return nf * p;
+}
+function niceScale(minV, maxV, n) {
+  if (minV > 0) { minV = 0; }
+  if (maxV < 0) { maxV = 0; }
+  if (maxV === minV) { maxV = 1; }
+  var step = niceStep((maxV - minV) / n);
+  return { min: Math.floor(minV / step) * step, max: Math.ceil(maxV / step) * step, step: step };
+}
+function svgOpen(w, h) {
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">';
+}
+
+function barChart(w, h, groups, o) {
+  var padL = 66, padR = 12, padT = 34, padB = 30;
+  var plotW = w - padL - padR, plotH = h - padT - padB;
+  var minV = 0, maxV = 0, i, g;
+  for (i = 0; i < groups.length; i++) {
+    g = groups[i];
+    if (g.a > maxV) { maxV = g.a; }
+    if (g.b > maxV) { maxV = g.b; }
+    if (g.a < minV) { minV = g.a; }
+    if (g.b < minV) { minV = g.b; }
+  }
+  var sc = niceScale(minV, maxV * 1.1, 4);
+  var yv = function (v) { return padT + (sc.max - v) / (sc.max - sc.min) * plotH; };
+  var s = svgOpen(w, h);
+  var steps = Math.round((sc.max - sc.min) / sc.step);
+  var t, y;
+  for (i = 0; i <= steps; i++) {
+    t = sc.min + i * sc.step;
+    y = yv(t);
+    s += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + y + '" y2="' + y + '" stroke="#e3e8ee" stroke-width="1"/>';
+    s += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" font-size="10.5" fill="#6b7683" text-anchor="end">' + fmt(t, 0) + '</text>';
+  }
+  var gw = plotW / groups.length;
+  var bw = Math.min(70, gw * 0.3);
+  var cx, ya, yb, v, arr, j;
+  for (i = 0; i < groups.length; i++) {
+    g = groups[i];
+    cx = padL + gw * i + gw / 2;
+    arr = [{ v: g.a, x: cx - bw - 4, c: o.ca }, { v: g.b, x: cx + 4, c: o.cb }];
+    for (j = 0; j < 2; j++) {
+      v = arr[j].v;
+      ya = Math.min(yv(v), yv(0));
+      yb = Math.abs(yv(v) - yv(0));
+      s += '<rect x="' + arr[j].x + '" y="' + ya + '" width="' + bw + '" height="' + Math.max(yb, 1) + '" rx="3" fill="' + arr[j].c + '"/>';
+      s += '<text x="' + (arr[j].x + bw / 2) + '" y="' + (v >= 0 ? yv(v) - 6 : yv(v) + 14) + '" font-size="11" font-weight="700" fill="#1b2430" text-anchor="middle">' + eur(v) + '</text>';
+    }
+    s += '<text x="' + cx + '" y="' + (h - 10) + '" font-size="12" font-weight="600" fill="#3a4552" text-anchor="middle">' + esc(g.label) + '</text>';
+  }
+  s += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + yv(0) + '" y2="' + yv(0) + '" stroke="#9aa5b1" stroke-width="1.2"/>';
+  s += '<rect x="' + padL + '" y="8" width="12" height="12" rx="2" fill="' + o.ca + '"/><text x="' + (padL + 18) + '" y="18" font-size="12" fill="#3a4552">' + esc(o.na) + '</text>';
+  s += '<rect x="' + (padL + 150) + '" y="8" width="12" height="12" rx="2" fill="' + o.cb + '"/><text x="' + (padL + 168) + '" y="18" font-size="12" fill="#3a4552">' + esc(o.nb) + '</text>';
+  s += '</svg>';
+  return s;
+}
+
+function stackedChart(w, h, bars, comps) {
+  var padL = 70, plotRight = 420, padT = 28, padB = 30;
+  var plotH = h - padT - padB;
+  var maxT = 0, i, j, tot;
+  for (i = 0; i < bars.length; i++) {
+    tot = 0;
+    for (j = 0; j < bars[i].vals.length; j++) { tot += bars[i].vals[j]; }
+    bars[i].total = tot;
+    if (tot > maxT) { maxT = tot; }
+  }
+  var sc = niceScale(0, maxT * 1.12, 4);
+  var yv = function (v) { return padT + (sc.max - v) / (sc.max - sc.min) * plotH; };
+  var s = svgOpen(w, h);
+  var steps = Math.round((sc.max - sc.min) / sc.step);
+  var t, y;
+  for (i = 0; i <= steps; i++) {
+    t = sc.min + i * sc.step;
+    y = yv(t);
+    s += '<line x1="' + padL + '" x2="' + plotRight + '" y1="' + y + '" y2="' + y + '" stroke="#e3e8ee" stroke-width="1"/>';
+    s += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" font-size="10.5" fill="#6b7683" text-anchor="end">' + fmt(t, 0) + '</text>';
+  }
+  var bw = 110;
+  var gw = (plotRight - padL) / bars.length;
+  var cx, cum, v, y0, y1;
+  for (i = 0; i < bars.length; i++) {
+    cx = padL + gw * i + gw / 2;
+    cum = 0;
+    for (j = 0; j < comps.length; j++) {
+      v = bars[i].vals[j];
+      if (v <= 0) { continue; }
+      y0 = yv(cum);
+      y1 = yv(cum + v);
+      s += '<rect x="' + (cx - bw / 2) + '" y="' + y1 + '" width="' + bw + '" height="' + (y0 - y1) + '" fill="' + comps[j].color + '" stroke="#fff" stroke-width="1"/>';
+      if (y0 - y1 >= 16) {
+        s += '<text x="' + cx + '" y="' + ((y0 + y1) / 2 + 4) + '" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">' + eur(v) + '</text>';
+      }
+      cum += v;
+    }
+    s += '<text x="' + cx + '" y="' + (yv(cum) - 7) + '" font-size="12" font-weight="800" fill="#1b2430" text-anchor="middle">' + eur(cum) + '</text>';
+    s += '<text x="' + cx + '" y="' + (h - 10) + '" font-size="12.5" font-weight="700" fill="#3a4552" text-anchor="middle">' + esc(bars[i].label) + '</text>';
+  }
+  s += '<line x1="' + padL + '" x2="' + plotRight + '" y1="' + yv(0) + '" y2="' + yv(0) + '" stroke="#9aa5b1" stroke-width="1.2"/>';
+  var ly = 40, sum;
+  for (j = comps.length - 1; j >= 0; j--) {
+    sum = 0;
+    for (i = 0; i < bars.length; i++) { sum += bars[i].vals[j]; }
+    if (sum <= 0) { continue; }
+    s += '<rect x="' + (plotRight + 36) + '" y="' + (ly - 11) + '" width="13" height="13" rx="2" fill="' + comps[j].color + '"/>';
+    s += '<text x="' + (plotRight + 56) + '" y="' + ly + '" font-size="12" fill="#3a4552">' + esc(comps[j].name) + '</text>';
+    ly += 24;
+  }
+  s += '</svg>';
+  return s;
+}
+
+function lineChart(w, h, n, A, B, o) {
+  var padL = 70, padR = 46, padT = 34, padB = 30;
+  var plotW = w - padL - padR, plotH = h - padT - padB;
+  var minV = 0, maxV = 0, i;
+  for (i = 0; i <= n; i++) {
+    if (A[i] > maxV) { maxV = A[i]; }
+    if (B[i] > maxV) { maxV = B[i]; }
+    if (A[i] < minV) { minV = A[i]; }
+    if (B[i] < minV) { minV = B[i]; }
+  }
+  var sc = niceScale(minV, maxV * 1.12, 4);
+  var yv = function (v) { return padT + (sc.max - v) / (sc.max - sc.min) * plotH; };
+  var xv = function (k) { return padL + (n === 0 ? 0 : k / n * plotW); };
+  var s = svgOpen(w, h);
+  var steps = Math.round((sc.max - sc.min) / sc.step);
+  var t, y;
+  for (i = 0; i <= steps; i++) {
+    t = sc.min + i * sc.step;
+    y = yv(t);
+    s += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + y + '" y2="' + y + '" stroke="#e3e8ee" stroke-width="1"/>';
+    s += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" font-size="10.5" fill="#6b7683" text-anchor="end">' + fmt(t, 0) + '</text>';
+  }
+  var ptsA = [], ptsB = [];
+  for (i = 0; i <= n; i++) {
+    ptsA.push(xv(i) + ',' + yv(A[i]));
+    ptsB.push(xv(i) + ',' + yv(B[i]));
+    s += '<text x="' + xv(i) + '" y="' + (h - 10) + '" font-size="11" fill="#3a4552" text-anchor="middle">' + (i === 0 ? 'Achat' : 'An ' + i) + '</text>';
+  }
+  s += '<polyline points="' + ptsA.join(' ') + '" fill="none" stroke="' + o.ca + '" stroke-width="3" stroke-linejoin="round"/>';
+  s += '<polyline points="' + ptsB.join(' ') + '" fill="none" stroke="' + o.cb + '" stroke-width="3" stroke-linejoin="round"/>';
+  var showAll = n <= 6;
+  var up, pa, pb, tx, anc;
+  for (i = 0; i <= n; i++) {
+    s += '<circle cx="' + xv(i) + '" cy="' + yv(A[i]) + '" r="4" fill="' + o.ca + '"/>';
+    s += '<circle cx="' + xv(i) + '" cy="' + yv(B[i]) + '" r="4" fill="' + o.cb + '"/>';
+    if (showAll || i === n) {
+      up = A[i] >= B[i];
+      pa = up ? yv(A[i]) - 9 : yv(A[i]) + 17;
+      pb = up ? yv(B[i]) + 17 : yv(B[i]) - 9;
+      tx = (i === n) ? xv(i) - 6 : xv(i);
+      anc = (i === n) ? 'end' : 'middle';
+      if (i === 0) { tx = xv(i) + 4; anc = 'start'; }
+      s += '<text x="' + tx + '" y="' + pa + '" font-size="10" font-weight="700" fill="' + o.ca + '" text-anchor="' + anc + '">' + eur(A[i]) + '</text>';
+      s += '<text x="' + tx + '" y="' + pb + '" font-size="10" font-weight="700" fill="' + o.cb + '" text-anchor="' + anc + '">' + eur(B[i]) + '</text>';
+    }
+  }
+  s += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + yv(0) + '" y2="' + yv(0) + '" stroke="#9aa5b1" stroke-width="1.2"/>';
+  s += '<rect x="' + padL + '" y="8" width="12" height="12" rx="2" fill="' + o.ca + '"/><text x="' + (padL + 18) + '" y="18" font-size="12" fill="#3a4552">' + esc(o.na) + '</text>';
+  s += '<rect x="' + (padL + 190) + '" y="8" width="12" height="12" rx="2" fill="' + o.cb + '"/><text x="' + (padL + 208) + '" y="18" font-size="12" fill="#3a4552">' + esc(o.nb) + '</text>';
+  s += '</svg>';
+  return s;
+}
+
+/* ===================== Pages du rapport (A4) ===================== */
+var TOTAL_PAGES = 4;
+var COMPS = [
+  { name: 'Prix d\'achat (net des aides)', color: '#00529b' },
+  { name: 'Borne de recharge', color: '#7a5cc7' },
+  { name: 'Énergie', color: '#1a9b6c' },
+  { name: 'Entretien', color: '#e0a82a' },
+  { name: 'AdBlue', color: '#4aa3df' },
+  { name: 'Assurance et taxes', color: '#8a94a1' },
+  { name: 'Financement (intérêts)', color: '#d2478c' }
+];
+
+function headHtml(d) {
+  var date = new Date().toLocaleDateString('fr-FR');
+  var h = '<div class="ph"><div><div class="ph-t">' + esc(d.titre || 'Comparatif tracteur électrique vs diesel') + '</div>';
+  h += '<div class="ph-s">Comparatif tracteur électrique et tracteur diesel · coût total de possession</div></div>';
+  h += '<div class="ph-r">' + date + (d.client ? '<br>' + esc(d.client) : '') + '</div></div>';
+  return h;
+}
+function footHtml(d, pageNo) {
+  return '<div class="foot"><span>' + esc(d.auteur || '') + '</span><span>Page ' + pageNo + ' / ' + TOTAL_PAGES + '</span></div>';
+}
+function kpi(cls, l1, val, sub) {
+  return '<div class="kpi ' + cls + '"><div class="k1">' + l1 + '</div><div class="k2">' + val + '</div><div class="k3">' + sub + '</div></div>';
+}
+function beText(r) {
+  if (r.be0) { return 'Immédiat'; }
+  if (r.be === null) { return 'Au-delà de ' + ans(r.n); }
+  return fmt(r.be, 1) + ' ans';
+}
+
+/* Page 1 : synthèse */
+function page1(r, d, on) {
+  var h = '<div class="page">' + headHtml(d);
+  h += '<div class="kpis">';
+  h += kpi('g', 'Économie annuelle', eur(r.opSav), 'HT · exploitation (énergie, entretien, AdBlue…)');
+  h += kpi('g', 'Économie sur ' + ans(r.n), eur(r.tcoSav), 'HT · coût total, tous postes retenus');
+  h += kpi('b', 'Retour sur investissement', beText(r), 'hors valeur de revente');
+  h += kpi('b', 'CO₂ évité par an', on.co2 ? fmt(r.co2Year, 0) + ' t' : '–', on.co2 ? fmt(r.co2Year * r.n, 0) + ' t sur ' + ans(r.n) : 'poste non pris en compte');
+  h += '</div>';
+  h += '<div class="basis">Base : ' + fmt(d.kmAn, 0) + ' km/an sur ' + ans(r.n) + ' · ' + fmt(r.conso100, 1) + ' kWh/100 km contre ' + fmt(d.cDiesel, 1) + ' L/100 km. Tous les montants sont HT (TVA récupérable).</div>';
+
+  h += '<div class="st">Coût total par camion sur ' + ans(r.n) + (on.revente && on.achat ? ' (avant valeur de revente)' : '') + '</div>';
+  var bars = [
+    { label: 'Électrique', vals: [r.cE.achat, r.cE.borne, r.cE.ene, r.cE.ent, r.cE.adb, r.cE.ass, r.cE.fin] },
+    { label: 'Diesel', vals: [r.cD.achat, r.cD.borne, r.cD.ene, r.cD.ent, r.cD.adb, r.cD.ass, r.cD.fin] }
+  ];
+  h += stackedChart(706, 320, bars, COMPS);
+
+  h += '<div class="st">Détail du coût total sur ' + ans(r.n) + '</div>';
+  var rows = [
+    ['Prix d\'achat (net des aides)', r.cE.achat, r.cD.achat, on.achat],
+    ['Borne de recharge (investissement et abonnement)', r.cE.borne, r.cD.borne, on.borne],
+    ['Énergie', r.cE.ene, r.cD.ene, on.energie],
+    ['Entretien', r.cE.ent, r.cD.ent, on.entretien],
+    ['AdBlue', r.cE.adb, r.cD.adb, on.adblue],
+    ['Assurance et taxes', r.cE.ass, r.cD.ass, on.assur],
+    ['Financement (intérêts)', r.cE.fin, r.cD.fin, on.fin && on.achat]
+  ];
+  h += '<table class="t"><tr><th></th><th>Électrique</th><th>Diesel</th><th>Écart</th></tr>';
+  var i;
+  for (i = 0; i < rows.length; i++) {
+    if (rows[i][3]) {
+      h += '<tr><td>' + rows[i][0] + '</td><td>' + eur(rows[i][1]) + '</td><td>' + eur(rows[i][2]) + '</td><td>' + eur(rows[i][2] - rows[i][1]) + '</td></tr>';
+    }
+  }
+  if (on.revente && on.achat) {
+    h += '<tr><td>Valeur de revente (déduite)</td><td>– ' + eur(r.resE) + '</td><td>– ' + eur(r.resD) + '</td><td>' + eur(r.resE - r.resD) + '</td></tr>';
+  }
+  h += '<tr class="hl"><td>Coût total de possession</td><td>' + eur(r.tcoE) + '</td><td>' + eur(r.tcoD) + '</td><td>' + eur(r.tcoSav) + '</td></tr>';
+  h += '</table>';
+  h += footHtml(d, 1) + '</div>';
+  return h;
+}
+
+/* Page 2 : énergie */
+function page2(r, d, on) {
+  var h = '<div class="page">' + headHtml(d);
+  h += '<div class="st">Consommation et coût de l\'énergie</div>';
+  if (!on.energie) {
+    h += '<div class="callout">Le coût de l\'énergie n\'est pas pris en compte dans cette simulation.</div>';
+    h += footHtml(d, 2) + '</div>';
+    return h;
+  }
+  h += '<div class="kpis">';
+  h += kpi('g', 'Économie énergie annuelle · TTC', eur(r.an.ecoTTC), fmt(r.an.pctTTC, 0) + ' % de moins que le diesel');
+  h += kpi('g', 'Économie énergie annuelle · HT', eur(r.an.ecoHT), fmt(r.an.pctHT, 0) + ' % de moins que le diesel');
+  h += '</div>';
+  h += '<div class="basis">Électricité à ' + fmt(r.pElecEff, 3) + ' €/kWh TTC' + (on.recharge ? ' (moyenne pondérée dépôt et borne publique)' : '') + ' · gazole à ' + fmt(d.pDiesel, 2) + ' €/L TTC.</div>';
+
+  h += '<div class="st">Coût annuel de l\'énergie à ' + fmt(d.kmAn, 0) + ' km/an</div>';
+  h += barChart(706, 270, [
+    { label: 'Toutes taxes comprises (TTC)', a: r.an.eleTTC, b: r.an.dieTTC },
+    { label: 'Hors taxes (HT)', a: r.an.eleHT, b: r.an.dieHT }
+  ], { na: 'Camion électrique', nb: 'Camion diesel', ca: '#1a9b6c', cb: '#e0642a' });
+
+  h += '<div class="st">Essai de référence : ' + fmt(r.km, 1) + ' km</div>';
+  h += '<table class="t"><tr><th></th><th>Électrique</th><th>Diesel</th><th>Économie</th></tr>';
+  h += '<tr><td>Énergie consommée</td><td>' + fmt(r.kwh, 1) + ' kWh</td><td>' + fmt(r.ref.L, 1) + ' L</td><td></td></tr>';
+  h += '<tr><td>Consommation aux 100 km</td><td>' + fmt(r.conso100, 1) + ' kWh</td><td>' + fmt(d.cDiesel, 1) + ' L</td><td></td></tr>';
+  h += '<tr><td>Coût TTC</td><td>' + eur(r.ref.eleTTC, 2) + '</td><td>' + eur(r.ref.dieTTC, 2) + '</td><td>' + eur(r.ref.ecoTTC, 2) + '</td></tr>';
+  h += '<tr><td>Coût HT</td><td>' + eur(r.ref.eleHT, 2) + '</td><td>' + eur(r.ref.dieHT, 2) + '</td><td>' + eur(r.ref.ecoHT, 2) + '</td></tr>';
+  h += '<tr class="hl"><td>Économie aux 100 km (TTC)</td><td colspan="3">' + (r.km > 0 ? eur(r.ref.ecoTTC / r.km * 100, 2) : eur(0, 2)) + '</td></tr>';
+  h += '</table>';
+
+  h += '<div class="st">Consommations annuelles</div>';
+  h += '<table class="t"><tr><th></th><th>Électrique</th><th>Diesel</th></tr>';
+  h += '<tr><td>Énergie</td><td>' + fmt(r.an.kwh, 0) + ' kWh</td><td>' + fmt(r.an.L, 0) + ' L</td></tr>';
+  if (on.adblue) {
+    h += '<tr><td>AdBlue</td><td>–</td><td>' + fmt(r.oc.adbLitres, 0) + ' L</td></tr>';
+  }
+  h += '<tr><td>dont TICPE sur le gazole</td><td>–</td><td>' + eur(r.an.ticpe) + '</td></tr>';
+  if (on.remb) {
+    h += '<tr><td>Remboursement partiel de TICPE (déduit du HT)</td><td>–</td><td>– ' + eur(r.an.remb) + '</td></tr>';
+  }
+  h += '</table>';
+  h += footHtml(d, 2) + '</div>';
+  return h;
+}
+
+/* Page 3 : coût cumulé et rentabilité */
+function page3(r, d, on) {
+  var h = '<div class="page">' + headHtml(d);
+  h += '<div class="st">Coût cumulé sur ' + ans(r.n) + ' (achat compris)</div>';
+  h += lineChart(706, 310, r.n, r.cumE, r.cumD, { na: 'Camion électrique (cumul)', nb: 'Camion diesel (cumul)', ca: '#1a9b6c', cb: '#e0642a' });
+  var msg;
+  if (r.be0) {
+    msg = 'Le camion électrique est moins coûteux dès l\'achat.';
+  } else if (r.be === null) {
+    msg = 'Dans cette simulation, l\'électrique n\'a pas encore rattrapé le diesel au bout de ' + ans(r.n) + '.';
+  } else {
+    msg = 'Le surcoût initial du camion électrique est rattrapé après environ <b>' + fmt(r.be, 1) + ' ans</b>.';
+  }
+  h += '<div class="callout">' + msg + ' La courbe ne comprend pas la valeur de revente' + (on.revente && on.achat ? ' (électrique : ' + eur(r.resE) + ', diesel : ' + eur(r.resD) + ').' : '.') + '</div>';
+
+  h += '<div class="st">Cumul année par année</div>';
+  h += '<table class="t"><tr><th></th><th>Électrique</th><th>Diesel</th><th>Économie cumulée</th></tr>';
+  var y;
+  for (y = 0; y <= r.n; y++) {
+    h += '<tr><td>' + (y === 0 ? 'Achat (année 0)' : 'Année ' + y) + '</td><td>' + eur(r.cumE[y]) + '</td><td>' + eur(r.cumD[y]) + '</td><td>' + eur(r.cumD[y] - r.cumE[y]) + '</td></tr>';
+  }
+  h += '<tr class="hl"><td>Total avec revente</td><td>' + eur(r.tcoE) + '</td><td>' + eur(r.tcoD) + '</td><td>' + eur(r.tcoSav) + '</td></tr>';
+  h += '</table>';
+  h += footHtml(d, 3) + '</div>';
+  return h;
+}
+
+/* Page 4 : hypothèses */
+var BLOCK_NAMES = [
+  ['energie', 'Énergie'], ['achat', 'Prix d\'achat'], ['aides', 'Aides'], ['fin', 'Financement'],
+  ['revente', 'Valeur de revente'], ['borne', 'Borne de recharge'], ['entretien', 'Entretien'],
+  ['adblue', 'AdBlue'], ['assur', 'Assurance et taxes'], ['recharge', 'Recharge en borne publique'],
+  ['remb', 'Remboursement de TICPE'], ['evol', 'Évolution des prix'], ['co2', 'CO₂']
+];
+
+function page4(r, d, on) {
+  var h = '<div class="page">' + headHtml(d);
+  h += '<div class="st">Postes pris en compte</div><div>';
+  var i;
+  for (i = 0; i < BLOCK_NAMES.length; i++) {
+    h += '<span class="pill ' + (on[BLOCK_NAMES[i][0]] ? 'y' : 'n') + '">' + BLOCK_NAMES[i][1] + '</span>';
+  }
+  h += '</div>';
+
+  h += '<div class="st">Hypothèses retenues</div><ul class="assump">';
+  h += '<li>Durée de la comparaison : ' + ans(r.n) + ' à ' + fmt(d.kmAn, 0) + ' km/an. Tous les montants du coût total sont HT.</li>';
+  if (on.energie) {
+    h += '<li>Consommation électrique issue de l\'essai de référence (' + fmt(r.kwh, 1) + ' kWh pour ' + fmt(r.km, 1) + ' km, soit ' + fmt(r.conso100, 1) + ' kWh/100 km).</li>';
+    h += '<li>Électricité : ' + fmt(d.pElec, 3) + ' €/kWh TTC au dépôt (TVA ' + fmt(d.tvaElec, 0) + ' %)' + (on.recharge ? ', ' + fmt(d.partPublic, 0) + ' % rechargés en borne publique à ' + fmt(d.pPublic, 2) + ' €/kWh TTC' : '') + '.</li>';
+    h += '<li>Gazole : ' + fmt(d.pDiesel, 2) + ' €/L TTC (TVA ' + fmt(d.tvaDiesel, 0) + ' %), soit ' + fmt(r.p.dieHT, 3) + ' €/L HT dont TICPE ' + fmt(d.ticpe, 3) + ' €/L, pour ' + fmt(d.cDiesel, 1) + ' L/100 km.</li>';
+  }
+  if (on.remb) { h += '<li>Remboursement partiel de TICPE : ' + fmt(d.rembTicpe, 3) + ' €/L HT.</li>'; }
+  if (on.achat) {
+    h += '<li>Prix d\'achat HT : électrique ' + eur(d.prixE) + ', diesel ' + eur(d.prixD) + (on.aides ? ' ; aide à l\'achat ' + eur(d.aideAchat) : '') + '.</li>';
+  }
+  if (on.borne) {
+    h += '<li>Borne : ' + eur(d.borneInv) + ' HT' + (on.aides ? ' (aide ' + eur(d.aideBorne) + ')' : '') + ', ' + eur(d.borneAbo) + '/an d\'abonnement et maintenance, répartis sur ' + fmt(d.borneNb >= 1 ? d.borneNb : 1, 0) + ' camion(s).</li>';
+  }
+  if (on.entretien) {
+    h += '<li>Entretien : ' + eur(r.oc.entE) + '/an (électrique) et ' + eur(r.oc.entD) + '/an (diesel).</li>';
+  }
+  if (on.adblue) {
+    h += '<li>AdBlue : ' + fmt(d.adbL, 2) + ' L/100 km à ' + fmt(d.adbP, 2) + ' €/L HT, soit ' + eur(r.oc.adb) + '/an.</li>';
+  }
+  if (on.assur) {
+    h += '<li>Assurance et taxes : ' + eur(d.assE) + '/an (électrique) et ' + eur(d.assD) + '/an (diesel).</li>';
+  }
+  if (on.fin && on.achat) {
+    h += '<li>Financement : ' + fmt(d.finPart, 0) + ' % du prix, taux ' + fmt(d.finTaux, 2) + ' %, sur ' + ans(Math.max(1, Math.round(d.finDuree))) + '. Seuls les intérêts sont ajoutés au coût.</li>';
+  }
+  if (on.revente && on.achat) {
+    h += '<li>Valeur de revente à ' + ans(r.n) + ' : ' + fmt(d.resE, 0) + ' % du prix pour l\'électrique, ' + fmt(d.resD, 0) + ' % pour le diesel.</li>';
+  }
+  if (on.evol) {
+    h += '<li>Évolution annuelle : électricité ' + fmt(d.evElec, 1) + ' %, gazole ' + fmt(d.evDiesel, 1) + ' %, autres coûts ' + fmt(d.evAutres, 1) + ' %.</li>';
+  }
+  h += '</ul>';
+
+  if (on.co2) {
+    h += '<div class="st">Émissions de CO₂ à l\'usage</div>';
+    h += '<table class="t"><tr><th></th><th>Électrique</th><th>Diesel</th><th>Évité</th></tr>';
+    h += '<tr><td>Par an</td><td>' + fmt(r.kgE / 1000, 1) + ' t</td><td>' + fmt(r.kgD / 1000, 1) + ' t</td><td>' + fmt(r.co2Year, 1) + ' t</td></tr>';
+    h += '<tr class="hl"><td>Sur ' + ans(r.n) + '</td><td>' + fmt(r.kgE / 1000 * r.n, 1) + ' t</td><td>' + fmt(r.kgD / 1000 * r.n, 1) + ' t</td><td>' + fmt(r.co2Year * r.n, 1) + ' t</td></tr>';
+    h += '</table>';
+  }
+
+  h += '<div class="callout">Simulation indicative, fondée sur les hypothèses ci-dessus. Les prix, aides, valeurs de revente et conditions de financement varient selon le client et le moment : à confirmer par une offre commerciale.</div>';
+  h += footHtml(d, 4) + '</div>';
+  return h;
+}
+
+function buildPages(r, d, on) {
+  return [page1(r, d, on), page2(r, d, on), page3(r, d, on), page4(r, d, on)];
+}
+
+/* ===================== Application ===================== */
+var state = copyDefaults();
+var ons = copyOn();
+var touched = {};
+var modalCb = null;
+var KEYBLOCK = {};
+var LABELS = {};
+
+function copyDefaults() {
+  var o = {};
+  var k;
+  for (k in DEFAULTS) {
+    if (Object.prototype.hasOwnProperty.call(DEFAULTS, k)) { o[k] = DEFAULTS[k]; }
+  }
+  return o;
+}
+function copyOn() {
+  var o = {};
+  var k;
+  for (k in DEFAULT_ON) {
+    if (Object.prototype.hasOwnProperty.call(DEFAULT_ON, k)) { o[k] = DEFAULT_ON[k]; }
+  }
+  return o;
+}
+
+function buildMaps() {
+  var gi, fi, g, f;
+  for (gi = 0; gi < GROUPS.length; gi++) {
+    g = GROUPS[gi];
+    for (fi = 0; fi < g.fields.length; fi++) {
+      f = g.fields[fi];
+      if (f.k) {
+        KEYBLOCK[f.k] = g.on || '';
+        LABELS[f.k] = g.title + ' : ' + f.l;
+      }
+    }
+  }
+}
+
+function loadState() {
+  var raw = null;
+  var o;
+  var k;
+  try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+  if (raw) {
+    try {
+      o = JSON.parse(raw);
+      if (o.v) {
+        for (k in state) {
+          if (Object.prototype.hasOwnProperty.call(o.v, k) && typeof o.v[k] === 'string') { state[k] = o.v[k]; }
+        }
+      }
+      if (o.on) {
+        for (k in ons) {
+          if (Object.prototype.hasOwnProperty.call(o.on, k)) { ons[k] = !!o.on[k]; }
+        }
+      }
+      if (o.t) { touched = o.t; }
+    } catch (e2) {}
+    return;
+  }
+  try { raw = localStorage.getItem(OLD_STORAGE_KEY); } catch (e3) {}
+  if (raw) {
+    try {
+      o = JSON.parse(raw);
+      for (k in state) {
+        if (Object.prototype.hasOwnProperty.call(o, k) && typeof o[k] === 'string') { state[k] = o[k]; }
+      }
+    } catch (e4) {}
+  }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ v: state, on: ons, t: touched })); } catch (e) {}
+}
+
+function fieldHtml(f) {
+  var h = '';
+  var hint, i;
+  if (f.sep) { return '<div class="sep">' + esc(f.sep) + '</div>'; }
+  hint = f.hint ? ' <span class="hint">(' + esc(f.hint) + ')</span>' : '';
+  h += '<div class="field"><label for="f_' + f.k + '">' + esc(f.l) + hint;
+  if (EX_KEYS[f.k]) { h += '<span class="exb" id="ex_' + f.k + '">exemple</span>'; }
+  h += '</label><div class="inp">';
+  if (f.select) {
+    h += '<select id="f_' + f.k + '" data-key="' + f.k + '">';
+    for (i = 0; i < f.select.length; i++) {
+      h += '<option value="' + f.select[i][0] + '">' + esc(f.select[i][1]) + '</option>';
+    }
+    h += '</select>';
+  } else {
+    h += '<input id="f_' + f.k + '" data-key="' + f.k + '" type="text" autocomplete="off" ' + (f.text ? 'inputmode="text"' : 'inputmode="decimal"') + ' value="' + esc(state[f.k]) + '">';
+  }
+  if (f.u) { h += '<span class="unit">' + esc(f.u) + '</span>'; }
+  h += '</div></div>';
+  return h;
+}
+
+function buildForm() {
+  var h = '';
+  var gi, fi, g;
+  for (gi = 0; gi < GROUPS.length; gi++) {
+    g = GROUPS[gi];
+    h += '<div class="card" id="card_' + g.id + '"><div class="chead"><h2>' + esc(g.title) + '</h2>';
+    if (g.on) {
+      h += '<button type="button" class="sw" role="switch" data-action="toggle" data-on="' + g.on + '" id="sw_' + g.on + '" aria-label="Activer ou désactiver : ' + esc(g.title) + '"><span></span></button>';
+    }
+    h += '</div>';
+    if (g.note) { h += '<p class="note">' + esc(g.note) + '</p>'; }
+    h += '<div class="cbody" id="body_' + g.id + '">';
+    for (fi = 0; fi < g.fields.length; fi++) { h += fieldHtml(g.fields[fi]); }
+    h += '</div></div>';
+  }
+  document.getElementById('formHost').innerHTML = h;
+  fillInputs();
+  applyToggles();
+  refreshBadges();
+}
+
+function fillInputs() {
+  var k, el;
+  for (k in state) {
+    if (Object.prototype.hasOwnProperty.call(state, k)) {
+      el = document.getElementById('f_' + k);
+      if (el) { el.value = state[k]; }
+    }
+  }
+}
+
+function applyToggles() {
+  var gi, g, card, sw, inputs, i, isOn;
+  for (gi = 0; gi < GROUPS.length; gi++) {
+    g = GROUPS[gi];
+    if (!g.on) { continue; }
+    isOn = !!ons[g.on];
+    card = document.getElementById('card_' + g.id);
+    sw = document.getElementById('sw_' + g.on);
+    card.className = 'card' + (isOn ? '' : ' off');
+    sw.className = 'sw' + (isOn ? ' on' : '');
+    sw.setAttribute('aria-checked', isOn ? 'true' : 'false');
+    inputs = document.getElementById('body_' + g.id).querySelectorAll('input,select');
+    for (i = 0; i < inputs.length; i++) { inputs[i].disabled = !isOn; }
+  }
+}
+
+function blockActive(key) {
+  var b = KEYBLOCK[key];
+  if (!b) { return true; }
+  if (b === 'aides') { return !!ons.aides; }
+  return !!ons[b];
+}
+
+function pendingExamples() {
+  var list = [];
+  var k;
+  for (k in EX_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(EX_KEYS, k)) {
+      if (!touched[k] && blockActive(k)) { list.push(LABELS[k]); }
+    }
+  }
+  return list;
+}
+
+function refreshBadges() {
+  var k, el;
+  for (k in EX_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(EX_KEYS, k)) {
+      el = document.getElementById('ex_' + k);
+      if (el) { el.style.display = (!touched[k] && blockActive(k)) ? 'inline-block' : 'none'; }
+    }
+  }
+}
+
+function updateLive() {
+  var d = readData(state);
+  var r = compute(d, ons);
+  var h = '<h2>Résultats en direct</h2>';
+  if (!r.valid) {
+    h += '<div style="margin-top:6px;font-size:14px;opacity:.9">Renseigne la distance et l\'énergie de l\'essai ainsi que le kilométrage annuel (ou désactive l\'énergie) pour obtenir les résultats.</div>';
+  } else {
+    h += '<div class="lgrid">';
+    h += '<div class="lbox"><div class="t">Consommation</div><div class="v">' + fmt(r.conso100, 1) + ' kWh/100 km</div></div>';
+    h += '<div class="lbox"><div class="t">Économie énergie annuelle TTC</div><div class="v">' + eur(r.an.ecoTTC) + '</div></div>';
+    h += '<div class="lbox"><div class="t">Économie annuelle d\'exploitation HT</div><div class="v">' + eur(r.opSav) + '</div></div>';
+    h += '<div class="lbox"><div class="t">Économie ' + ans(r.n) + ' (coût total HT)</div><div class="v">' + eur(r.tcoSav) + '</div></div>';
+    h += '<div class="lbox"><div class="t">Retour sur investissement</div><div class="v">' + beText(r) + '</div></div>';
+    h += '<div class="lbox"><div class="t">CO₂ évité par an</div><div class="v">' + (ons.co2 ? fmt(r.co2Year, 0) + ' t' : '–') + '</div></div>';
+    h += '</div>';
+  }
+  document.getElementById('liveBox').innerHTML = h;
+}
+
+function renderReport() {
+  var d = readData(state);
+  var r = compute(d, ons);
+  var warn = document.getElementById('reportWarn');
+  var btn = document.getElementById('btnPdf');
+  var w = '';
+  var pend = pendingExamples();
+  if (!r.valid) {
+    w += '<div class="warn">Données incomplètes : renseigne la distance et l\'énergie de l\'essai ainsi que le kilométrage annuel (ou désactive l\'énergie) pour générer le rapport.</div>';
+    btn.disabled = true;
+  } else {
+    btn.disabled = false;
+  }
+  if (pend.length > 0) {
+    w += '<div class="warn"><b>' + pend.length + ' valeur(s) d\'exemple non modifiée(s)</b> sont utilisées dans ce rapport. Remplace-les par les vraies données, ou désactive le poste, avant de le présenter à un client.</div>';
+  }
+  warn.innerHTML = w;
+  var pages = buildPages(r, d, ons);
+  var host = document.getElementById('pagesHost');
+  var h = '';
+  var i;
+  for (i = 0; i < pages.length; i++) {
+    h += '<div class="pgwrap"><div class="pgscale">' + pages[i] + '</div></div>';
+  }
+  host.innerHTML = h;
+  fitPages();
+}
+
+function fitPages() {
+  var host = document.getElementById('pagesHost');
+  var w = host.clientWidth;
+  if (!w) { return; }
+  var sc = Math.min(1, w / 794);
+  var wraps = host.getElementsByClassName('pgwrap');
+  var i, sEl;
+  for (i = 0; i < wraps.length; i++) {
+    sEl = wraps[i].firstChild;
+    sEl.style.transform = 'scale(' + sc + ')';
+    wraps[i].style.width = (794 * sc) + 'px';
+    wraps[i].style.height = (1122 * sc) + 'px';
+  }
+}
+
+function showTab(name) {
+  var isRapport = name === 'rapport';
+  document.getElementById('view-saisie').style.display = isRapport ? 'none' : 'block';
+  document.getElementById('view-rapport').style.display = isRapport ? 'block' : 'none';
+  document.getElementById('tab-saisie').className = 'tab' + (isRapport ? '' : ' on');
+  document.getElementById('tab-rapport').className = 'tab' + (isRapport ? ' on' : '');
+  if (isRapport) { renderReport(); }
+  window.scrollTo(0, 0);
+}
+
+function showModal(title, text, okLabel, cb) {
+  document.getElementById('mTitle').textContent = title;
+  document.getElementById('mText').textContent = text;
+  document.getElementById('mOk').textContent = okLabel;
+  modalCb = cb;
+  document.getElementById('modal').className = 'on';
+}
+function closeModal() {
+  document.getElementById('modal').className = '';
+  modalCb = null;
+}
+
+function doReset() {
+  state = copyDefaults();
+  ons = copyOn();
+  touched = {};
+  saveState();
+  fillInputs();
+  applyToggles();
+  refreshBadges();
+  updateLive();
+}
+function doClear() {
+  var k;
+  for (k in state) {
+    if (Object.prototype.hasOwnProperty.call(state, k)) {
+      state[k] = (k === 'perEntretien') ? 'an' : '';
+      touched[k] = 1;
+    }
+  }
+  saveState();
+  fillInputs();
+  refreshBadges();
+  updateLive();
+}
+
+/* ----- PDF ----- */
+function startPdf() {
+  var d = readData(state);
+  var r = compute(d, ons);
+  if (!r.valid) { return; }
+  var pages = buildPages(r, d, ons);
+  if (!window.html2canvas || !window.jspdf) {
+    printFallback(pages);
+    return;
+  }
+  var btn = document.getElementById('btnPdf');
+  btn.disabled = true;
+  btn.textContent = 'Génération du PDF…';
+  var stage = document.getElementById('stage');
+  stage.innerHTML = pages.join('');
+  var els = stage.getElementsByClassName('page');
+  var pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+  var idx = 0;
+
+  function finish(ok) {
+    stage.innerHTML = '';
+    btn.disabled = false;
+    btn.textContent = 'Télécharger le rapport en PDF (4 pages)';
+    if (!ok) { printFallback(pages); }
+  }
+  function next() {
+    if (idx >= els.length) {
+      pdf.save('rapport-comparatif-tracteur-electrique-diesel.pdf');
+      finish(true);
+      return;
+    }
+    window.html2canvas(els[idx], { scale: 2, backgroundColor: '#ffffff', useCORS: true, scrollX: 0, scrollY: 0 }).then(function (canvas) {
+      if (idx > 0) { pdf.addPage(); }
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+      idx++;
+      next();
+    }).catch(function () {
+      finish(false);
+    });
+  }
+  next();
+}
+
+function downloadPdf() {
+  var pend = pendingExamples();
+  if (pend.length > 0) {
+    showModal('Valeurs d\'exemple non modifiées', pend.length + ' valeur(s) d\'exemple sont encore utilisées dans le rapport. Télécharger quand même ?', 'Télécharger quand même', startPdf);
+  } else {
+    startPdf();
+  }
+}
+
+function printFallback(pages) {
+  var pa = document.getElementById('printArea');
+  pa.innerHTML = pages.join('');
+  window.print();
+}
+
+/* ----- Événements (délégation) ----- */
+function onFieldEvent(e) {
+  var key = e.target.getAttribute ? e.target.getAttribute('data-key') : null;
+  if (key) {
+    state[key] = e.target.value;
+    touched[key] = 1;
+    saveState();
+    refreshBadges();
+    updateLive();
+  }
+}
+document.addEventListener('input', onFieldEvent);
+document.addEventListener('change', onFieldEvent);
+
+document.addEventListener('click', function (e) {
+  var el = e.target;
+  var action = null;
+  while (el && el !== document) {
+    if (el.getAttribute && el.getAttribute('data-action')) {
+      action = el.getAttribute('data-action');
+      break;
+    }
+    el = el.parentNode;
+  }
+  if (!action || el.disabled) { return; }
+  if (action === 'tab') { showTab(el.getAttribute('data-tab')); }
+  else if (action === 'go-rapport') { showTab('rapport'); }
+  else if (action === 'toggle') {
+    var key = el.getAttribute('data-on');
+    ons[key] = !ons[key];
+    saveState();
+    applyToggles();
+    refreshBadges();
+    updateLive();
+  }
+  else if (action === 'reset') {
+    showModal('Réinitialiser les données ?', 'Les valeurs et les interrupteurs reviennent à l\'exemple de départ (tracteur 44 t, essai de 368,4 km).', 'Réinitialiser', doReset);
+  }
+  else if (action === 'clear') {
+    showModal('Tout effacer ?', 'Tous les champs seront vidés. Les interrupteurs restent tels quels. Tu pourras revenir à l\'exemple avec « Réinitialiser ».', 'Tout effacer', doClear);
+  }
+  else if (action === 'pdf') { downloadPdf(); }
+  else if (action === 'modal-cancel') { closeModal(); }
+  else if (action === 'modal-ok') {
+    var cb = modalCb;
+    closeModal();
+    if (cb) { cb(); }
+  }
+});
+
+window.addEventListener('resize', fitPages);
+window.addEventListener('orientationchange', function () { setTimeout(fitPages, 200); });
+
+buildMaps();
+loadState();
+buildForm();
+updateLive();
+</script>
+</body>
+</html>
