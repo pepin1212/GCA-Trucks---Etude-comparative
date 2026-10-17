@@ -95,6 +95,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 .mbox h3{margin:0 0 6px;font-size:17px}
 .mbox p{margin:0 0 10px;color:var(--muted)}
 .mbox .redlist{margin:0 0 12px;padding-left:18px;color:var(--red);font-size:14px}
+/* Dossiers clients */
+.dbar{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:10px 12px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.dbar .di{flex:1;min-width:0}
+.dbar .dl{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.dbar .dn{font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dbar .ds{font-size:12px;color:var(--muted)}
+.dbar .ds.mod{color:#a35a00;font-weight:600}
+.dbar .btn{flex:none;padding:10px 12px;font-size:14px}
+#dossiers{position:fixed;inset:0;background:var(--bg);z-index:90;display:none;flex-direction:column}
+#dossiers.on{display:flex}
+.dhead{background:var(--brand);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 14px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dhead h3{margin:0;font-size:17px}
+.dhead .x{border:0;background:rgba(255,255,255,.18);color:#fff;font-size:15px;font-weight:700;border-radius:10px;padding:8px 12px;cursor:pointer;font-family:inherit}
+.dscroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+.dwrap{max-width:760px;margin:0 auto;padding:14px 14px calc(30px + env(safe-area-inset-bottom))}
+.dsearch{width:100%;border:1.5px solid var(--line);border-radius:10px;font-size:16px;padding:11px 12px;font-family:inherit;margin-bottom:12px;background:#fff;color:var(--text);outline:0}
+.dsearch:focus{border-color:var(--brand)}
+.dclient{margin:16px 0 6px;font-size:13px;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.4px}
+.dstudy{background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:2px solid transparent}
+.dstudy.cur{border-color:var(--brand)}
+.dstudy .t1{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.dstudy .nm{font-weight:700}
+.dstudy .eco{font-weight:800;white-space:nowrap}
+.dstudy .eco.pos{color:var(--green)}
+.dstudy .eco.neg{color:var(--red)}
+.dstudy .meta{font-size:12px;color:var(--muted);margin-top:2px}
+.dacts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.dacts .btn{flex:1;padding:9px 6px;font-size:13px;min-width:70px}
+.dempty{text-align:center;color:var(--muted);padding:30px 10px}
+.dsave{background:#eaf2fb;border-radius:12px;padding:10px 12px;font-size:13px;color:var(--brand);margin-bottom:12px}
+.dsave.late{background:#fff4e5;color:#8a4b00}
+#prompt{position:fixed;inset:0;background:rgba(10,20,35,.55);display:none;align-items:center;justify-content:center;z-index:110;padding:20px}
+#prompt.on{display:flex}
+.pfield{margin-bottom:10px}
+.pfield label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+.pfield input{width:100%;border:1.5px solid var(--line);border-radius:10px;font-size:16px;padding:11px 12px;font-family:inherit;outline:0}
+.pfield input:focus{border-color:var(--brand)}
+.perr{color:var(--red);font-size:13px;margin:-4px 0 10px;display:none}
+#modal{z-index:120}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#1b2430;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:130;max-width:90%;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 /* Pages A4 (96 dpi) */
 .page{width:794px;height:1122px;padding:34px 44px 52px;background:#fff;color:#1b2430;position:relative;overflow:hidden;font-size:13px;line-height:1.35;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 .ph{border-bottom:1px solid #cfd6df;padding-bottom:12px;margin-bottom:14px}
@@ -168,7 +209,7 @@ table.a2 tr.sec td{background:#f4f7fb;color:var(--brand);font-weight:800;text-tr
 #printArea{display:none}
 @media print{
   body{background:#fff}
-  #app,#modal{display:none !important}
+  #app,#modal,#dossiers,#prompt,#toast{display:none !important}
   #printArea{display:block}
   #printArea .page{break-after:page;page-break-after:always}
   #printArea .page:last-child{break-after:auto;page-break-after:auto}
@@ -187,6 +228,11 @@ table.a2 tr.sec td{background:#f4f7fb;color:var(--brand);font-weight:800;text-tr
   </header>
 
   <section class="view" id="view-saisie">
+    <div class="dbar" id="dosBar">
+      <div class="di"><div class="dl">Étude</div><div class="dn" id="dosName">Étude non enregistrée</div><div class="ds" id="dosState"></div></div>
+      <button class="btn sec" type="button" data-action="dos-save">Enregistrer</button>
+      <button class="btn main" type="button" data-action="dos-panel">Dossiers</button>
+    </div>
     <div class="modebar">
       <div class="mt">Type de rapport</div>
       <div class="mslider"><div class="mthumb"></div>
@@ -222,6 +268,39 @@ table.a2 tr.sec td{background:#f4f7fb;color:var(--brand);font-weight:800;text-tr
     <div id="pagesHost"></div>
   </section>
 </div>
+
+<div id="dossiers" role="dialog" aria-modal="true" aria-labelledby="dosTitle">
+  <div class="dhead"><h3 id="dosTitle">Dossiers clients</h3><button class="x" type="button" data-action="dos-close">Fermer</button></div>
+  <div class="dscroll"><div class="dwrap">
+    <div id="dosSaveInfo"></div>
+    <div class="row2" style="margin-bottom:8px">
+      <button class="btn main" type="button" data-action="dos-new">Nouvelle étude</button>
+    </div>
+    <div class="row2" style="margin-bottom:12px">
+      <button class="btn sec" type="button" data-action="dos-export">Exporter mes dossiers</button>
+      <button class="btn sec" type="button" data-action="dos-import">Importer</button>
+    </div>
+    <input class="dsearch" type="search" id="dosSearch" placeholder="Rechercher un client ou une étude" autocomplete="off">
+    <div id="dosList"></div>
+  </div></div>
+  <input type="file" id="dosFile" accept=".json,application/json" style="display:none">
+</div>
+
+<div id="prompt" role="dialog" aria-modal="true">
+  <div class="mbox">
+    <h3 id="pTitle"></h3>
+    <p id="pText"></p>
+    <div class="pfield"><label for="pClient">Client</label><input type="text" id="pClient" autocomplete="off" placeholder="Ex. Transports Nicolas"></div>
+    <div class="pfield"><label for="pName">Nom de l’étude</label><input type="text" id="pName" autocomplete="off" placeholder="Ex. Offre crédit-bail"></div>
+    <div class="perr" id="pErr"></div>
+    <div class="row2">
+      <button class="btn sec" type="button" data-action="prompt-cancel">Annuler</button>
+      <button class="btn main" type="button" data-action="prompt-ok" id="pOk">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
 
 <div id="stage"></div>
 <div id="printArea"></div>
@@ -260,8 +339,8 @@ var DEFAULTS = {
   rechMode: 'pct', partPublic: '20', rechKwh: '200', rechDur: '45', rechDurU: 'min', rechPow: '150',
   rechFreq: '1', rechFreqU: 'jour', pPublic: '0,55', pPublicBase: 'ttc',
   coutChauf: '35',
-  modeE: 'achat', prixE: '290000', loyE: '5200', durLocE: '5', durLocUE: 'ans', optE: '2900', cbTauxE: '5', cbPremierE: 'non', cbPremierMontantE: '0', cbResE: '10', cbResUE: 'pct',
-  modeD: 'achat', prixD: '115000', loyD: '2100', durLocD: '5', durLocUD: 'ans', optD: '1150', cbTauxD: '5', cbPremierD: 'non', cbPremierMontantD: '0', cbResD: '10', cbResUD: 'pct',
+  modeE: 'achat', prixE: '290000', loyE: '5200', durLocE: '5', durLocUE: 'ans', optE: '2900', cbTauxE: '5', cbPremierE: 'non', cbPremierMontantE: '10', cbPremierUE: 'pct', cbResE: '10', cbResUE: 'pct',
+  modeD: 'achat', prixD: '115000', loyD: '2100', durLocD: '5', durLocUD: 'ans', optD: '1150', cbTauxD: '5', cbPremierD: 'non', cbPremierMontantD: '10', cbPremierUD: 'pct', cbResD: '10', cbResUD: 'pct',
   aideAchat: '0', aideBorne: '0',
   finPartE: '80', finTauxE: '5', finDureeE: '5', finUE: 'ans',
   finPartD: '80', finTauxD: '5', finDureeD: '5', finUD: 'ans',
@@ -386,7 +465,7 @@ var GROUPS = [
     { k: 'durLocE', l: 'Durée du contrat', ctx: 'électrique', unitKey: 'durLocUE', units: U_DUREE, pos: true, vis: function (s) { return s.modeE !== 'achat'; } },
     { k: 'cbTauxE', l: 'Taux annuel du crédit-bail', ctx: 'électrique', u: '%/an', vis: function (s) { return s.modeE === 'cbail'; } },
     { k: 'cbPremierE', l: 'Premier loyer majoré', ctx: 'électrique', select: [['non', 'Non'], ['oui', 'Oui']], vis: function (s) { return s.modeE === 'cbail'; } },
-    { k: 'cbPremierMontantE', l: 'Montant du premier loyer majoré', ctx: 'électrique', u: '€ HT', pos: true, vis: function (s) { return s.modeE === 'cbail' && s.cbPremierE === 'oui'; } },
+    { k: 'cbPremierMontantE', l: 'Montant du premier loyer majoré', ctx: 'électrique', unitKey: 'cbPremierUE', units: U_RES, pos: true, max: function (s) { return s.cbPremierUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE === 'cbail' && s.cbPremierE === 'oui'; } },
     { k: 'cbResE', l: 'Valeur résiduelle du crédit-bail', ctx: 'électrique', unitKey: 'cbResUE', units: U_RES, max: function (s) { return s.cbResUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE === 'cbail'; } },
     { info: 'acqE' },
     { sep: 'Tracteur diesel' },
@@ -396,7 +475,7 @@ var GROUPS = [
     { k: 'durLocD', l: 'Durée du contrat', ctx: 'diesel', unitKey: 'durLocUD', units: U_DUREE, pos: true, vis: function (s) { return s.modeD !== 'achat'; } },
     { k: 'cbTauxD', l: 'Taux annuel du crédit-bail', ctx: 'diesel', u: '%/an', vis: function (s) { return s.modeD === 'cbail'; } },
     { k: 'cbPremierD', l: 'Premier loyer majoré', ctx: 'diesel', select: [['non', 'Non'], ['oui', 'Oui']], vis: function (s) { return s.modeD === 'cbail'; } },
-    { k: 'cbPremierMontantD', l: 'Montant du premier loyer majoré', ctx: 'diesel', u: '€ HT', pos: true, vis: function (s) { return s.modeD === 'cbail' && s.cbPremierD === 'oui'; } },
+    { k: 'cbPremierMontantD', l: 'Montant du premier loyer majoré', ctx: 'diesel', unitKey: 'cbPremierUD', units: U_RES, pos: true, max: function (s) { return s.cbPremierUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD === 'cbail' && s.cbPremierD === 'oui'; } },
     { k: 'cbResD', l: 'Valeur résiduelle du crédit-bail', ctx: 'diesel', unitKey: 'cbResUD', units: U_RES, max: function (s) { return s.cbResUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD === 'cbail'; } },
     { info: 'acqD' }
   ]},
@@ -529,6 +608,8 @@ function readData(s) {
       d[k] = isText(k) ? s[k] : num(s[k]);
     }
   }
+  d.firstE = creditLeaseFirst(s, 'E');
+  d.firstD = creditLeaseFirst(s, 'D');
   if (s.modeE === 'cbail') { d.loyE = creditLeaseMonthly(s, 'E'); d.optE = creditLeaseResidual(s, 'E'); }
   if (s.modeD === 'cbail') { d.loyD = creditLeaseMonthly(s, 'D'); d.optD = creditLeaseResidual(s, 'D'); }
   return d;
@@ -580,11 +661,18 @@ function creditLeaseResidual(s, X) {
   var value = Math.max(0, num(s['cbRes' + X]));
   return s['cbResU' + X] === 'eur' ? value : price * value / 100;
 }
+/* Premier loyer majoré du crédit-bail, en € HT (saisi en € ou en % du prix neuf) */
+function creditLeaseFirst(s, X) {
+  if (s['mode' + X] !== 'cbail' || s['cbPremier' + X] !== 'oui') { return 0; }
+  var price = Math.max(0, num(s['prix' + X]));
+  var value = Math.max(0, num(s['cbPremierMontant' + X]));
+  return s['cbPremierU' + X] === 'pct' ? price * value / 100 : value;
+}
 function creditLeaseMonthly(s, X) {
   var price = Math.max(0, num(s['prix' + X]));
   var months = leaseMonths(s, X);
   var rate = Math.max(0, num(s['cbTaux' + X])) / 100 / 12;
-  var first = s['cbPremier' + X] === 'oui' ? Math.max(0, num(s['cbPremierMontant' + X])) : 0;
+  var first = creditLeaseFirst(s, X);
   var residual = creditLeaseResidual(s, X);
   var payments = months - (first > 0 ? 1 : 0);
   if (months <= 0 || price <= 0 || first >= price || residual >= price || first + residual >= price || payments <= 0) { return 0; }
@@ -806,8 +894,8 @@ function compute(d, on) {
     pegDY = on.regl ? d.pegD * fA : 0;
     certY = (on.fisc && eOn) ? depY * d.certif : 0;
     fiscY = (on.fisc && y === 1) ? d.fiscGain : 0;
-    rEY = acqOn ? rentInYear(d.modeE, d.loyE, lmE, d.optE, y, d.modeE === 'cbail' && d.cbPremierE === 'oui' ? d.cbPremierMontantE : 0) : 0;
-    rDY = acqOn ? rentInYear(d.modeD, d.loyD, lmD, d.optD, y, d.modeD === 'cbail' && d.cbPremierD === 'oui' ? d.cbPremierMontantD : 0) : 0;
+    rEY = acqOn ? rentInYear(d.modeE, d.loyE, lmE, d.optE, y, d.firstE || 0) : 0;
+    rDY = acqOn ? rentInYear(d.modeD, d.loyD, lmD, d.optD, y, d.firstD || 0) : 0;
     rc = bat ? bat.repl[y] : 0;
     costE = eHT + oc.entE * fA + oc.assE * fA + oc.borneAbo * fA + intE[y] + rc + chY + pegEY + rEY - certY - fiscY;
     costD = dHT + oc.entD * fA + oc.adb * fA + oc.assD * fA + intD[y] + carbY + pegDY + rDY;
@@ -894,7 +982,7 @@ function compute(d, on) {
     pVar1: pVar1, pAll1: pAll1, share1: share1, fixedContrat: fixedContrat,
     occ: occ, autoOk: autoOk, ref: ref, an: an, perKm: perKm, oc: oc, bat: bat, yr: yr,
     aideA: aideA, aideB: aideB, netE: netE, capD: capD, borneNet: borneNet,
-    lmE: lmE, lmD: lmD, ownE: ownE, ownD: ownD, leaseShortE: leaseShortE, leaseShortD: leaseShortD,
+    d: d, lmE: lmE, lmD: lmD, ownE: ownE, ownD: ownD, leaseShortE: leaseShortE, leaseShortD: leaseShortD,
     cE: cE, cD: cD, stackE: stackE, stackD: stackD,
     resE: resE, resD: resD, tcoE: tcoE, tcoD: tcoD, tcoSav: tcoD - tcoE,
     opE1: opE1, opD1: opD1, opSav: opD1 - opE1,
@@ -1321,6 +1409,10 @@ function missReason(k) {
   if (needPos && parseFloat(s) <= 0) { return 'doit être supérieur à 0'; }
   var mx = typeof f.max === 'function' ? f.max(state) : f.max;
   if (mx !== undefined && mx !== null && parseFloat(s) > mx) { return 'maximum ' + fmt(mx, 0); }
+  if (k === 'cbPremierMontantE' || k === 'cbPremierMontantD') {
+    var X = k.slice(-1);
+    if (creditLeaseFirst(state, X) + creditLeaseResidual(state, X) >= Math.max(0, num(state['prix' + X]))) { return 'premier loyer + valeur résiduelle doivent rester inférieurs au prix'; }
+  }
   return '';
 }
 function isMissing(k) { return missReason(k) !== ''; }
@@ -1690,7 +1782,7 @@ function pageComplet4(r, d, on) {
     }
   }
   if (on.achat) {
-    h += '<li>Acquisition : électrique en ' + ACQ_NAME[d.modeE] + ', diesel en ' + ACQ_NAME[d.modeD] + '. Temps d’équilibre économique : <b>' + beMain(r) + '</b> (hors revente).</li>';
+    h += '<li>Acquisition : électrique en ' + ACQ_NAME[d.modeE] + (d.firstE > 0 ? ' (premier loyer majoré ' + eur(d.firstE) + ')' : '') + ', diesel en ' + ACQ_NAME[d.modeD] + (d.firstD > 0 ? ' (premier loyer majoré ' + eur(d.firstD) + ')' : '') + '. Temps d’équilibre économique : <b>' + beMain(r) + '</b> (hors revente).</li>';
     if (r.leaseShortE || r.leaseShortD) { h += '<li>Hypothèse de location : le loyer est prolongé au même tarif après l’échéance du contrat initial, jusqu’à la fin de l’étude. À confirmer avec une offre de renouvellement.</li>'; }
   }
   if (on.sens && CUR_SENS) { h += '<li>Les seuils de sensibilité sont calculés en faisant varier un seul paramètre à la fois ; ils ne constituent pas un scénario de stress combiné.</li>'; }
@@ -1810,7 +1902,9 @@ function acqText(d, X, r) {
   var mode = d['mode' + X];
   if (mode === 'achat') { return null; }
   var m = X === 'E' ? r.lmE : r.lmD;
-  return ACQ_NAME[mode] + ' ' + eur(d['loy' + X]) + ' × ' + fmt(Math.min(m, 12 * r.n), 0) + ' mois' + (mode === 'cbail' && m <= 12 * r.n ? ' + option ' + eur(d['opt' + X]) : '');
+  var first = mode === 'cbail' ? (d['first' + X] || 0) : 0;
+  var cnt = Math.min(m, 12 * r.n) - (first > 0 ? 1 : 0);
+  return ACQ_NAME[mode] + ' ' + (first > 0 ? 'premier loyer majoré ' + eur(first) + ' + ' : '') + eur(d['loy' + X]) + ' × ' + fmt(cnt, 0) + ' mois' + (mode === 'cbail' && m <= 12 * r.n ? ' + option ' + eur(d['opt' + X]) : '');
 }
 function annex2(r, d, on) {
   var rows = [];
@@ -1929,6 +2023,8 @@ function migrateValues(v) {
       if (typeof m[old + 'D'] !== 'string') { m[old + 'D'] = m[old]; }
     }
   }
+  if (typeof m.cbPremierMontantE === 'string' && typeof m.cbPremierUE !== 'string') { m.cbPremierUE = 'eur'; }
+  if (typeof m.cbPremierMontantD === 'string' && typeof m.cbPremierUD !== 'string') { m.cbPremierUD = 'eur'; }
   return m;
 }
 function applyStored(o) {
@@ -2115,8 +2211,8 @@ function updateInfos(r) {
     if (state.rechMode === 'auto' && !eo.batterie) { setInfo('rech', 'Le calcul automatique utilise l’autonomie et le temps de recharge de la carte Batterie : active-la en étude complète.', true); }
     else { setInfo('rech', 'Année 1 : <b>' + fmt(r.an.pub, 0) + ' kWh</b> en borne publique (' + fmt(r.share1 * 100, 0) + ' % de l’énergie)' + (eo.chauf ? ', ' + fmt(r.yr.hours[1], 0) + ' h de chauffeur' : '') + '. Prix moyen : ' + fmt(r.pVar1, 3) + ' €/kWh HT.', false); }
   } else { setInfo('rech', '', false); }
-  setInfo('acqE', (state.modeE === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du premier loyer éventuel et de la valeur résiduelle. Valeur résiduelle due en fin de contrat : <b>' + eur(r.d.optE) + '</b>. ' : '') + ((eo.achat && r.leaseShortE) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state.modeE === 'cbail' || (eo.achat && r.leaseShortE));
-  setInfo('acqD', (state.modeD === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du premier loyer éventuel et de la valeur résiduelle. Valeur résiduelle due en fin de contrat : <b>' + eur(r.d.optD) + '</b>. ' : '') + ((eo.achat && r.leaseShortD) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state.modeD === 'cbail' || (eo.achat && r.leaseShortD));
+  setInfo('acqE', (state.modeE === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du premier loyer éventuel et de la valeur résiduelle. ' + (r.d.firstE > 0 ? 'Premier loyer majoré : <b>' + eur(r.d.firstE) + '</b>, puis ' + fmt(r.lmE - 1, 0) + ' loyers de <b>' + eur(r.d.loyE) + '</b>. ' : '') + 'Valeur résiduelle due en fin de contrat : <b>' + eur(r.d.optE) + '</b>. ' : '') + ((eo.achat && r.leaseShortE) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state.modeE === 'cbail' || (eo.achat && r.leaseShortE));
+  setInfo('acqD', (state.modeD === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du premier loyer éventuel et de la valeur résiduelle. ' + (r.d.firstD > 0 ? 'Premier loyer majoré : <b>' + eur(r.d.firstD) + '</b>, puis ' + fmt(r.lmD - 1, 0) + ' loyers de <b>' + eur(r.d.loyD) + '</b>. ' : '') + 'Valeur résiduelle due en fin de contrat : <b>' + eur(r.d.optD) + '</b>. ' : '') + ((eo.achat && r.leaseShortD) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state.modeD === 'cbail' || (eo.achat && r.leaseShortD));
 }
 
 function updateLive() {
@@ -2157,6 +2253,7 @@ function refreshAll() {
   applyVisibility();
   refreshMissing();
   updateLive();
+  refreshDossierBar();
 }
 
 function missingList() {
@@ -2292,6 +2389,8 @@ function showModal(title, text, okLabel, okCb, listHtml, cancelLabel, cancelCb) 
   document.getElementById('mList').innerHTML = listHtml || '';
   document.getElementById('mOk').textContent = okLabel;
   document.getElementById('mCancel').textContent = cancelLabel || 'Annuler';
+  document.getElementById('mCancel').style.display = okCb ? '' : 'none';
+  document.getElementById('mOk').className = 'btn ' + (okCb ? 'danger' : 'main');
   modalOk = okCb;
   modalCancel = cancelCb || null;
   document.getElementById('modal').className = 'on';
@@ -2345,7 +2444,7 @@ function startPdf() {
   var stage = document.getElementById('stage');
   stage.innerHTML = pages.join('');
   var els = stage.getElementsByClassName('page');
-  var pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+  var pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
   var idx = 0;
   var name = 'MasterTCO' + (d.client ? '-' + slug(d.client) : '') + '.pdf';
 
@@ -2357,13 +2456,14 @@ function startPdf() {
   }
   function next() {
     if (idx >= els.length) {
-      pdf.save(name);
       finish(true);
+      pdfDeliver(pdf.output('blob'), name);
       return;
     }
-    window.html2canvas(els[idx], { scale: 3, backgroundColor: '#ffffff', useCORS: true, scrollX: 0, scrollY: 0 }).then(function (canvas) {
+    /* JPEG haute qualité : ~250 dpi, rendu net pour quelques Mo au lieu de centaines en PNG */
+    window.html2canvas(els[idx], { scale: 2.6, backgroundColor: '#ffffff', useCORS: true, scrollX: 0, scrollY: 0 }).then(function (canvas) {
       if (idx > 0) { pdf.addPage(); }
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, 297);
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
       idx++;
       next();
     }).catch(function () {
@@ -2371,6 +2471,28 @@ function startPdf() {
     });
   }
   next();
+}
+/* PDF prêt : partage direct (mail, messagerie, Drive…) sur téléphone, sinon téléchargement */
+function pdfDownloadBlob(blob, name) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+}
+function pdfDeliver(blob, name) {
+  var file = null;
+  try { file = new File([blob], name, { type: 'application/pdf' }); } catch (e) { file = null; }
+  var canShare = !!(file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] }));
+  var mobile = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  if (!canShare || !mobile) { pdfDownloadBlob(blob, name); return; }
+  var size = blob.size >= 1048576 ? fmt(blob.size / 1048576, 1) + ' Mo' : fmt(blob.size / 1024, 0) + ' Ko';
+  showModal('Rapport prêt', name + ' · ' + size + '. Partage-le directement (mail, messagerie, Drive…) ou enregistre-le sur l’appareil.', 'Partager', function () {
+    navigator.share({ files: [file], title: name }).catch(function (err) {
+      if (!err || err.name !== 'AbortError') { pdfDownloadBlob(blob, name); }
+    });
+  }, '', 'Télécharger', function () { pdfDownloadBlob(blob, name); });
+  document.getElementById('mOk').className = 'btn main';
 }
 function downloadPdf() {
   var miss = missingList();
@@ -2442,6 +2564,18 @@ document.addEventListener('click', function (e) {
     showModal('Tout effacer ?', 'Tous les champs seront vidés. Les interrupteurs et les unités restent tels quels. Tu pourras revenir à l’exemple avec « Réinitialiser ».', 'Tout effacer', doClear);
   }
   else if (action === 'pdf') { downloadPdf(); }
+  else if (action === 'dos-save') { dosSaveClick(); }
+  else if (action === 'dos-panel') { dosOpenPanel(); }
+  else if (action === 'dos-close') { dosClosePanel(); }
+  else if (action === 'dos-new') { dosNew(); }
+  else if (action === 'dos-load') { dosOpen(el.getAttribute('data-id')); }
+  else if (action === 'dos-dup') { dosDuplicate(el.getAttribute('data-id')); }
+  else if (action === 'dos-ren') { dosRename(el.getAttribute('data-id')); }
+  else if (action === 'dos-del') { dosDelete(el.getAttribute('data-id')); }
+  else if (action === 'dos-export') { dosExport(); }
+  else if (action === 'dos-import') { dosImportClick(); }
+  else if (action === 'prompt-ok') { promptSubmit(); }
+  else if (action === 'prompt-cancel') { closePrompt(); }
   else if (action === 'modal-cancel') {
     var cc = modalCancel;
     closeModal();
@@ -2454,11 +2588,376 @@ document.addEventListener('click', function (e) {
   }
 });
 
+/* ===================== DOSSIERS CLIENTS (stockage local + fichier de sauvegarde) ===================== */
+var DOS_KEY = 'masterTCO_dossiers_v1';
+var DOS_CUR_KEY = 'masterTCO_dossier_courant';
+var DOS_EXPORT_KEY = 'masterTCO_dossiers_export';
+var DOS_FORMAT = 'MasterTCO-dossiers';
+var dosStudies = [];
+var dosCurrent = null;
+var promptCb = null;
+var toastTimer = null;
+
+function dosLoad() {
+  var raw = null, o;
+  try { raw = localStorage.getItem(DOS_KEY); } catch (e) { raw = null; }
+  dosStudies = [];
+  if (raw) {
+    try { o = JSON.parse(raw); if (o && o.studies && o.studies.length >= 0) { dosStudies = o.studies.filter(dosValidStudy); } } catch (e2) { dosStudies = []; }
+  }
+  try { dosCurrent = localStorage.getItem(DOS_CUR_KEY) || null; } catch (e3) { dosCurrent = null; }
+  if (dosCurrent && !dosFind(dosCurrent)) { dosCurrent = null; }
+}
+function dosPersist() {
+  try {
+    localStorage.setItem(DOS_KEY, JSON.stringify({ format: DOS_FORMAT, version: 1, studies: dosStudies }));
+    return true;
+  } catch (e) {
+    showModal('Enregistrement impossible', 'Le navigateur a refusé l’enregistrement (mémoire pleine ou navigation privée). Exporte tes dossiers dans un fichier pour ne rien perdre.', 'Exporter', dosExport);
+    return false;
+  }
+}
+function dosSetCurrent(id) {
+  dosCurrent = id || null;
+  try { if (dosCurrent) { localStorage.setItem(DOS_CUR_KEY, dosCurrent); } else { localStorage.removeItem(DOS_CUR_KEY); } } catch (e) {}
+}
+function dosValidStudy(x) {
+  return !!(x && typeof x.id === 'string' && x.data && typeof x.data === 'object' && x.data.v && typeof x.data.v === 'object');
+}
+function dosFind(id) {
+  var i;
+  for (i = 0; i < dosStudies.length; i++) { if (dosStudies[i].id === id) { return dosStudies[i]; } }
+  return null;
+}
+function dosNewId() { return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function dosSnapshot() { return { v: copyObj(state), on: copyObj(ons) }; }
+function dosSig(o) {
+  var v = o.v || {}, on = o.on || {};
+  var keys = Object.keys(v).sort(), okeys = Object.keys(on).sort();
+  var a = [], i;
+  for (i = 0; i < keys.length; i++) { a.push(keys[i] + '=' + v[keys[i]]); }
+  for (i = 0; i < okeys.length; i++) { a.push(okeys[i] + ':' + (on[okeys[i]] ? 1 : 0)); }
+  return a.join('|');
+}
+function dosKpi() {
+  try {
+    var d = readData(state);
+    var r = compute(d, effOn());
+    return { valid: !!r.valid, complet: isComplet(), n: r.n, tcoSav: r.tcoSav, eneSav: r.an ? r.an.ecoHT : 0 };
+  } catch (e) { return { valid: false }; }
+}
+function dosModified() {
+  var c = dosCurrent ? dosFind(dosCurrent) : null;
+  return !!c && dosSig(c.data) !== dosSig(dosSnapshot());
+}
+function dosDate(ts) {
+  if (!ts) { return ''; }
+  var d = new Date(ts);
+  return d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+function dosToday() { return new Date().toLocaleDateString('fr-FR'); }
+function dosClientName(x) { return String(x.client || '').replace(/^\s+|\s+$/g, '') || 'Sans client'; }
+
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'on';
+  if (toastTimer) { clearTimeout(toastTimer); }
+  toastTimer = setTimeout(function () { t.className = ''; }, 2600);
+}
+
+function refreshDossierBar() {
+  var c = dosCurrent ? dosFind(dosCurrent) : null;
+  var nEl = document.getElementById('dosName');
+  var sEl = document.getElementById('dosState');
+  if (!nEl) { return; }
+  if (!c) {
+    nEl.textContent = 'Étude non enregistrée';
+    sEl.textContent = dosStudies.length ? dosStudies.length + ' étude(s) dans tes dossiers' : 'Enregistre-la pour la retrouver plus tard';
+    sEl.className = 'ds';
+    return;
+  }
+  nEl.textContent = dosClientName(c);
+  if (dosModified()) { sEl.textContent = (c.name || 'Étude') + ' · modifications non enregistrées'; sEl.className = 'ds mod'; }
+  else { sEl.textContent = (c.name || 'Étude') + ' · enregistrée le ' + dosDate(c.updated); sEl.className = 'ds'; }
+}
+
+/* ----- Fenêtre de saisie client / nom ----- */
+function showPrompt(title, text, client, name, okLabel, cb) {
+  document.getElementById('pTitle').textContent = title;
+  document.getElementById('pText').textContent = text;
+  document.getElementById('pClient').value = client || '';
+  document.getElementById('pName').value = name || '';
+  document.getElementById('pOk').textContent = okLabel;
+  document.getElementById('pErr').style.display = 'none';
+  promptCb = cb;
+  document.getElementById('prompt').className = 'on';
+  setTimeout(function () { var f = document.getElementById(client ? 'pName' : 'pClient'); f.focus(); f.select(); }, 50);
+}
+function closePrompt() { document.getElementById('prompt').className = ''; promptCb = null; }
+function promptSubmit() {
+  var c = document.getElementById('pClient').value.replace(/^\s+|\s+$/g, '');
+  var n = document.getElementById('pName').value.replace(/^\s+|\s+$/g, '');
+  var err = document.getElementById('pErr');
+  if (!c) { err.textContent = 'Indique le nom du client.'; err.style.display = 'block'; document.getElementById('pClient').focus(); return; }
+  if (!n) { n = 'Étude du ' + dosToday(); }
+  var cb = promptCb;
+  closePrompt();
+  if (cb) { cb(c, n); }
+}
+
+/* ----- Enregistrer ----- */
+function dosSaveClick() {
+  var c = dosCurrent ? dosFind(dosCurrent) : null;
+  if (c) {
+    if (!dosModified()) { toast('Étude déjà à jour'); return; }
+    dosUpdateCurrent(c);
+    return;
+  }
+  dosSaveAs();
+}
+function dosSaveAs() {
+  showPrompt('Enregistrer l’étude', 'Elle sera rangée dans le dossier de ce client. Le nom du client est aussi celui qui figure sur le rapport.', state.client, 'Étude du ' + dosToday(), 'Enregistrer', function (client, name) {
+    state.client = client;
+    saveState();
+    fillInputs();
+    var now = Date.now();
+    var st = { id: dosNewId(), client: client, name: name, created: now, updated: now, data: dosSnapshot(), kpi: dosKpi() };
+    dosStudies.push(st);
+    if (dosPersist()) {
+      dosSetCurrent(st.id);
+      refreshAll();
+      toast('Étude enregistrée dans le dossier ' + client);
+    } else { dosStudies.pop(); }
+  });
+}
+function dosUpdateCurrent(c) {
+  var prev = { data: c.data, kpi: c.kpi, updated: c.updated, client: c.client };
+  c.data = dosSnapshot();
+  c.kpi = dosKpi();
+  c.updated = Date.now();
+  if (String(state.client || '').replace(/^\s+|\s+$/g, '')) { c.client = state.client; }
+  if (dosPersist()) { refreshAll(); toast('Étude mise à jour'); }
+  else { c.data = prev.data; c.kpi = prev.kpi; c.updated = prev.updated; c.client = prev.client; }
+}
+
+/* ----- Ouvrir / nouvelle étude (avec garde si modifications non enregistrées) ----- */
+function dosGuard(next) {
+  var c = dosCurrent ? dosFind(dosCurrent) : null;
+  if (c && dosModified()) {
+    showModal('Modifications non enregistrées', 'L’étude « ' + (c.name || '') + ' » (' + dosClientName(c) + ') a été modifiée depuis son dernier enregistrement.', 'Continuer sans enregistrer', next, '', 'Annuler');
+  } else if (!c && dosSig(dosSnapshot()) !== dosSig({ v: copyDefaults(), on: copyOn() })) {
+    showModal('Étude non enregistrée', 'L’étude affichée n’est enregistrée dans aucun dossier : elle sera remplacée.', 'Continuer', next, '', 'Annuler');
+  } else { next(); }
+}
+function dosApply(data) {
+  state = copyDefaults();
+  ons = copyOn();
+  applyStored(data);
+  saveState();
+  fillInputs();
+  refreshAll();
+  if (reportVisible()) { renderReport(); }
+}
+function dosOpen(id) {
+  var st = dosFind(id);
+  if (!st) { return; }
+  dosGuard(function () {
+    dosSetCurrent(st.id);
+    dosApply(st.data);
+    dosClosePanel();
+    showTab('saisie');
+    toast('Étude ouverte : ' + dosClientName(st) + ' · ' + st.name);
+  });
+}
+function dosNew() {
+  dosGuard(function () {
+    dosSetCurrent(null);
+    dosApply({ v: copyDefaults(), on: copyOn() });
+    dosClosePanel();
+    showTab('saisie');
+    toast('Nouvelle étude à partir de l’exemple de départ');
+  });
+}
+
+/* ----- Dupliquer, renommer, supprimer ----- */
+function dosDuplicate(id) {
+  var st = dosFind(id);
+  if (!st) { return; }
+  showPrompt('Dupliquer l’étude', 'Crée une copie pour tester une variante (financement, kilométrage…). Tu peux la ranger chez un autre client.', st.client, st.name + ' (copie)', 'Dupliquer', function (client, name) {
+    var now = Date.now();
+    var data = JSON.parse(JSON.stringify(st.data));
+    data.v.client = client;
+    dosStudies.push({ id: dosNewId(), client: client, name: name, created: now, updated: now, data: data, kpi: st.kpi });
+    if (dosPersist()) { renderDossiers(); toast('Copie créée'); } else { dosStudies.pop(); }
+  });
+}
+function dosRename(id) {
+  var st = dosFind(id);
+  if (!st) { return; }
+  showPrompt('Renommer l’étude', 'Le nom du client est aussi mis à jour sur le rapport de cette étude.', st.client, st.name, 'Renommer', function (client, name) {
+    var prev = [st.client, st.name, st.data.v.client];
+    st.client = client; st.name = name; st.data.v.client = client;
+    if (dosCurrent === st.id) { state.client = client; saveState(); fillInputs(); }
+    if (dosPersist()) { renderDossiers(); refreshAll(); toast('Étude renommée'); }
+    else { st.client = prev[0]; st.name = prev[1]; st.data.v.client = prev[2]; }
+  });
+}
+function dosDelete(id) {
+  var st = dosFind(id);
+  if (!st) { return; }
+  showModal('Supprimer cette étude ?', '« ' + st.name + ' » (' + dosClientName(st) + ') sera supprimée de ce téléphone. Seule une sauvegarde exportée permettra de la récupérer.', 'Supprimer', function () {
+    var i, keep = [];
+    for (i = 0; i < dosStudies.length; i++) { if (dosStudies[i].id !== id) { keep.push(dosStudies[i]); } }
+    var prev = dosStudies;
+    dosStudies = keep;
+    if (dosPersist()) {
+      if (dosCurrent === id) { dosSetCurrent(null); }
+      renderDossiers(); refreshAll(); toast('Étude supprimée');
+    } else { dosStudies = prev; }
+  });
+}
+
+/* ----- Liste ----- */
+function dosOpenPanel() {
+  document.getElementById('dosSearch').value = '';
+  renderDossiers();
+  document.getElementById('dossiers').className = 'on';
+  document.body.style.overflow = 'hidden';
+}
+function dosClosePanel() {
+  document.getElementById('dossiers').className = '';
+  document.body.style.overflow = '';
+}
+function dosNorm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+function renderDossiers() {
+  var info = document.getElementById('dosSaveInfo');
+  var last = null;
+  try { last = parseInt(localStorage.getItem(DOS_EXPORT_KEY), 10) || null; } catch (e) { last = null; }
+  var newest = 0, i;
+  for (i = 0; i < dosStudies.length; i++) { if (dosStudies[i].updated > newest) { newest = dosStudies[i].updated; } }
+  if (!dosStudies.length) { info.innerHTML = ''; }
+  else if (!last) { info.innerHTML = '<div class="dsave late"><b>Aucune sauvegarde exportée.</b> Tes dossiers ne sont que sur cet appareil : exporte-les pour pouvoir les récupérer ou les ouvrir ailleurs.</div>'; }
+  else if (newest > last) {
+    var days = Math.floor((Date.now() - last) / 86400000);
+    info.innerHTML = '<div class="dsave' + (days >= 7 ? ' late' : '') + '">Dernière sauvegarde exportée le ' + esc(dosDate(last)) + '. Des études ont changé depuis : pense à exporter à nouveau.</div>';
+  } else { info.innerHTML = '<div class="dsave">Sauvegarde à jour : exportée le ' + esc(dosDate(last)) + '.</div>'; }
+
+  var q = dosNorm(document.getElementById('dosSearch').value);
+  var list = dosStudies.filter(function (x) { return !q || dosNorm(dosClientName(x) + ' ' + x.name).indexOf(q) >= 0; });
+  var host = document.getElementById('dosList');
+  if (!dosStudies.length) { host.innerHTML = '<div class="dempty">Aucune étude enregistrée.<br>Utilise « Enregistrer » sur la page Données, ou importe un fichier de sauvegarde.</div>'; return; }
+  if (!list.length) { host.innerHTML = '<div class="dempty">Aucun résultat.</div>'; return; }
+  var groups = {}, names = [];
+  for (i = 0; i < list.length; i++) {
+    var cn = dosClientName(list[i]);
+    var key = dosNorm(cn);
+    if (!groups[key]) { groups[key] = { name: cn, items: [], last: 0 }; names.push(key); }
+    groups[key].items.push(list[i]);
+    if (list[i].updated > groups[key].last) { groups[key].last = list[i].updated; }
+  }
+  names.sort(function (a, b) { return groups[a].name.localeCompare(groups[b].name, 'fr'); });
+  var h = '', g, j, x, eco, k;
+  for (i = 0; i < names.length; i++) {
+    g = groups[names[i]];
+    g.items.sort(function (a, b) { return b.updated - a.updated; });
+    h += '<div class="dclient">' + esc(g.name) + ' · ' + g.items.length + ' étude' + (g.items.length > 1 ? 's' : '') + '</div>';
+    for (j = 0; j < g.items.length; j++) {
+      x = g.items[j];
+      k = x.kpi || {};
+      eco = '';
+      if (k.valid && k.complet) { eco = '<span class="eco ' + (k.tcoSav >= 0 ? 'pos' : 'neg') + '">' + eur(k.tcoSav) + '</span>'; }
+      else if (k.valid) { eco = '<span class="eco pos">' + eur(k.eneSav) + '/an</span>'; }
+      h += '<div class="dstudy' + (x.id === dosCurrent ? ' cur' : '') + '"><div class="t1"><span class="nm">' + esc(x.name) + (x.id === dosCurrent ? ' <span style="color:var(--brand);font-size:12px">· ouverte</span>' : '') + '</span>' + eco + '</div>';
+      h += '<div class="meta">' + (k.valid ? (k.complet ? 'Économie sur ' + ans(k.n) + ' (coût total)' : 'Consommation seule · économie d’énergie') + ' · ' : '') + 'modifiée le ' + esc(dosDate(x.updated)) + '</div>';
+      h += '<div class="dacts"><button class="btn main" type="button" data-action="dos-load" data-id="' + esc(x.id) + '">Ouvrir</button>';
+      h += '<button class="btn sec" type="button" data-action="dos-dup" data-id="' + esc(x.id) + '">Dupliquer</button>';
+      h += '<button class="btn sec" type="button" data-action="dos-ren" data-id="' + esc(x.id) + '">Renommer</button>';
+      h += '<button class="btn danger" type="button" data-action="dos-del" data-id="' + esc(x.id) + '">Supprimer</button></div></div>';
+    }
+  }
+  host.innerHTML = h;
+}
+
+/* ----- Export / import du fichier de sauvegarde ----- */
+function dosExport() {
+  if (!dosStudies.length) { toast('Aucune étude à exporter'); return; }
+  var now = new Date();
+  var stamp = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
+  var name = 'MasterTCO-dossiers-' + stamp + '.json';
+  var json = JSON.stringify({ format: DOS_FORMAT, version: 1, exported: now.getTime(), studies: dosStudies }, null, 1);
+  var blob = new Blob([json], { type: 'application/json' });
+  function done() {
+    try { localStorage.setItem(DOS_EXPORT_KEY, String(Date.now())); } catch (e) {}
+    renderDossiers();
+    toast(dosStudies.length + ' étude(s) exportée(s)');
+  }
+  function download() {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    done();
+  }
+  var file = null;
+  try { file = new File([blob], name, { type: 'application/json' }); } catch (e) { file = null; }
+  var mobile = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  if (mobile && file && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+    navigator.share({ files: [file], title: name }).then(done).catch(function (err) {
+      if (!err || err.name !== 'AbortError') { download(); }
+    });
+  } else { download(); }
+}
+function dosImportClick() {
+  var f = document.getElementById('dosFile');
+  f.value = '';
+  f.click();
+}
+function dosImportFile(file) {
+  if (!file) { return; }
+  var rd = new FileReader();
+  rd.onload = function () {
+    var o = null;
+    try { o = JSON.parse(String(rd.result)); } catch (e) { o = null; }
+    if (!o || o.format !== DOS_FORMAT || !o.studies || typeof o.studies.length !== 'number') {
+      showModal('Fichier non reconnu', 'Ce fichier n’est pas une sauvegarde de dossiers MasterTCO.', 'OK', null);
+      return;
+    }
+    var add = 0, upd = 0, same = 0, bad = 0, i, x, cur;
+    var prev = JSON.parse(JSON.stringify(dosStudies));
+    for (i = 0; i < o.studies.length; i++) {
+      x = o.studies[i];
+      if (!dosValidStudy(x)) { bad++; continue; }
+      x = { id: x.id, client: String(x.client || ''), name: String(x.name || 'Étude'), created: +x.created || Date.now(), updated: +x.updated || Date.now(), data: { v: x.data.v, on: x.data.on || {} }, kpi: x.kpi || {} };
+      cur = dosFind(x.id);
+      if (!cur) { dosStudies.push(x); add++; }
+      else if (x.updated > cur.updated) { dosStudies[dosStudies.indexOf(cur)] = x; upd++; }
+      else { same++; }
+    }
+    if (!dosPersist()) { dosStudies = prev; return; }
+    renderDossiers();
+    refreshAll();
+    var parts = [];
+    parts.push(add + ' étude(s) ajoutée(s)');
+    if (upd) { parts.push(upd + ' mise(s) à jour par une version plus récente'); }
+    if (same) { parts.push(same + ' déjà présente(s) et conservée(s)'); }
+    if (bad) { parts.push(bad + ' illisible(s) ignorée(s)'); }
+    showModal('Import terminé', parts.join(' · ') + '.', 'OK', null);
+  };
+  rd.onerror = function () { showModal('Lecture impossible', 'Le fichier n’a pas pu être lu.', 'OK', null); };
+  rd.readAsText(file);
+}
+document.getElementById('dosFile').addEventListener('change', function (e) { dosImportFile(e.target.files && e.target.files[0]); });
+document.getElementById('dosSearch').addEventListener('input', renderDossiers);
+document.getElementById('prompt').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); promptSubmit(); } else if (e.key === 'Escape') { closePrompt(); } });
+
 window.addEventListener('resize', fitPages);
 window.addEventListener('orientationchange', function () { setTimeout(fitPages, 200); });
 
 buildMaps();
 loadState();
+dosLoad();
 buildForm();
 </script>
 </body>
