@@ -7,7 +7,10 @@
 <style>
 :root{
   --brand:#00529b;
-  --green:#1a9b6c;
+  --green:#16a37a;
+  --v2:#5b7aa6;
+  --navy:#071a33;
+  --cyan:#39c6f4;
   --orange:#e0642a;
   --red:#c62828;
   --bg:#f3f5f8;
@@ -151,23 +154,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 .wmwrap{display:inline-block}
 .wmwrap .wm{font-size:17px;color:#1b2430}
 .wmwrap .wm .b{color:var(--brand)}
-.wmbar{height:2px;margin-top:7px;background:var(--brand)}
+.wmbar{height:3px;margin-top:7px;border-radius:2px;background:linear-gradient(90deg,#00529b,#39c6f4)}
 .ph-r{text-align:right;font-size:11.5px;color:#6b7683;line-height:1.45}
 .ph-t{font-size:22px;font-weight:800;color:#0b2a4a;line-height:1.15}
 .ph-s{font-size:12.5px;color:#6b7683;margin-top:3px}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
-.kpi{border-radius:12px;padding:10px 16px;color:#fff}
-.kpi.g{background:var(--green)}
-.kpi.b{background:var(--brand)}
-.kpi .k1{font-size:12px;opacity:.92;text-transform:uppercase;letter-spacing:.4px}
+.kpi{border-radius:14px;padding:11px 16px;color:#fff;box-shadow:0 6px 16px rgba(7,26,51,.22);position:relative;overflow:hidden}
+.kpi.g{background:linear-gradient(135deg,#06291f 0%,#0d5a43 55%,#16a37a 100%)}
+.kpi.b{background:linear-gradient(135deg,#071a33 0%,#0b2f5e 55%,#00529b 100%)}
+.kpi .k1{font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:800;color:#8fd3ff}
+.kpi.g .k1{color:#9ff5d2}
 .kpi .k2{font-size:28px;font-weight:800;margin-top:1px}
 .kpi .k3{font-size:12px;opacity:.9}
 .basis{font-size:11.5px;color:#6b7683;margin:6px 0 8px}
-.st{font-size:15px;font-weight:700;color:var(--brand);margin:12px 0 6px;border-left:4px solid var(--brand);padding-left:8px}
+.st{font-size:15px;font-weight:800;color:#0b2f5e;margin:12px 0 6px;border-left:4px solid var(--brand);padding-left:8px}
 table.t{width:100%;border-collapse:collapse;font-size:12.5px}
-table.t th{background:#eef3f9;color:#00386b;text-align:right;padding:6px 8px;font-weight:700}
+table.t th{background:#0b2f5e;color:#fff;text-align:right;padding:6px 8px;font-weight:700}
+table.t tr:first-child th:first-child{border-radius:6px 0 0 0}
+table.t tr:first-child th:last-child{border-radius:0 6px 0 0}
 table.t th:first-child,table.t td:first-child{text-align:left}
 table.t td{padding:5px 8px;text-align:right;border-bottom:1px solid #e6eaf0}
+table.t td:not(:first-child){white-space:nowrap}
+table.t.bt th,table.t.bt td{white-space:nowrap;font-size:10.4px;padding:4px 5px}
 table.t.sm{font-size:11.5px}
 table.t.sm th{padding:4px 6px}
 table.t.sm td{padding:3px 6px}
@@ -198,7 +206,7 @@ table.t tr.hl td{font-weight:800;background:#eaf7f1;color:#0d6b49}
 .m.ko{background:#fff1e6;color:#a34a0b}
 .m.na{background:#eef0f3;color:#6b7683}
 table.hm{width:100%;border-collapse:separate;border-spacing:3px;font-size:11.5px}
-table.hm th{font-weight:700;color:#3a4552;padding:4px 6px;text-align:center;background:#f2f5f9;border-radius:4px}
+table.hm th{font-weight:700;color:#fff;padding:4px 6px;text-align:center;background:#0b2f5e;border-radius:4px}
 table.hm th.rh{text-align:right}
 table.hm td{text-align:center;padding:4px 4px;border-radius:4px;font-weight:700;color:#1b2430}
 table.hm td.cur{outline:2px solid #0b2a4a;outline-offset:-2px}
@@ -211,16 +219,100 @@ table.hm td.cur{outline:2px solid #0b2a4a;outline-offset:-2px}
 .a1r span:first-child{color:#3a4552}
 .a1r span:last-child{font-weight:700;text-align:right}
 table.a2{width:100%;border-collapse:collapse;font-size:8.8px;line-height:1.25}
-table.a2 th{background:#eef3f9;color:#00386b;text-align:left;padding:3px 5px;font-weight:700}
+table.a2 th{background:#0b2f5e;color:#fff;text-align:left;padding:3px 5px;font-weight:700}
 table.a2 td{padding:2.2px 5px;border-bottom:1px solid #e6eaf0;vertical-align:top}
 table.a2 td:first-child{font-weight:700;width:21%}
 table.a2 td:nth-child(2){color:#3a4552;width:55%}
 table.a2 td:last-child{text-align:right;font-weight:700;width:24%}
 table.a2 tr.sec td{background:#f4f7fb;color:var(--brand);font-weight:800;text-transform:uppercase;letter-spacing:.3px;font-size:8.4px;text-align:left}
+/* Semaine type de la batterie */
+.wk{background:linear-gradient(135deg,#071a33 0%,#0b2f5e 55%,#00529b 100%);border-radius:14px;padding:12px 12px 10px;margin:6px 0 10px;color:#fff;box-shadow:0 6px 18px rgba(7,26,51,.25)}
+.wkh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:0 4px 2px}
+.wkt{font-size:14px;font-weight:800;letter-spacing:.2px}
+.wks{font-size:10px;color:rgba(255,255,255,.7);margin-top:2px}
+.wkl{display:flex;flex-wrap:wrap;gap:4px 10px;justify-content:flex-end;font-size:9px;color:rgba(255,255,255,.85);max-width:270px}
+.wkl span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.wkl i{display:inline-block;width:10px;height:6px;border-radius:3px}
+.wkk{display:flex;gap:6px;margin-top:4px}
+.wkk div{flex:1;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:6px 8px}
+.wkk div.bad{background:rgba(255,138,101,.22);border-color:rgba(255,138,101,.6)}
+.wkk div.pub{background:rgba(251,191,36,.16);border-color:rgba(251,191,36,.5)}
+.wkk b{display:block;font-size:15px;font-weight:800;line-height:1.1}
+.wkk span{display:block;font-size:8.6px;color:rgba(255,255,255,.72);margin-top:2px;line-height:1.2}
+.dial{display:flex;gap:16px;align-items:center;background:#f6f9fc;border:1px solid #e3e9f0;border-radius:14px;padding:10px 14px}
+.dtx{flex:1;min-width:0}
+.dtt{font-size:12.5px;font-weight:800;color:#0b2a4a;margin-bottom:6px}
+.dli{display:flex;align-items:baseline;gap:7px;font-size:10.5px;padding:3px 0;border-bottom:1px dotted #d6dee8}
+.dli i{flex:none;width:9px;height:9px;border-radius:50%;transform:translateY(1px)}
+.dli b{flex:none;width:84px;color:#0b2a4a}
+.dli span{color:#3a4552}
+.dlg{font-size:9px;color:#6b7683;margin-top:6px}
+/* Synthèse */
+.syh{background:linear-gradient(135deg,#071a33 0%,#0b2f5e 55%,#00529b 100%);border-radius:16px;padding:18px 20px;color:#fff;display:flex;gap:22px;align-items:center;box-shadow:0 8px 22px rgba(7,26,51,.28)}
+.syh .v{flex:0 0 250px}
+.syh .v i{font-style:normal;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:#8fd3ff;font-weight:800}
+.syh .v b{display:block;font-size:38px;font-weight:800;line-height:1.05;margin:4px 0}
+.syh .v span{font-size:11.5px;color:rgba(255,255,255,.8)}
+.syh .bars{flex:1;min-width:0}
+.syb{margin:6px 0 10px}
+.syb div{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px}
+.syb div b{font-weight:800}
+.syb p{margin:0;height:18px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden}
+.syb p i{display:block;height:100%;border-radius:9px}
+.syk{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px}
+.syk div{border:1px solid #dde3ea;border-radius:12px;padding:10px 12px;background:#fbfcfe}
+.syk i{font-style:normal;display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.45px;color:#6b7683;font-weight:800}
+.syk b{display:block;font-size:20px;font-weight:800;color:#0b2a4a;margin-top:4px;line-height:1.1}
+.syk span{display:block;font-size:10.5px;color:#3a4552;margin-top:3px;line-height:1.25}
+.syk div.ok{border-color:#9fdcc1;background:#effaf4}
+.syk div.ko{border-color:#f5c2a4;background:#fff5ee}
+.syt{display:flex;gap:10px;margin-top:12px}
+.syt>div{flex:1}
+/* Pile de la batterie */
+.pl{background:linear-gradient(135deg,#071a33 0%,#0b2f5e 55%,#00529b 100%);border-radius:16px;padding:16px 18px 14px;color:#fff;display:flex;gap:18px;box-shadow:0 8px 22px rgba(7,26,51,.28)}
+.pll{flex:0 0 330px}
+.plr{flex:1;min-width:0;display:flex;flex-direction:column;gap:9px}
+.plhd{font-size:14.5px;font-weight:800}
+.plsub{font-size:10px;color:rgba(255,255,255,.7);margin-top:2px}
+.plspec{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:11px;padding:9px 11px}
+.plspec h5{margin:0 0 6px;font-size:9.5px;letter-spacing:.8px;color:#8fd3ff;text-transform:uppercase}
+.plrow{display:flex;justify-content:space-between;gap:8px;font-size:11px;padding:3px 0;border-bottom:1px dotted rgba(255,255,255,.14)}
+.plrow:last-child{border-bottom:0}
+.plrow span:first-child{color:rgba(255,255,255,.72)}
+.plrow b{font-weight:800;text-align:right;white-space:nowrap}
+.plbig{display:flex;gap:8px}
+.plbig div{flex:1;border-radius:11px;padding:8px 10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+.plbig div.n{background:rgba(57,198,244,.18);border-color:rgba(57,198,244,.55)}
+.plbig div.o{background:rgba(255,138,101,.16);border-color:rgba(255,138,101,.5)}
+.plbig b{display:block;font-size:21px;font-weight:800;line-height:1.05}
+.plbig span{font-size:9px;color:rgba(255,255,255,.75)}
+.plbar{height:16px;border-radius:8px;background:rgba(255,255,255,.12);position:relative;overflow:hidden;margin-top:5px}
+.plbar i{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:linear-gradient(90deg,#1c7fd0,#39c6f4)}
+.plbl{font-size:10px;color:rgba(255,255,255,.75);margin-top:6px}
+.plbl:first-of-type{margin-top:0}
+.plnote{font-size:9px;color:rgba(255,255,255,.6);margin-top:3px}
+.plfoot{font-size:10.5px;color:#3a4552;background:#f4f7fb;border-left:4px solid #00529b;border-radius:6px;padding:7px 11px;margin-top:10px}
+/* Kilomètres possibles par jour */
+.kmb{background:#f6f9fc;border:1px solid #e3e9f0;border-radius:14px;padding:9px 14px 10px;margin-top:9px}
+.kmt{font-size:12.5px;font-weight:800;color:#0b2a4a;margin-bottom:7px}
+.kmg{display:flex;gap:8px}
+.kmg>div{flex:1;background:#fff;border:1px solid #dde6ef;border-radius:10px;padding:7px 9px}
+.kmg>div.win{background:#00529b;border-color:#00529b;color:#fff}
+.kmg>div.win span{color:rgba(255,255,255,.82)}
+.kmg>div.dim b{color:#6b7683}
+.kmg b{display:block;font-size:19px;font-weight:800;color:#0b2a4a;line-height:1.1}
+.kmg>div.win b{color:#fff}
+.kmg span{display:block;font-size:9.4px;color:#5d6876;margin-top:2px;line-height:1.25}
+.kmg i{font-style:normal;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#00529b;display:block;margin-bottom:2px}
+.kmg>div.win i{color:#8fd3ff}
+.kmv{margin-top:9px}
+.kmm{font-size:11px;color:#3a4552;margin-top:6px}
+.kmm b.ok{color:#0d6b49}
+.kmm b.ko{color:#c2410c}
 table.a5{width:100%;border-collapse:collapse;font-size:7.6px;line-height:1.15}
-table.a5 th{background:#eef3f9;color:#00386b;padding:2px 3px;text-align:right;font-weight:700}
+table.a5 th{background:#e7eef7;color:#0b2f5e;padding:2px 3px;text-align:right;font-weight:700}
 table.a5 th.g1{background:var(--green);color:#fff;text-align:center}
-table.a5 th.g2{background:var(--orange);color:#fff;text-align:center}
+table.a5 th.g2{background:var(--v2);color:#fff;text-align:center}
 table.a5 th:first-child,table.a5 td:first-child{text-align:left;white-space:nowrap}
 table.a5 td{padding:1.4px 3px;text-align:right;border-bottom:1px solid #f0f2f5;white-space:nowrap}
 table.a5 td.c{font-weight:700}
@@ -231,7 +323,7 @@ table.a5 tr.ty td{font-weight:800;background:#f4f7fb;border-bottom:1px solid #cf
 .tsum{display:flex;gap:8px;margin:4px 0 8px}
 .tbox{flex:1;border-radius:8px;padding:6px 9px;font-size:9.5px;line-height:1.4;background:#f4f7fb;border-left:4px solid var(--brand)}
 .tbox.v1{border-color:var(--green)}
-.tbox.v2{border-color:var(--orange)}
+.tbox.v2{border-color:var(--v2)}
 .tbox .tn{font-weight:800;font-size:10.5px;margin-bottom:2px}
 table.a3{font-size:11px}
 table.a3 tr.a3m td{padding:3px 8px 1px;border-bottom:0;font-weight:600}
@@ -239,8 +331,8 @@ table.a3 tr.a3s td{padding:0 8px 4px;font-size:10px;text-align:left;border-botto
 table.a3 tr.a3s.pos td{color:#0d6b49}
 table.a3 tr.a3s.neg td{color:#b42318}
 .a4t{font-size:10px;font-weight:800;color:#fff;background:var(--green);padding:3px 8px;border-radius:4px 4px 0 0;margin-top:8px}
-.a4t.v2{background:var(--orange)}
-.a4t.vx{background:var(--brand)}
+.a4t.v2{background:var(--v2)}
+.a4t.vx{background:#0b2f5e}
 table.a4{width:100%;border-collapse:collapse;font-size:8.4px;line-height:1.2}
 table.a4 th{background:#eef3f9;color:#00386b;padding:3px 4px;text-align:right;font-weight:700}
 table.a4 th:first-child,table.a4 td:first-child{text-align:left;width:24%}
@@ -401,7 +493,7 @@ var DEFAULTS = {
   coutChauf: '35',
   modeE: 'achat', prixE: '290000', loyE: '5200', durLocE: '5', durLocUE: 'ans', optE: '2900', cbTauxE: '5', cbPremierE: 'non', cbPremierMontantE: '10', cbPremierUE: 'pct', cbResE: '10', cbResUE: 'pct',
   modeD: 'achat', prixD: '115000', loyD: '2100', durLocD: '5', durLocUD: 'ans', optD: '1150', cbTauxD: '5', cbPremierD: 'non', cbPremierMontantD: '10', cbPremierUD: 'pct', cbResD: '10', cbResUD: 'pct',
-  aideAchat: '0', aideCbBenef: 'fin', aideAchat2: '0', aideCbBenef2: 'fin', tvaLoyer: '20', aideBorne: '0',
+  aideAchat: '0', aideCbBenef: 'fin', aideAchat2: '0', aideCbBenef2: 'fin', tvaLoyer: '20', aideBorne: '0', aideBorneMode: 'client',
   finPartE: '80', finTauxE: '5', finDureeE: '5', finUE: 'ans',
   finPartD: '80', finTauxD: '5', finDureeD: '5', finUD: 'ans',
   resE: '30', resD: '35', resU: 'pct',
@@ -409,9 +501,12 @@ var DEFAULTS = {
   entE: '6000', entD: '11000', entU: 'an',
   adbL: '1,3', adbU: 'l100', adbP: '0,85',
   assE: '7500', assD: '7000', assU: 'an',
-  capBat: '350', batDeg: '1,5', batDegU: 'an', batSeuil: '70', batRempl: '70000', batEff: '3',
-  capBat2: '350', batDeg2: '1,5', batDegU2: 'an', batSeuil2: '70', batRempl2: '70000', batEff2: '3',
-  bornePuis: '150', socArr: '20', socFin: '100', fenetre: '10',
+  motNom: 'PACCAR EX-D1', motKw: '270', capBrut: '525', packs: '5', dod: '88', dcMax: '325', acMax: '22', taperSoc: '80', taperPct: '30',
+  motNom2: 'PACCAR EX-D1', motKw2: '270', capBrut2: '525', packs2: '5', dod2: '88', dcMax2: '325', acMax2: '22', taperSoc2: '80', taperPct2: '30',
+  batDeg: '1,5', batDegU: 'an', batSeuil: '70', batRempl: '70000', batEff: '3',
+  batDeg2: '1,5', batDegU2: 'an', batSeuil2: '70', batRempl2: '70000', batEff2: '3',
+  vitMoy: '55', conduiteMax: '9', margeRet: '5', pauseCharge: 'non', pausePuis: '150',
+  bornePuis: '150', socFin: '100', fenetre: '10', semJours: '5', hDep: '6', hRet: '17', chargeStart: 'retour',
   carbP: '0,12', carbYear: '2', pegD: '0', pegE: '0',
   fiscGain: '0', certif: '0',
   evElec: '0', evDiesel: '0', evAutres: '0',
@@ -554,14 +649,16 @@ var GROUPS = [
     { info: 'acqD' }
   ]},
   { id: 'aides', on: 'aides', cx: true, need: 'elec', title: 'Aides', note: 'Les aides (véhicule et borne) sont versées le 6e mois : elles ne comptent qu’à partir de ce moment-là. L’aide à un tracteur électrique n’est acquise que si le client le garde au moins 5 ans. Elle s’applique quel que soit le mode d’acquisition. En crédit-bail, elle peut payer un loyer majoré : le 1er (le client avance l’aide jusqu’au 6e mois) ou le 6e, pour un montant égal à l’aide − TVA (aucune avance) ou à l’aide en HT (le client avance seulement la TVA, loyers plus bas). Elle peut aussi être versée directement au client.', fields: [
-    { k: 'aideAchat', slot: 'E', l: function (s) { return 'Aide au tracteur ' + V1(s); }, u: '€', vis: function (s, o) { return !!o.achat && isElec(s, 'E'); } },
+    { k: 'aideAchat', slot: 'E', l: 'Aide à l’acquisition du tracteur', u: '€', vis: function (s, o) { return !!o.achat && isElec(s, 'E'); } },
     { k: 'aideCbBenef', slot: 'E', l: 'Versement de l’aide en crédit-bail', select: [['fin', '1er loyer majoré (avance)'], ['fin6', '6e loyer majoré = aide − TVA'], ['fin6ht', '6e loyer majoré = aide HT'], ['client', 'Aide versée au client']], vis: function (s, o) { return !!o.achat && isElec(s, 'E') && s.modeE === 'cbail'; } },
     { info: 'aideT' },
-    { k: 'aideAchat2', slot: 'D', l: function (s) { return 'Aide au tracteur ' + V2(s); }, u: '€', vis: function (s, o) { return !!o.achat && isElec(s, 'D'); } },
+    { k: 'aideAchat2', slot: 'D', l: 'Aide à l’acquisition du tracteur', u: '€', vis: function (s, o) { return !!o.achat && isElec(s, 'D'); } },
     { k: 'aideCbBenef2', slot: 'D', l: 'Versement de l’aide en crédit-bail', select: [['fin', '1er loyer majoré (avance)'], ['fin6', '6e loyer majoré = aide − TVA'], ['fin6ht', '6e loyer majoré = aide HT'], ['client', 'Aide versée au client']], vis: function (s, o) { return !!o.achat && isElec(s, 'D') && s.modeD === 'cbail'; } },
     { info: 'aideT2' },
-    { k: 'tvaLoyer', l: 'TVA sur les loyers', u: '%', hint: 'sert à calculer « aide − TVA »', vis: function (s, o) { return !!o.achat && (((isElec(s, 'E') && s.modeE === 'cbail' && s.aideCbBenef === 'fin6')) || (isElec(s, 'D') && s.modeD === 'cbail' && s.aideCbBenef2 === 'fin6')); } },
-    { k: 'aideBorne', l: 'Aide à l’installation de la borne', u: '€', hint: 'versée le 6e mois, déduite du prix de la borne', vis: function (s, o) { return !!o.borne; } }
+    { k: 'tvaLoyer', l: 'TVA sur les loyers', u: '%', hint: 'sert à calculer « aide − TVA »', vis: function (s, o) { return !!o.achat && (((isElec(s, 'E') && s.modeE === 'cbail' && s.aideCbBenef === 'fin6')) || (isElec(s, 'D') && s.modeD === 'cbail' && s.aideCbBenef2 === 'fin6') || (!!o.borne && s.aideBorneMode === 'fin6' && borneLeaseOk(s))); } },
+    { k: 'aideBorne', l: 'Aide à l’installation de la borne', u: '€', hint: 'versée le 6e mois, déduite du prix de la borne', vis: function (s, o) { return !!o.borne; } },
+    { k: 'aideBorneMode', l: 'Versement de l’aide à la borne', select: [['client', 'Aide versée au client'], ['fin', '1er loyer majoré (avance)'], ['fin6', '6e loyer majoré = aide − TVA'], ['fin6ht', '6e loyer majoré = aide HT']], vis: function (s, o) { return !!o.borne && posNum(s.aideBorne) > 0; } },
+    { info: 'aideB' }
   ]},
   { id: 'fin', on: 'fin', cx: true, req: 'achat', title: 'Financement par crédit', note: 'Intérêts d’un crédit amortissable mensuellement, pour les tracteurs achetés.', fields: [
     { sep: V1 },
@@ -595,24 +692,53 @@ var GROUPS = [
     { k: 'assE', l: V1, unitKey: 'assU', units: U_AN_MOIS },
     { k: 'assD', l: V2, unitKey: 'assU', units: U_AN_MOIS }
   ]},
-  { id: 'batterie', on: 'batterie', cx: true, need: 'elec', title: 'Batterie LFP : vieillissement et recharge', note: 'Perte de capacité, autonomie et temps de recharge. Valeurs d’exemple à remplacer par les données constructeur DAF.', fields: [
+  { id: 'batterie', on: 'batterie', cx: true, need: 'elec', title: 'Batterie LFP : capacité, recharge et tournée', note: 'Capacité brute et nette (brute × part utilisable), recharge avec ralentissement en fin de charge, vieillissement et kilomètres possibles par jour. Valeurs pré-remplies : fiche DAF XD Electric ou exemples à remplacer.', fields: [
     { sep: V1 },
-    { k: 'capBat', slot: 'E', l: 'Capacité utile de la batterie neuve', u: 'kWh', pos: true, vis: function (s) { return isElec(s, 'E'); } },
+    { k: 'motNom', slot: 'E', l: 'Motorisation', text: true, optional: true, hint: 'ex. PACCAR EX-D1', vis: function (s) { return isElec(s, 'E'); } },
+    { k: 'motKw', slot: 'E', l: 'Puissance du moteur', u: 'kW', optional: true, hint: 'EX-D1 : 170, 220 ou 270 kW', vis: function (s) { return isElec(s, 'E'); } },
+    { k: 'capBrut', slot: 'E', l: 'Capacité brute de la batterie', u: 'kWh', pos: true, hint: 'DAF XD : 210 à 525 kWh', vis: function (s) { return isElec(s, 'E'); } },
+    { k: 'packs', slot: 'E', l: 'Nombre de packs', u: 'packs', optional: true, max: 12, hint: 'DAF : packs de 105 kWh', vis: function (s) { return isElec(s, 'E'); } },
+    { k: 'dod', slot: 'E', l: 'Part utilisable (profondeur de décharge)', u: '%', pos: true, max: 100, hint: 'LFP DAF : 88 %', vis: function (s) { return isElec(s, 'E'); } },
+    { info: 'batNet' },
+    { k: 'dcMax', slot: 'E', l: 'Recharge maximale acceptée en DC', u: 'kW', pos: true, hint: 'DAF : 150 ou 325 kW', vis: function (s) { return isElec(s, 'E'); } },
+    { k: 'acMax', slot: 'E', l: 'Recharge maximale acceptée en AC', u: 'kW', optional: true, hint: 'DAF : 22 kW', vis: function (s) { return isElec(s, 'E'); } },
+    { k: 'taperSoc', slot: 'E', l: 'Début du ralentissement de fin de charge', u: '%', pos: true, max: 100, hint: 'exemple, à remplacer par la courbe constructeur', vis: function (s) { return isElec(s, 'E'); } },
+    { k: 'taperPct', slot: 'E', l: 'Puissance encore acceptée à 100 %', u: '% du max', pos: true, max: 100, hint: 'exemple, à remplacer par la courbe constructeur', vis: function (s) { return isElec(s, 'E'); } },
     { k: 'batDeg', slot: 'E', l: 'Perte de capacité (scénario réaliste)', unitKey: 'batDegU', units: [['an', '% / an'], ['cycle', '% / 1000 cycles']], hint: '1 à 2 % par an en général', vis: function (s) { return isElec(s, 'E'); } },
     { k: 'batSeuil', slot: 'E', l: 'État de santé minimal (fin de vie)', u: '%', pos: true, max: 100, vis: function (s) { return isElec(s, 'E'); } },
     { k: 'batRempl', slot: 'E', l: 'Coût de remplacement de la batterie', u: '€ HT', vis: function (s) { return isElec(s, 'E'); } },
     { k: 'batEff', slot: 'E', l: 'Surconsommation au seuil de fin de vie', u: '%', vis: function (s) { return isElec(s, 'E'); } },
     { sep: V2 },
-    { k: 'capBat2', slot: 'D', l: 'Capacité utile de la batterie neuve', u: 'kWh', pos: true, vis: function (s) { return isElec(s, 'D'); } },
+    { k: 'motNom2', slot: 'D', l: 'Motorisation', text: true, optional: true, hint: 'ex. PACCAR EX-D1', vis: function (s) { return isElec(s, 'D'); } },
+    { k: 'motKw2', slot: 'D', l: 'Puissance du moteur', u: 'kW', optional: true, hint: 'EX-D1 : 170, 220 ou 270 kW', vis: function (s) { return isElec(s, 'D'); } },
+    { k: 'capBrut2', slot: 'D', l: 'Capacité brute de la batterie', u: 'kWh', pos: true, hint: 'DAF XD : 210 à 525 kWh', vis: function (s) { return isElec(s, 'D'); } },
+    { k: 'packs2', slot: 'D', l: 'Nombre de packs', u: 'packs', optional: true, max: 12, hint: 'DAF : packs de 105 kWh', vis: function (s) { return isElec(s, 'D'); } },
+    { k: 'dod2', slot: 'D', l: 'Part utilisable (profondeur de décharge)', u: '%', pos: true, max: 100, hint: 'LFP DAF : 88 %', vis: function (s) { return isElec(s, 'D'); } },
+    { info: 'batNet2' },
+    { k: 'dcMax2', slot: 'D', l: 'Recharge maximale acceptée en DC', u: 'kW', pos: true, hint: 'DAF : 150 ou 325 kW', vis: function (s) { return isElec(s, 'D'); } },
+    { k: 'acMax2', slot: 'D', l: 'Recharge maximale acceptée en AC', u: 'kW', optional: true, hint: 'DAF : 22 kW', vis: function (s) { return isElec(s, 'D'); } },
+    { k: 'taperSoc2', slot: 'D', l: 'Début du ralentissement de fin de charge', u: '%', pos: true, max: 100, hint: 'exemple, à remplacer par la courbe constructeur', vis: function (s) { return isElec(s, 'D'); } },
+    { k: 'taperPct2', slot: 'D', l: 'Puissance encore acceptée à 100 %', u: '% du max', pos: true, max: 100, hint: 'exemple, à remplacer par la courbe constructeur', vis: function (s) { return isElec(s, 'D'); } },
     { k: 'batDeg2', slot: 'D', l: 'Perte de capacité (scénario réaliste)', unitKey: 'batDegU2', units: [['an', '% / an'], ['cycle', '% / 1000 cycles']], hint: '1 à 2 % par an en général', vis: function (s) { return isElec(s, 'D'); } },
     { k: 'batSeuil2', slot: 'D', l: 'État de santé minimal (fin de vie)', u: '%', pos: true, max: 100, vis: function (s) { return isElec(s, 'D'); } },
     { k: 'batRempl2', slot: 'D', l: 'Coût de remplacement de la batterie', u: '€ HT', vis: function (s) { return isElec(s, 'D'); } },
     { k: 'batEff2', slot: 'D', l: 'Surconsommation au seuil de fin de vie', u: '%', vis: function (s) { return isElec(s, 'D'); } },
     { sep: 'Recharge au dépôt' },
     { k: 'bornePuis', l: 'Puissance de la borne au dépôt', u: 'kW', pos: true },
-    { k: 'socArr', l: 'Niveau de batterie à l’arrivée au dépôt', u: '%', max: 100 },
     { k: 'socFin', l: 'Niveau de recharge visé', u: '%', max: 100, hint: 'LFP : 100 % possible' },
-    { k: 'fenetre', l: 'Temps disponible pour recharger au dépôt', u: 'h/jour', pos: true, max: 24 }
+    { k: 'fenetre', l: 'Temps disponible pour recharger au dépôt', u: 'h/jour', pos: true, max: 24 },
+    { sep: 'Chauffeur et tournée' },
+    { k: 'vitMoy', l: 'Vitesse moyenne en roulage', u: 'km/h', pos: true, hint: 'exemple, à remplacer par la moyenne réelle' },
+    { k: 'conduiteMax', l: 'Temps de conduite maximal par jour', select: [['9', '9 h (règle générale)'], ['10', '10 h (2 fois par semaine au plus)']] },
+    { k: 'margeRet', l: 'Marge de sécurité au retour au dépôt', u: '%', max: 50, hint: 'bouchon, surconsommation, tournée imprévue' },
+    { k: 'pauseCharge', l: 'Recharge pendant la pause de 45 min', select: [['non', 'Non'], ['oui', 'Oui']] },
+    { k: 'pausePuis', l: 'Puissance de la borne pendant la pause', u: 'kW', pos: true, vis: function (s) { return s.pauseCharge === 'oui'; } },
+    { info: 'kmJour' },
+    { sep: 'Semaine type (graphique du rapport)' },
+    { k: 'semJours', l: 'Jours de tournée dans la semaine', u: 'jours', pos: true, max: 7 },
+    { k: 'hDep', l: 'Heure de départ du dépôt', u: 'h', max: 23.5, hint: 'ex. 6 ou 5,5 pour 5 h 30' },
+    { k: 'hRet', l: 'Heure de retour au dépôt', u: 'h', pos: true, max: 24, hint: 'pauses comprises' },
+    { k: 'chargeStart', l: 'Début de la recharge au dépôt', select: [['retour', 'Dès le retour'], ['22', 'À 22 h (heures creuses)']] }
   ]},
   { id: 'regl', on: 'regl', cx: true, title: 'Taxes à venir', note: 'Non applicables à ce jour : taxe carbone sur les carburants (ETS2) et péages ou taxes kilométriques. À activer quand ils seront en vigueur.', fields: [
     { k: 'carbP', l: 'Taxe carbone sur le gazole', u: '€/L HT', vis: function (s, o) { return !!o.energie && anyTherm(s); } },
@@ -660,7 +786,7 @@ function sepText(f) { return typeof f.sep === 'function' ? f.sep(state) : f.sep;
 function fieldCtx(f) { return f.slot ? vehName(state, f.slot) : (f.ctx || ''); }
 function needOk(g) { return !g.need || (g.need === 'elec' ? anyElec(state) : anyTherm(state)); }
 
-var TEXT_KEYS = { titre: 1, client: 1, auteur: 1, nom1: 1, nom2: 1 };
+var TEXT_KEYS = { titre: 1, client: 1, auteur: 1, nom1: 1, nom2: 1, motNom: 1, motNom2: 1 };
 var SEL_KEYS = { mode: 1 };
 var FIELD = {};
 var GROUP_OF = {};
@@ -694,6 +820,7 @@ function fmt(n, d) {
   if (!isFinite(n)) { return '0'; }
   return n.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
 }
+function fmtT(v) { return fmt(v, Math.abs(v) < 10 ? 1 : 0); }
 function eur(n, d) { return fmt(n, d === undefined ? 0 : d) + ' €'; }
 function ans(n) { return n + (n > 1 ? ' ans' : ' an'); }
 function esc(s) {
@@ -712,6 +839,10 @@ function readData(s) {
   d.aideFinD = aideLeaseFin(s, 'D');
   d.aideMaj6E = aideLease6(s, 'E');
   d.aideMaj6D = aideLease6(s, 'D');
+  d.borneFinE = borneLeaseFin(s, 'E');
+  d.borneFinD = borneLeaseFin(s, 'D');
+  d.borneMaj6E = borneLease6(s, 'E');
+  d.borneMaj6D = borneLease6(s, 'D');
   d.firstD = creditLeaseFirst(s, 'D');
   if (s.modeE === 'cbail') { d.loyE = creditLeaseMonthly(s, 'E'); d.optE = creditLeaseResidual(s, 'E'); }
   if (s.modeD === 'cbail') { d.loyD = creditLeaseMonthly(s, 'D'); d.optD = creditLeaseResidual(s, 'D'); }
@@ -794,13 +925,29 @@ function aideLease6(s, X) {
   var aid = Math.max(0, num(s[eKey(X, 'aideAchat')]));
   return b === 'fin6' ? aid / (1 + Math.max(0, num(s.tvaLoyer)) / 100) : aid;
 }
+/* Aide à la borne versée au financeur d'un tracteur électrique en crédit-bail (part de ce camion) */
+function borneShareS(s) {
+  var o = effOn();
+  if (!o.borne || !o.aides) { return 0; }
+  var nb = Math.max(1, num(s.borneNb) || 1);
+  return Math.min(Math.max(0, num(s.aideBorne)), Math.max(0, num(s.borneInv))) / nb;
+}
+function borneLeaseX(s, X) { return isElec(s, X) && s['mode' + X] === 'cbail' && effOn().achat; }
+function borneLeaseOk(s) { return borneLeaseX(s, 'E') || borneLeaseX(s, 'D'); }
+function borneLeaseFin(s, X) { return (s.aideBorneMode === 'fin' && borneLeaseX(s, X)) ? borneShareS(s) : 0; }
+function borneLease6(s, X) {
+  var m = s.aideBorneMode;
+  if ((m !== 'fin6' && m !== 'fin6ht') || !borneLeaseX(s, X)) { return 0; }
+  var sh = borneShareS(s);
+  return m === 'fin6' ? sh / (1 + Math.max(0, num(s.tvaLoyer)) / 100) : sh;
+}
 function creditLeaseMonthly(s, X) {
   var price = Math.max(0, num(s['prix' + X]));
   var months = leaseMonths(s, X);
   var rate = Math.max(0, num(s['cbTaux' + X])) / 100 / 12;
-  var first = creditLeaseFirst(s, X) + aideLeaseFin(s, X);
+  var first = creditLeaseFirst(s, X) + aideLeaseFin(s, X) + borneLeaseFin(s, X);
   var residual = creditLeaseResidual(s, X);
-  var maj6 = months >= 6 ? aideLease6(s, X) : 0;
+  var maj6 = months >= 6 ? aideLease6(s, X) + borneLease6(s, X) : 0;
   if (maj6 > 0) {
     /* Échéancier identique au cas sans 6e loyer majoré (loyer k payé au temps k, ou k − 1 s'il y a un premier loyer majoré),
        le 6e loyer étant remplacé par le loyer majoré */
@@ -881,70 +1028,176 @@ function vehName(s, X) {
 }
 function other(X) { return X === 'E' ? 'D' : 'E'; }
 
+/* ===================== BATTERIE : CAPACITÉ ET RECHARGE ===================== */
+/* Fiche batterie d'un véhicule électrique : brut, part utilisable, puissances acceptées */
+function batSpec(d, X) {
+  var brut = Math.max(0, d[eKey(X, 'capBrut')]), dod = d[eKey(X, 'dod')];
+  if (!(dod > 0)) { dod = 100; }
+  dod = Math.min(100, dod);
+  return {
+    brut: brut, dod: dod, net: brut * dod / 100, packs: Math.max(0, Math.round(d[eKey(X, 'packs')])),
+    dc: Math.max(0, d[eKey(X, 'dcMax')]), ac: Math.max(0, d[eKey(X, 'acMax')]),
+    ts: d[eKey(X, 'taperSoc')], tp: d[eKey(X, 'taperPct')],
+    motKw: Math.max(0, d[eKey(X, 'motKw')]), motNom: String(d[eKey(X, 'motNom')] || '').replace(/^\s+|\s+$/g, '')
+  };
+}
+function taperOn(sp) { return sp.ts > 0 && sp.ts < 100 && sp.tp > 0 && sp.tp < 100; }
+/* Puissance acceptée par le véhicule à un niveau de charge donné (ralentissement linéaire en fin de charge) */
+function vehAccept(sp, soc) {
+  var p = sp.dc > 0 ? sp.dc : 1e6;
+  if (taperOn(sp) && soc > sp.ts) { p = p * (1 - (1 - sp.tp / 100) * Math.min(1, (soc - sp.ts) / (100 - sp.ts))); }
+  return p;
+}
+/* Puissance réellement reçue : la plus basse entre la borne et le véhicule */
+function chargePow(sp, soc, pB) { return Math.max(0.01, Math.min(pB > 0 ? pB : 1e6, vehAccept(sp, soc))); }
+/* Durée (h) pour passer de from % à to % d'une capacité capK */
+function chargeHours(sp, capK, from, to, pB) {
+  if (!(capK > 0) || !(pB > 0) || to <= from) { return 0; }
+  var h = 0, s0 = Math.max(0, from), ds = 0.2, s1;
+  while (s0 < to - 1e-9) {
+    s1 = Math.min(to, s0 + ds);
+    h += capK * (s1 - s0) / 100 / chargePow(sp, (s0 + s1) / 2, pB);
+    s0 = s1;
+  }
+  return h;
+}
+/* Énergie (kWh) rechargée en hrs heures à partir de from %, sans dépasser maxPct */
+function chargeIn(sp, capK, from, hrs, pB, maxPct) {
+  if (!(capK > 0) || !(pB > 0) || !(hrs > 0) || from >= maxPct) { return { e: 0, to: from }; }
+  var pa = chargePow(sp, from, pB), pz = chargePow(sp, maxPct, pB);
+  if (Math.abs(pa - pz) < 1e-9) {
+    var eLin = Math.min(pa * hrs, capK * (maxPct - from) / 100);
+    return { e: eLin, to: from + eLin / capK * 100 };
+  }
+  var soc = from, left = hrs * 60, dt;
+  while (left > 1e-9 && soc < maxPct - 1e-9) {
+    dt = Math.min(1, left);
+    soc = Math.min(maxPct, soc + chargePow(sp, soc, pB) * dt / 60 / capK * 100);
+    left -= dt;
+  }
+  return { e: (soc - from) * capK / 100, to: soc };
+}
+/* Surconsommation liée au vieillissement pour un état de santé donné */
+function multAt(bat, soh) { return bat.seuil < 100 ? 1 + Math.max(0, bat.eff / 100 * (100 - soh) / (100 - bat.seuil)) : 1; }
+function marginPct(d) { return Math.min(50, Math.max(0, d.margeRet)); }
+function startPct(d) { return Math.min(100, Math.max(1, d.socFin)); }
+/* Puissance de recharge réellement disponible au dépôt et en route (plus basse entre borne et véhicule) */
+function depotPow(d, sp) { return d.bornePuis > 0 ? Math.min(d.bornePuis, sp.dc > 0 ? sp.dc : d.bornePuis) : 0; }
+function pubPow(d, sp) { var p = d.rechPow > 0 ? d.rechPow : 0; return p > 0 ? Math.min(p, sp.dc > 0 ? sp.dc : p) : 0; }
+/* Énergie maximale rechargée au dépôt dans le temps disponible, en remontant jusqu'au niveau visé */
+function depotSupply(sp, d, cap) {
+  var st = startPct(d), mg = marginPct(d), lo, hi, mid, k;
+  var eMax = cap * Math.max(0, st - mg) / 100;
+  if (!(cap > 0) || !(d.bornePuis > 0)) { return 0; }
+  if (chargeHours(sp, cap, mg, st, d.bornePuis) <= d.fenetre + 1e-9) { return eMax; }
+  lo = 0; hi = eMax;
+  for (k = 0; k < 40; k++) { mid = (lo + hi) / 2; if (chargeHours(sp, cap, st - mid / cap * 100, st, d.bornePuis) <= d.fenetre) { lo = mid; } else { hi = mid; } }
+  return lo;
+}
+/* Calcul unique d'une journée de tournée : km possibles, niveau au retour, recharge à la pause et au dépôt.
+   Départ au niveau visé ; retour avec la marge de sécurité ; pause de 45 min après 4 h 30 de conduite. */
+function kmCore(sp, d, on, cap, consKm, tour) {
+  if (!(cap > 0) || !(consKm > 0)) { return null; }
+  var st = startPct(d), mg = marginPct(d), v = Math.max(0, d.vitMoy), legalH = num(d.conduiteMax) || 9;
+  var o = { cap: cap, consKm: consKm, start: st, marge: mg, v: v, legalH: legalH, tour: tour || 0 };
+  o.range = cap / consKm;
+  o.eUse = cap * Math.max(0, st - mg) / 100;
+  o.kmBat = o.eUse / consKm;
+  o.kmLegal = v > 0 ? legalH * v : null;
+  o.pauseOn = d.pauseCharge === 'oui' && v > 0 && d.pausePuis > 0;
+  o.pauseP = o.pauseOn ? Math.min(d.pausePuis, sp.dc > 0 ? sp.dc : d.pausePuis) : 0;
+  o.pauseKmAt = 4.5 * v;
+  o.pauseCap = 0;
+  if (o.pauseOn && o.kmBat > o.pauseKmAt) {
+    o.socPause = st - o.pauseKmAt * consKm / cap * 100;
+    o.pauseCap = chargeIn(sp, cap, o.socPause, 0.75, d.pausePuis, st).e;
+  }
+  o.pauseKm = o.pauseCap / consKm;
+  o.kmBatAll = o.kmBat + o.pauseKm;
+  o.kmMax = o.kmLegal !== null ? Math.min(o.kmBatAll, o.kmLegal) : o.kmBatAll;
+  o.limit = o.kmLegal !== null && o.kmLegal < o.kmBatAll ? 'conduite' : 'batterie';
+  /* Tournée prévue : la pause ne recharge que ce qui manque pour rentrer avec la marge */
+  o.tourE = o.tour * consKm;
+  o.deficit = Math.max(0, o.tourE - o.eUse);
+  o.tourPauseE = o.tour > o.pauseKmAt ? Math.min(o.deficit, o.pauseCap) : 0;
+  o.enRoute = o.deficit - o.tourPauseE;
+  o.retPct = st - (o.tourE - o.tourPauseE) / cap * 100;
+  o.okBat = o.enRoute <= 1e-6;
+  o.retEff = (!o.okBat && on && on.recharge) ? mg : o.retPct;
+  o.retKwh = Math.max(0, o.retPct) * cap / 100;
+  o.retKm = o.retKwh / consKm;
+  o.marginKm = (o.retPct - mg) / 100 * cap / consKm;
+  o.driveH = v > 0 ? o.tour / v : null;
+  o.okLegal = o.driveH === null || o.driveH <= legalH + 1e-9;
+  var pD = depotPow(d, sp);
+  o.depP = pD;
+  o.rechH = pD > 0 ? chargeHours(sp, cap, Math.max(0, o.retEff), st, d.bornePuis) : 0;
+  o.rechFullH = pD > 0 ? chargeHours(sp, cap, mg, st, d.bornePuis) : 0;
+  o.okWindow = o.rechH <= d.fenetre + 1e-9;
+  return o;
+}
+
 /* ===================== CALCULS PAR VÉHICULE ===================== */
 function batteryModel(d, on, X, cReal, c100, kwhAn0, ctx) {
   if (!on.batterie || !isElec(d, X)) { return null; }
   var n = ctx.n, P = ctx.P, y;
-  var spanSoc = Math.max(0, d.socFin - d.socArr) / 100;
-  var cap = d[eKey(X, 'capBat')];
+  var sp = batSpec(d, X);
+  var cap = sp.net;
   var cyclesYr = cap > 0 ? kwhAn0 / cap : 0;
   var degYr = d[eKey(X, 'batDegU')] === 'cycle' ? d[eKey(X, 'batDeg')] * cyclesYr / 1000 : d[eKey(X, 'batDeg')];
   var seuil = d[eKey(X, 'batSeuil')];
   var rempl = d[eKey(X, 'batRempl')];
   var eff = d[eKey(X, 'batEff')];
-  var cur = 100, start, end, avg, overc, endShown;
+  var cur = 100, start, end, avg, overc;
   var bat = {
     cap: cap, cyclesYr: cyclesYr, degYr: degYr, seuil: seuil, rempl: rempl, eff: eff,
-    soh: [100], mult: [1], multShown: [1], repl: [0], replYears: [], seuilYear: null,
-    capU: [cap], capAvg: [cap], range: [], tFull: [], t100: []
+    spec: sp, soh: [100], sohPre: [100], mult: [1], repl: [0], replYears: [], seuilYear: null,
+    capAvg: [cap], K: [], KW: [], winterOn: !!(on.saison && c100 > 0)
   };
-  var effP = d.bornePuis;
+  bat.effP = depotPow(d, sp);
   for (y = 1; y <= n; y++) {
     start = cur;
     end = Math.max(0, start - degYr);
     avg = (start + end) / 2;
     overc = seuil < 100 ? Math.max(0, eff / 100 * (100 - avg) / (100 - seuil)) : 0;
-    endShown = end;
     bat.mult.push(1 + overc);
     bat.repl.push(0);
+    bat.sohPre.push(end);
     bat.capAvg.push(cap * avg / 100);
     if (end < seuil && bat.seuilYear === null) { bat.seuilYear = y; }
     if (end < seuil && y < n && rempl > 0) {
       bat.repl[y] = rempl;
       bat.replYears.push(y);
       end = 100;
-      endShown = 100;
     }
-    bat.soh.push(endShown);
-    bat.multShown.push(bat.repl[y] > 0 ? 1 : 1 + overc);
+    bat.soh.push(end);
     cur = end;
-  }
-  for (y = 0; y <= n; y++) {
-    bat.capU[y] = cap * bat.soh[y] / 100;
-    bat.range.push(cReal > 0 ? bat.capU[y] / (cReal * bat.multShown[y] / 100) : 0);
-    bat.tFull.push(effP > 0 ? bat.capU[y] * spanSoc / effP : 0);
-    bat.t100.push(effP > 0 ? cReal * bat.multShown[y] / effP : 0);
   }
   bat.dailyKm = P.days > 0 ? ctx.kmAn / P.days : 0;
   bat.days = P.days;
-  bat.rangeDay0 = cReal > 0 ? bat.capU[0] * spanSoc / (cReal * bat.mult[0] / 100) : 0;
-  bat.rangeDayN = cReal > 0 ? bat.capU[n] * spanSoc / (cReal * bat.mult[n] / 100) : 0;
-  bat.rangeWinter0 = (on.saison && c100 > 0) ? bat.capU[0] * spanSoc / (c100 * (1 + d.hivPct / 100) * ctx.chgF / 100) : 0;
-  bat.needH0 = effP > 0 ? cReal * bat.mult[0] * bat.dailyKm / 100 / effP : 0;
-  bat.needHN = effP > 0 ? cReal * bat.mult[n] * bat.dailyKm / 100 / effP : 0;
-  bat.okRange = bat.dailyKm <= bat.rangeDayN;
-  bat.okWindow = bat.needHN <= d.fenetre;
+  /* État de fin d'année (avant un éventuel remplacement) : base unique de tous les affichages batterie */
+  var sohE, mE;
+  for (y = 0; y <= n; y++) {
+    sohE = bat.sohPre[y];
+    mE = multAt(bat, sohE);
+    bat.K.push(kmCore(sp, d, on, cap * sohE / 100, cReal * mE / 100, bat.dailyKm));
+    bat.KW.push(bat.winterOn ? kmCore(sp, d, on, cap * sohE / 100, c100 * (1 + d.hivPct / 100) * ctx.chgF * mE / 100, bat.dailyKm) : null);
+  }
+  bat.okRange = true; bat.okWindow = true;
+  for (y = 0; y <= n; y++) {
+    if (bat.K[y] && !bat.K[y].okBat) { bat.okRange = false; }
+    if (bat.K[y] && !bat.K[y].okWindow) { bat.okWindow = false; }
+  }
   bat.avgMult = 0;
   for (y = 1; y <= n; y++) { bat.avgMult += bat.mult[y]; }
   bat.avgMult = bat.avgMult / n;
-  bat.spanSoc = spanSoc;
   return bat;
 }
 
 function energyVeh(d, on, X, ctx) {
   var n = ctx.n, kmAn = ctx.kmAn, eOn = ctx.eOn, y, fA;
   var ev = { X: X, type: vType(d, X), name: vehName(d, X) };
-  var yr = { qty: [0], ene: [0], pub: [0], dep: [0], hours: [0], chauf: [0], carb: [0], certif: [0], kg: [0], batt: [0], price: [0] };
+  var yr = { qty: [0], ene: [0], pub: [0], pause: [0], dep: [0], hours: [0], chauf: [0], carb: [0], certif: [0], kg: [0], batt: [0], price: [0] };
   ev.yr = yr;
   if (ev.type === 'therm') {
     ev.unit = 'L';
@@ -960,7 +1213,7 @@ function energyVeh(d, on, X, ctx) {
       yr.qty.push(ev.qty0);
       yr.ene.push(eOn * ev.qty0 * ctx.pDieHTnet * fD);
       yr.price.push(ctx.pDieHTnet * fD);
-      yr.pub.push(0); yr.dep.push(0); yr.hours.push(0); yr.chauf.push(0); yr.certif.push(0); yr.batt.push(0);
+      yr.pub.push(0); yr.pause.push(0); yr.dep.push(0); yr.hours.push(0); yr.chauf.push(0); yr.certif.push(0); yr.batt.push(0);
       yr.carb.push((on.regl && eOn && y >= d.carbYear) ? ev.qty0 * d.carbP : 0);
       yr.kg.push(on.co2 ? ev.qty0 * d.co2D : 0);
     }
@@ -987,7 +1240,7 @@ function energyVeh(d, on, X, ctx) {
       occ = d.rechFreq * perYear;
     }
     var autoOk = rechOn && d.rechMode === 'auto' && !!bat && P.days > 0;
-    var spanSoc = Math.max(0, d.socFin - d.socArr) / 100;
+    var pauseFor = [0];
     var pubFor = function (yy, kwhY) {
       var v = 0, need, depMax;
       if (!rechOn) { return 0; }
@@ -996,19 +1249,23 @@ function energyVeh(d, on, X, ctx) {
       else if (d.rechMode === 'dur') { v = d.rechPow * durH * occ; }
       else if (autoOk) {
         need = kwhY / P.days;
-        depMax = Math.min(bat.capAvg[yy] * spanSoc, d.bornePuis * d.fenetre);
+        var Ky = kmCore(bat.spec, d, on, bat.capAvg[yy], need / Math.max(1e-9, bat.dailyKm), bat.dailyKm);
+        depMax = Math.min(need, depotSupply(bat.spec, d, bat.capAvg[yy]));
         v = Math.max(0, need - depMax) * P.days;
+        pauseFor[yy] = Ky ? Math.min(Math.max(0, need - depMax), Ky.pauseOn && bat.dailyKm > Ky.pauseKmAt ? Ky.pauseCap : 0) * P.days : 0;
       }
       return Math.min(Math.max(0, v), kwhY);
     };
-    var hoursFor = function (pub) {
+    var pPubEff = bat ? pubPow(d, bat.spec) : (d.rechPow > 0 ? d.rechPow : 0);
+    var hoursFor = function (pub, pz) {
       var full;
       if (d.rechMode === 'dur') {
         full = d.rechPow * durH * occ;
         return full > 0 ? occ * durH * (pub / full) : 0;
       }
-      return d.rechPow > 0 ? pub / d.rechPow : 0;
+      return pPubEff > 0 ? Math.max(0, pub - (pz || 0)) / pPubEff : 0;
     };
+    ev.pPubEff = pPubEff;
     ev.occ = occ; ev.autoOk = autoOk;
     var fE, mU, kwhY, pubY, depY, eHT, hrs;
     for (y = 1; y <= n; y++) {
@@ -1019,7 +1276,9 @@ function energyVeh(d, on, X, ctx) {
       pubY = pubFor(y, kwhY);
       depY = kwhY - pubY;
       eHT = eOn * ((depY * ctx.pDepHT + pubY * ctx.pPubHT) * fE + ctx.fixedContrat * fA);
-      hrs = rechOn ? hoursFor(pubY) : 0;
+      if (pauseFor[y] === undefined) { pauseFor[y] = 0; }
+      hrs = rechOn ? hoursFor(pubY, pauseFor[y]) : 0;
+      yr.pause.push(pauseFor[y]);
       yr.qty.push(kwhY); yr.pub.push(pubY); yr.dep.push(depY); yr.ene.push(eHT);
       yr.price.push(kwhY > 0 ? eHT / kwhY : 0);
       yr.hours.push(hrs);
@@ -1065,10 +1324,19 @@ function acqVeh(d, on, X, ctx) {
   a.loanP = (finOn && mode === 'achat') ? a.cap * d['finPart' + X] / 100 : 0;
   a.int = loanInterestByYear(a.loanP, d['finTaux' + X], d['finDuree' + X], d['finU' + X], n);
   a.leaseShort = acqOn && mode === 'location' && a.lm < 12 * n;
-  a.first = mode === 'cbail' ? (d['first' + X] || 0) + (d['aideFin' + X] || 0) : 0;
-  a.maj6 = (mode === 'cbail' && a.aideT > 0) ? (d['aideMaj6' + X] || 0) : 0;
+  var tvl = Math.max(0, d.tvaLoyer) / 100;
+  a.bFin = mode === 'cbail' ? (d['borneFin' + X] || 0) : 0;
+  a.b6 = mode === 'cbail' ? (d['borneMaj6' + X] || 0) : 0;
+  a.t6 = (mode === 'cbail' && a.aideT > 0) ? (d['aideMaj6' + X] || 0) : 0;
+  a.first = mode === 'cbail' ? (d['first' + X] || 0) + (d['aideFin' + X] || 0) + a.bFin : 0;
+  a.maj6 = a.t6 + a.b6;
   a.benef = (mode === 'cbail' && a.aideT > 0) ? d[eKey(X, 'aideCbBenef')] : '';
-  a.tvaMaj = a.benef === 'fin' ? a.first * Math.max(0, d.tvaLoyer) / 100 : (a.maj6 > 0 ? a.maj6 * Math.max(0, d.tvaLoyer) / 100 : 0);
+  a.bMode = (a.bFin > 0 || a.b6 > 0) ? d.aideBorneMode : '';
+  /* TVA à avancer par le client sur les loyers majorés payés par les aides */
+  a.tvaM1 = ((d['aideFin' + X] || 0) + a.bFin) * tvl;
+  a.tvaM6 = ((a.benef === 'fin6ht' ? a.t6 : 0) + (a.bMode === 'fin6ht' ? a.b6 : 0)) * tvl;
+  a.tva6c = ((a.benef === 'fin6' ? a.t6 : 0) + (a.bMode === 'fin6' ? a.b6 : 0)) * tvl;
+  a.tvaMaj = a.benef === 'fin' ? (d['aideFin' + X] || 0) * tvl : (a.t6 * tvl);
   return a;
 }
 
@@ -1374,7 +1642,7 @@ function sensitivity(d, on, complet, r) {
   if (on.energie) {
     if (hasT) { addThr('die', 'Prix du gazole', r.pDieHT, ' €/L HT', 3, dieApply); }
     if (hasE) { addThr('ele', 'Prix de l’électricité', (r.V.E.type === 'elec' ? r.V.E : r.V.D).pVar1, ' €/kWh HT', 3, eleApply); }
-    addThr('con', 'Consommation ' + N1, v1.c100, v1.type === 'elec' ? ' kWh/100 km' : ' L/100 km', 1, con1);
+    addThr('con', 'Consommation ' + N1 + ' (essai)', v1.c100, v1.type === 'elec' ? ' kWh/100 km' : ' L/100 km', 1, con1);
   }
   if (complet && on.achat) {
     if (d.modeE === 'achat') { addThr('prix', 'Prix d’achat ' + N1, d.prixE, ' € HT', 0, function (dc, f) { dc.prixE *= f; }); }
@@ -1543,9 +1811,9 @@ function stackedChart(w, h, bars, comps) {
       if (v <= 0) { continue; }
       y0 = yv(cum);
       y1 = yv(cum + v);
-      s += '<rect x="' + (cx - bw / 2) + '" y="' + y1 + '" width="' + bw + '" height="' + (y0 - y1) + '" fill="' + comps[j].color + '" stroke="#fff" stroke-width="1"/>';
+      s += '<rect x="' + (cx - bw / 2) + '" y="' + y1 + '" width="' + bw + '" height="' + (y0 - y1) + '" fill="' + comps[j].color + '" stroke="#fff" stroke-width="1.5"/>';
       if (y0 - y1 >= 16) {
-        s += '<text x="' + cx + '" y="' + ((y0 + y1) / 2 + 4) + '" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">' + eur(v) + '</text>';
+        s += '<text x="' + cx + '" y="' + ((y0 + y1) / 2 + 4) + '" font-size="10" font-weight="700" fill="' + (comps[j].ink || '#fff') + '" text-anchor="middle">' + eur(v) + '</text>';
       }
       cum += v;
     }
@@ -1597,8 +1865,11 @@ function lineChart(w, h, n, A, B, o) {
     ptsB.push(xv(i) + ',' + yv(B[i]));
     s += '<text x="' + xv(i) + '" y="' + (h - 10) + '" font-size="11" fill="#3a4552" text-anchor="middle">' + (i === 0 ? o.x0 : 'An ' + i) + '</text>';
   }
-  s += '<polyline points="' + ptsA.join(' ') + '" fill="none" stroke="' + o.ca + '" stroke-width="3" stroke-linejoin="round"/>';
-  s += '<polyline points="' + ptsB.join(' ') + '" fill="none" stroke="' + o.cb + '" stroke-width="3" stroke-linejoin="round"/>';
+  var base0 = yv(Math.max(sc.min, 0));
+  s += '<polygon points="' + xv(0) + ',' + base0 + ' ' + ptsB.join(' ') + ' ' + xv(n) + ',' + base0 + '" fill="' + o.cb + '" fill-opacity=".08"/>';
+  s += '<polygon points="' + xv(0) + ',' + base0 + ' ' + ptsA.join(' ') + ' ' + xv(n) + ',' + base0 + '" fill="' + o.ca + '" fill-opacity=".10"/>';
+  s += '<polyline points="' + ptsB.join(' ') + '" fill="none" stroke="' + o.cb + '" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>';
+  s += '<polyline points="' + ptsA.join(' ') + '" fill="none" stroke="' + o.ca + '" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>';
   var showAll = n <= 6;
   var up, pa, pb, tx, anc;
   for (i = 0; i <= n; i++) {
@@ -1632,7 +1903,7 @@ function lineChart(w, h, n, A, B, o) {
 
 /* Graphique tornade : effet de ± X % de chaque donnée sur l'économie */
 function tornadoChart(w, vars, base, amp) {
-  var rowH = 19, padT = 40, padB = 16, labW = 168, valW = 64;
+  var rowH = 19, padT = 40, padB = 16, labW = 196, valW = 60;
   var h = padT + vars.length * rowH + padB;
   var x0 = labW + valW, x1 = w - valW;
   var lo = base, hi = base, i;
@@ -1646,12 +1917,12 @@ function tornadoChart(w, vars, base, amp) {
   hi = base + span * 1.04;
   var xv = function (v) { return x0 + (v - lo) / (hi - lo) * (x1 - x0); };
   var s = svgOpen(w, h);
-  var cMinus = '#8fb3d9', cPlus = '#00529b';
+  var cMinus = '#9fd6f5', cPlus = '#00529b';
   s += '<rect x="' + x0 + '" y="6" width="12" height="12" rx="2" fill="' + cMinus + '"/><text x="' + (x0 + 18) + '" y="16" font-size="11.5" fill="#3a4552">Donnée −' + fmt(amp * 100, 0) + ' %</text>';
   s += '<rect x="' + (x0 + 140) + '" y="6" width="12" height="12" rx="2" fill="' + cPlus + '"/><text x="' + (x0 + 158) + '" y="16" font-size="11.5" fill="#3a4552">Donnée +' + fmt(amp * 100, 0) + ' %</text>';
   if (lo < 0 && hi > 0) {
-    s += '<line x1="' + xv(0) + '" x2="' + xv(0) + '" y1="' + (padT - 4) + '" y2="' + (h - padB + 2) + '" stroke="#c62828" stroke-width="1" stroke-dasharray="3,3"/>';
-    s += '<text x="' + xv(0) + '" y="' + (h - 6) + '" font-size="10" fill="#c62828" text-anchor="middle">équilibre</text>';
+    s += '<line x1="' + xv(0) + '" x2="' + xv(0) + '" y1="' + (padT - 4) + '" y2="' + (h - padB + 2) + '" stroke="#e0642a" stroke-width="1.2" stroke-dasharray="3,3"/>';
+    s += '<text x="' + xv(0) + '" y="' + (h - 6) + '" font-size="10" fill="#e0642a" text-anchor="middle">équilibre</text>';
   }
   var y, v, k, xa, xb, vals, col, tx, anc;
   for (i = 0; i < vars.length; i++) {
@@ -1771,6 +2042,7 @@ function missReason(k) {
   if (k === 'aideBorne') {
     if (parseFloat(s) < 0) { return 'ne peut pas être négative'; }
     if (effOn().borne && parseFloat(s) > num(state.borneInv)) { return 'ne peut pas dépasser le prix de la borne'; }
+    if (state.aideBorneMode !== 'client' && ((borneLeaseX(state, 'E') && creditLeaseMonthly(state, 'E') <= 0) || (borneLeaseX(state, 'D') && creditLeaseMonthly(state, 'D') <= 0))) { return 'aides trop élevées pour le crédit-bail'; }
   }
   return '';
 }
@@ -1808,20 +2080,21 @@ function valueText(f) {
 }
 
 /* ===================== PAGES DU RAPPORT (A4, HT uniquement) ===================== */
+/* Palette du rapport (charte DAF : bleu nuit, bleu DAF, cyan ; vert = véhicule 1, ardoise = véhicule 2) */
 var COMPS = [
-  { name: 'Prix d’achat', color: '#00529b' },
-  { name: 'Loyers (location, crédit-bail)', color: '#5b8fd1' },
-  { name: 'Borne de recharge', color: '#7a5cc7' },
-  { name: 'Énergie', color: '#1a9b6c' },
-  { name: 'Entretien', color: '#e0a82a' },
-  { name: 'AdBlue', color: '#4aa3df' },
-  { name: 'Assurance et taxes', color: '#8a94a1' },
-  { name: 'Financement (intérêts)', color: '#d2478c' },
-  { name: 'Remplacement batterie', color: '#e0642a' },
+  { name: 'Prix d’achat', color: '#071a33' },
+  { name: 'Loyers (location, crédit-bail)', color: '#00529b' },
+  { name: 'Borne de recharge', color: '#8e5bd8' },
+  { name: 'Énergie', color: '#39c6f4', ink: '#071a33' },
+  { name: 'Entretien', color: '#16a37a' },
+  { name: 'AdBlue', color: '#f2c14e', ink: '#071a33' },
+  { name: 'Assurance et taxes', color: '#9aa8b8', ink: '#071a33' },
+  { name: 'Financement (intérêts)', color: '#d9468f' },
+  { name: 'Remplacement batterie', color: '#ff8a65', ink: '#071a33' },
   { name: 'Temps chauffeur en recharge', color: '#a0522d' },
-  { name: 'Taxes à venir (carbone, péages)', color: '#5d4037' }
+  { name: 'Taxes à venir (carbone, péages)', color: '#4e342e' }
 ];
-var C1 = '#1a9b6c', C2 = '#e0642a';
+var C1 = '#16a37a', C2 = '#5b7aa6';
 function stackVals(c) { return [c.achat, c.loyer, c.borne, c.ene, c.ent, c.adb, c.ass, c.fin, c.batt, c.chauf, c.taxes]; }
 var CUR_RP = null;
 var CUR_SENS = null;
@@ -1863,10 +2136,23 @@ function consText(ev, on, r) {
   return fmt(ev.c100, 1) + ' kWh/100 km' + (on.saison && Math.abs(r.adj - 1) > 1e-9 ? ' à l’essai (' + fmt(ev.cReal, 1) + ' en conditions réelles)' : '');
 }
 function elecPriceShown(r) { return r.V.E.type === 'elec' ? r.V.E.pAll1 : r.V.D.pAll1; }
+/* Postes compris dans l'économie annuelle d'exploitation */
+function opItems(d, on) {
+  var a = [];
+  if (on.energie) { a.push('énergie'); }
+  if (on.entretien) { a.push('entretien'); }
+  if (on.adblue && anyTherm(d)) { a.push('AdBlue'); }
+  if (on.borne && anyElec(d) && d.borneAbo > 0) { a.push('abonnement borne'); }
+  if (on.assur && d.assE !== d.assD) { a.push('assurance'); }
+  if (on.chauf && anyElec(d)) { a.push('temps chauffeur'); }
+  if (on.regl) { a.push('taxes à venir'); }
+  if (on.fisc && d.certif > 0 && anyElec(d)) { a.push('certificats'); }
+  return a.join(', ') || 'usage';
+}
 function basisLine(r, d, on) {
   var p = [];
   if (anyElec(d)) { p.push('électricité ' + fmt(elecPriceShown(r), 3) + ' €/kWh HT'); }
-  if (anyTherm(d)) { p.push('gazole ' + fmt(r.pDieHT, 3) + ' €/L HT'); }
+  if (anyTherm(d)) { p.push('gazole ' + fmt(r.pDieHT, 3) + ' €/L HT' + (r.pDieHTnet < r.pDieHT - 1e-9 ? ' (' + fmt(r.pDieHTnet, 3) + ' après remboursement TICPE)' : '')); }
   return '<div class="basis">Scénario réaliste · ' + fmt(r.kmAn, 0) + ' km/an sur ' + ans(r.n) + ' · ' + esc(N1(d)) + ' : ' + consText(r.V.E, on, r) + ' · ' + esc(N2(d)) + ' : ' + consText(r.V.D, on, r) + (p.length ? ' · ' + p.join(' · ') : '') + '.</div>';
 }
 function pctText(r, d) {
@@ -1936,7 +2222,7 @@ function scenarioBlock(r, rp, d, on, complet) {
     h += row('Économie annuelle', eur(rp.an.ecoHT), eur(r.an.ecoHT), false);
     h += row('Économie sur ' + ans(r.n), eur(rp.totEneHT), eur(r.totEneHT), true);
   }
-  if (on.co2) { h += row('CO₂ évité par an', fmt(rp.co2Year, 0) + ' t', fmt(r.co2Year, 0) + ' t', false); }
+  if (on.co2) { h += row('CO₂ évité par an', fmtT(rp.co2Year) + ' t', fmtT(r.co2Year) + ' t', false); }
   h += '</table>';
   h += '<div class="basis">Réaliste : données saisies. Prudent : ' + scenarioText(d, on) + '. Économies exprimées pour ' + esc(N1(d)) + '.</div>';
   return h;
@@ -1958,7 +2244,7 @@ function pageConso1(r, d, on) {
   h += kpi('g', 'Économie annuelle', eur(r.an.ecoHT), pctText(r, d));
   h += kpi('g', 'Économie sur ' + ans(r.n), eur(r.totEneHT), 'énergie, cumul sur ' + ans(r.n));
   h += kpi('b', 'Économie aux 100 km', eur(r.ref.km > 0 ? r.ref.ecoHT / r.ref.km * 100 : 0, 2), r.ref.test ? 'sur l’essai de référence' : 'pour 100 km parcourus');
-  if (on.co2) { h += kpi('b', 'CO₂ évité par an', fmt(r.co2Year, 0) + ' t', fmt(r.co2Total, 0) + ' t sur ' + ans(r.n)); }
+  if (on.co2) { h += kpi('b', 'CO₂ évité par an', fmtT(r.co2Year) + ' t', fmtT(r.co2Total) + ' t sur ' + ans(r.n)); }
   else { h += kpi('b', 'Coût de l’énergie au km', eur(r.V.E.perKm, 3), 'contre ' + eur(r.V.D.perKm, 3) + ' pour ' + esc(N2(d))); }
   h += '</div>' + basisLine(r, d, on);
   h += energyBlock(r, d, on);
@@ -1994,10 +2280,10 @@ function pageComplet1(r, d, on) {
   var h = '<div class="page">' + headHtml(d);
   var resOn = on.revente && (r.ownE || r.ownD);
   h += '<div class="kpis">';
-  h += kpi('g', 'Économie annuelle', eur(r.opSav), 'exploitation (énergie, entretien' + (anyTherm(d) ? ', AdBlue' : '') + '…) pour ' + esc(N1(d)));
+  h += kpi('g', 'Économie annuelle', eur(r.opSav), 'exploitation (' + opItems(d, on) + ') pour ' + esc(N1(d)));
   h += kpi('g', 'Économie sur ' + ans(r.n), eur(r.tcoSav), 'coût total, tous postes retenus' + (resOn ? ', revente comprise' : ''));
   h += kpi('b', 'Temps d’équilibre économique', beMain(r), resOn ? 'hors revente · avec revente : ' + beWithRes(r) : 'hors valeur de revente');
-  h += kpi('b', 'CO₂ évité par an', on.co2 ? fmt(r.co2Year, 0) + ' t' : '–', on.co2 ? fmt(r.co2Total, 0) + ' t sur ' + ans(r.n) : 'poste non pris en compte');
+  h += kpi('b', 'CO₂ évité par an', on.co2 ? fmtT(r.co2Year) + ' t' : '–', on.co2 ? fmtT(r.co2Total) + ' t sur ' + ans(r.n) : 'poste non pris en compte');
   h += '</div>' + basisLine(r, d, on);
   var aidesAny = r.cE.aides > 0 || r.cD.aides > 0;
   var recAny = r.cE.recettes > 0 || r.cD.recettes > 0;
@@ -2121,7 +2407,7 @@ function thrCard(t, S) {
 function heatColor(v, maxAbs) {
   var a = maxAbs > 0 ? Math.min(1, Math.abs(v) / maxAbs) : 0;
   var alpha = 0.12 + 0.55 * a;
-  return v >= 0 ? 'rgba(26,155,108,' + alpha.toFixed(3) + ')' : 'rgba(198,40,40,' + alpha.toFixed(3) + ')';
+  return v >= 0 ? 'rgba(22,163,122,' + alpha.toFixed(3) + ')' : 'rgba(224,100,42,' + alpha.toFixed(3) + ')';
 }
 function pageSens(r, d, on, S) {
   var complet = isComplet();
@@ -2166,7 +2452,7 @@ function pageSens(r, d, on, S) {
     h += '</tr>';
   }
   h += '</table>';
-  h += '<div class="basis">Lecture : case encadrée = situation actuelle ; vert = ' + a + ' plus avantageux, rouge = ' + b + ' plus avantageux. Pas de ± ' + fmt(S.amp * 100, 0) + ' % sur chaque axe.</div>';
+  h += '<div class="basis">Lecture : case encadrée = situation actuelle ; vert = ' + a + ' plus avantageux, orange = ' + b + ' plus avantageux. Pas de ± ' + fmt(S.amp * 100, 0) + ' % sur chaque axe.</div>';
   h += footHtml(d, '') + '</div>';
   return h;
 }
@@ -2182,33 +2468,31 @@ var ACQ_NAME = { achat: 'achat', location: 'location', cbail: 'crédit-bail' };
 
 function batteryBlock(r, d, on, X, two) {
   var b = r.V[X].bat;
-  if (!b) { return ''; }
-  var ev = r.V[X];
-  var h = '<div class="st">Batterie LFP : vieillissement et recharge' + (two ? ' · ' + esc(ev.name) : '') + '</div>';
-  h += '<table class="t sm"><tr><th></th><th>État de santé</th><th>Capacité utile</th><th>Autonomie</th><th>Conso</th><th>Recharge 100 km</th><th>Recharge complète</th></tr>';
-  var y;
-  var stepY = Math.max(1, Math.ceil(r.n / (two ? 2 : 5)));
-  for (y = 0; y <= r.n; y++) {
-    if (y % stepY !== 0 && y !== r.n) { continue; }
-    h += '<tr><td>' + (y === 0 ? 'Neuve' : 'Fin année ' + y + (b.repl[y] > 0 ? ' (remplacée)' : '')) + '</td><td>' + fmt(b.soh[y], 1) + ' %</td><td>' + fmt(b.capU[y], 0) + ' kWh</td><td>' + fmt(b.range[y], 0) + ' km</td><td>' + fmt(ev.cReal * b.multShown[y], 1) + ' kWh</td><td>' + fmt(b.t100[y] * 60, 0) + ' min</td><td>' + fmt(b.tFull[y], 1) + ' h</td></tr>';
+  if (!b || !b.K[0]) { return ''; }
+  var ev = r.V[X], n = r.n;
+  var h = '<div class="st">Batterie LFP : vieillissement, autonomie et recharge' + (two ? ' · ' + esc(ev.name) : '') + '</div>';
+  h += '<table class="t sm bt"><tr><th>État</th><th>Santé</th><th>Capacité nette</th><th>Conso</th><th>Autonomie totale</th><th>Km possibles / jour</th><th>Retour au dépôt</th><th>Recharge au dépôt</th></tr>';
+  var y, K;
+  var stepY = Math.max(1, Math.ceil(n / (two ? 2 : 3)));
+  for (y = 0; y <= n; y++) {
+    if (y % stepY !== 0 && y !== n) { continue; }
+    K = b.K[y];
+    h += '<tr><td>' + (y === 0 ? 'Neuve' : 'Fin année ' + y + (b.repl[y] > 0 ? ' (puis remplacée)' : '')) + '</td><td>' + fmt(b.sohPre[y], 1) + ' %</td><td>' + fmt(K.cap, 0) + ' kWh</td><td>' + fmt(K.consKm * 100, 1) + ' kWh</td><td>' + fmt(K.range, 0) + ' km</td><td>' + fmt(K.kmMax, 0) + ' km</td><td>' + (K.okBat ? fmt(K.retPct, 0) + ' %' : '<b style="color:#c2410c">' + (K.retPct < 0 ? 'insuffisant' : fmt(K.retPct, 0) + ' %') + '</b>') + '</td><td>' + hTxt(K.rechH) + '</td></tr>';
   }
   h += '</table>';
+  h += '<div class="basis" style="margin:3px 0 0;font-size:10px">Autonomie totale : batterie nette de 100 à 0 %. Km possibles par jour : départ à ' + fmt(b.K[0].start, 0) + ' %, retour avec la marge de ' + fmt(b.K[0].marge, 0) + ' %' + (b.K[0].pauseOn ? ', recharge à la pause comprise' : '') + (b.K[0].kmLegal !== null ? ', dans la limite de ' + fmt(b.K[0].legalH, 0) + ' h de conduite' : '') + '. Retour et recharge pour la tournée de ' + fmt(b.dailyKm, 0) + ' km.</div>';
   var keys = [];
   keys.push('Perte de capacité estimée : <b>' + fmt(b.degYr, 2) + ' % par an</b> (' + fmt(b.cyclesYr, 0) + ' cycles équivalents par an).');
-  if (b.seuilYear === null) { keys.push('Le seuil de ' + fmt(b.seuil, 0) + ' % n’est pas atteint sur ' + ans(r.n) + '.'); }
+  if (b.seuilYear === null) { keys.push('Le seuil de ' + fmt(b.seuil, 0) + ' % n’est pas atteint sur ' + ans(n) + '.'); }
   else if (b.replYears.length > 0) { keys.push('Seuil de ' + fmt(b.seuil, 0) + ' % atteint en année ' + b.seuilYear + ' : remplacement de la batterie intégré au coût (' + eur(b.rempl) + ').'); }
   else { keys.push('Seuil de ' + fmt(b.seuil, 0) + ' % atteint en année ' + b.seuilYear + '.'); }
   if (!two) { keys.push('Effet sur l’énergie : consommation moyenne ' + fmt((b.avgMult - 1) * 100, 1) + ' % plus élevée que neuve, déjà comprise dans les coûts.'); }
-  h += '<ul class="keys" style="margin-top:6px;font-size:12px"><li>' + keys.join('</li><li>') + '</li></ul>';
+  h += '<div style="margin-top:5px;font-size:11.5px;color:#3a4552">' + keys.join(' ') + '</div>';
   if (b.dailyKm > 0) {
-    var t1 = 'Trajet moyen de ' + fmt(b.dailyKm, 0) + ' km par jour : autonomie journalière utile de ' + fmt(b.rangeDay0, 0) + ' km neuve' + (on.saison ? ' (' + fmt(b.rangeWinter0, 0) + ' km en hiver)' : '') + ' et ' + fmt(b.rangeDayN, 0) + ' km en fin de période. ' + (b.okRange ? 'Aucune recharge en route nécessaire.' : (on.recharge && d.rechMode === 'auto' ? 'La recharge en route nécessaire est calculée et comptée dans les coûts.' : 'Une recharge en route sera nécessaire : utiliser la recharge publique en mode automatique pour la chiffrer.'));
-    var t2 = 'Recharge au dépôt à ' + fmt(d.bornePuis, 0) + ' kW : ' + fmt(b.needH0, 1) + ' h par jour neuve et ' + fmt(b.needHN, 1) + ' h en fin de période, pour ' + fmt(d.fenetre, 0) + ' h disponibles. ' + (b.okWindow ? 'Le créneau est suffisant.' : 'Le créneau est insuffisant : borne plus puissante ou recharge complémentaire à prévoir.');
-    if (two) {
-      h += '<div class="callout ' + (b.okRange && b.okWindow ? 'ok' : 'bad') + '" style="font-size:11px;padding:6px 10px">' + t1 + ' ' + t2 + '</div>';
-    } else {
-      h += '<div class="callout ' + (b.okRange ? 'ok' : 'bad') + '">' + t1 + '</div>';
-      h += '<div class="callout ' + (b.okWindow ? 'ok' : 'bad') + '">' + t2 + '</div>';
-    }
+    var K0 = b.K[0], KN = b.K[n], W0 = b.KW[0];
+    var t1 = 'Tournée de ' + fmt(b.dailyKm, 0) + ' km par jour : <b>' + fmt(K0.kmMax, 0) + ' km possibles par jour</b> batterie neuve' + (W0 ? ' (' + fmt(W0.kmMax, 0) + ' km en hiver)' : '') + ' et ' + fmt(KN.kmMax, 0) + ' km en fin d’année ' + n + ', marge de ' + fmt(K0.marge, 0) + ' % gardée. ' + (b.okRange ? 'Aucune recharge en route nécessaire.' : (on.recharge && d.rechMode === 'auto' ? 'La recharge en route nécessaire est calculée et comptée dans les coûts.' : 'Une recharge en route sera nécessaire : utiliser la recharge publique en mode automatique pour la chiffrer.'));
+    var t2 = 'Recharge au dépôt à ' + fmt(K0.depP, 0) + ' kW (borne ' + fmt(d.bornePuis, 0) + ' kW, véhicule ' + fmt(b.spec.dc, 0) + ' kW) : ' + hTxt(K0.rechH) + ' par jour neuve et ' + hTxt(KN.rechH) + ' en fin d’année ' + n + ', pour ' + fmt(d.fenetre, 0) + ' h disponibles. ' + (b.okWindow ? 'Le créneau est suffisant.' : 'Le créneau est insuffisant : borne plus puissante ou recharge complémentaire à prévoir.');
+    h += '<div class="callout ' + (b.okRange && b.okWindow ? 'ok' : 'bad') + '" style="font-size:11.5px;padding:6px 10px;margin:6px 0">' + t1 + '<br>' + t2 + '</div>';
   }
   return h;
 }
@@ -2241,7 +2525,7 @@ function pageComplet4(r, d, on) {
     if (ac.aideT > 0) { aTxt.push('<b>' + eur(ac.aideT) + '</b> pour ' + esc(r.V[X].name) + ' (' + aideCbText(ac, d) + ')'); }
     if (ac.aideBlocked) { aTxt.push('aide de ' + eur(ac.aideAsked) + ' pour ' + esc(r.V[X].name) + ' <b>non retenue</b> : durée de détention inférieure à ' + AIDE_MIN_ANS + ' ans'); }
   });
-  if (r.aideB > 0) { aTxt.push('<b>' + eur(r.aideB) + '</b> pour la borne (déduite de son prix' + (r.oc.nb > 1 ? ', soit ' + eur(r.aideBShare) + ' par camion' : '') + ')'); }
+  if (r.aideB > 0) { aTxt.push('<b>' + eur(r.aideB) + '</b> pour la borne (' + (r.oc.nb > 1 ? 'soit ' + eur(r.aideBShare) + ' par camion, ' : '') + borneAideText(borneLeaseOk(state) ? state.aideBorneMode : 'client', r.aideBShare, d) + ')'); }
   if (aTxt.length) { h += '<li>Aides, versées le ' + AIDE_MOIS + 'e mois : ' + aTxt.join(' ; ') + '.</li>'; }
   if (on.borne && anyElec(d) && r.oc.nb > 1) { h += '<li>Borne partagée entre <b>' + fmt(r.oc.nb, 0) + ' camions</b> : ' + eur(r.borneNet) + ' d’investissement net et ' + eur(r.oc.borneAbo) + ' par an imputés à chaque camion électrique.</li>'; }
   if (on.recharge) {
@@ -2252,8 +2536,8 @@ function pageComplet4(r, d, on) {
     });
   }
   if (on.co2) {
-    if (r.co2Year >= 0) { h += '<li>CO₂ évité par ' + a + ' : <b>' + fmt(r.co2Year, 0) + ' t par an</b>, soit ' + fmt(r.co2Total, 0) + ' t sur ' + ans(r.n) + '.</li>'; }
-    else { h += '<li>' + a + ' émet <b>' + fmt(-r.co2Year, 0) + ' t de CO₂ de plus par an</b> que ' + b + ', soit ' + fmt(-r.co2Total, 0) + ' t sur ' + ans(r.n) + '.</li>'; }
+    if (r.co2Year >= 0) { h += '<li>CO₂ évité par ' + a + ' : <b>' + fmtT(r.co2Year) + ' t par an</b>, soit ' + fmtT(r.co2Total) + ' t sur ' + ans(r.n) + '.</li>'; }
+    else { h += '<li>' + a + ' émet <b>' + fmtT(-r.co2Year) + ' t de CO₂ de plus par an</b> que ' + b + ', soit ' + fmtT(-r.co2Total) + ' t sur ' + ans(r.n) + '.</li>'; }
   }
   h += '</ul>';
 
@@ -2263,10 +2547,8 @@ function pageComplet4(r, d, on) {
     if (on[BLOCK_NAMES[i][0]]) { h += '<span class="pill">' + BLOCK_NAMES[i][1] + '</span>'; }
   }
   h += '</div>';
-  if (on.batterie) {
-    var two = !!(r.V.E.bat && r.V.D.bat);
-    h += batteryBlock(r, d, on, 'E', two) + batteryBlock(r, d, on, 'D', two);
-  }
+  var two = !!(r.V.E.bat && r.V.D.bat);
+  if (on.batterie && !two) { h += batteryBlock(r, d, on, 'E', false) + batteryBlock(r, d, on, 'D', false); }
   if (on.co2) { h += co2Block(r, d); }
   h += disclaimer();
   h += footHtml(d, '') + '</div>';
@@ -2288,7 +2570,7 @@ function reportRow(f, d) {
     val = fmt(d[f.k], 0) + ' € HT/mois (calculé)';
   } else if ((f.k === 'cbPremierE' || f.k === 'cbPremierD') && d['mode' + f.k.slice(-1)] === 'cbail') {
     var X = f.k.slice(-1);
-    var fc = d['first' + X] || 0, fa = d['aideFin' + X] || 0;
+    var fc = d['first' + X] || 0, fa = (d['aideFin' + X] || 0) + (d['borneFin' + X] || 0);
     if (fc + fa <= 0) { val = 'Non'; }
     else { val = eur(fc + fa) + (fa > 0 ? (fc > 0 ? ' (dont aide ' + eur(fa) + ')' : ' (payé par l’aide)') : ''); }
   } else {
@@ -2305,14 +2587,19 @@ function annex1(r, d, on) {
     g = GROUPS[gi];
     if (!groupActive(g)) { continue; }
     rows = [];
+    var segs = [], segT = g.title;
     if (g.id === 'proj') { rows.push(['Kilométrage annuel d’étude', fmt(r.kmAn, 0) + ' km/an']); }
     for (fi = 0; fi < g.fields.length; fi++) {
       f = g.fields[fi];
+      if (f.sep) { if (rows.length) { segs.push({ title: segT, rows: rows }); } rows = []; segT = g.title.split(' : ')[0] + ' · ' + sepText(f); continue; }
       if (!f.k || !fieldVisible(f)) { continue; }
       if (TEXT_KEYS[f.k] && String(state[f.k]) === '') { continue; }
       rows.push(reportRow(f, d));
     }
-    if (rows.length > 0) { groups.push({ title: g.title, rows: rows }); }
+    if (rows.length) { segs.push({ title: segT, rows: rows }); }
+    var nRows = segs.reduce(function (t, x) { return t + x.rows.length; }, 0);
+    if (nRows > 14) { groups = groups.concat(segs); }
+    else if (nRows > 0) { groups.push({ title: g.title, rows: segs.reduce(function (t, x) { return t.concat(x.rows); }, []) }); }
   }
   var total = 0, i;
   for (i = 0; i < groups.length; i++) { total += groups[i].rows.length + 2; }
@@ -2348,12 +2635,12 @@ function acqText(d, X, r) {
   var mode = d['mode' + X];
   if (mode === 'achat') { return 'achat ' + eur(d['prix' + X]); }
   var m = X === 'E' ? r.lmE : r.lmD;
-  var fa = mode === 'cbail' ? (r.A[X].aideFin || 0) : 0;
+  var fa = mode === 'cbail' ? (r.A[X].aideFin || 0) + (r.A[X].bFin || 0) : 0;
   var first = r.A[X].first;
   var maj6 = r.A[X].maj6 || 0;
   var cnt = Math.min(m, 12 * r.n) - (first > 0 ? 1 : 0) - (maj6 > 0 && m >= 6 ? 1 : 0);
   var ft = '';
-  if (maj6 > 0) { ft = '6e loyer majoré ' + eur(maj6) + ' (payé par l’aide) + '; }
+  if (maj6 > 0) { ft = '6e loyer majoré ' + eur(maj6) + ' (payé par ' + (r.A[X].t6 > 0 && r.A[X].b6 > 0 ? 'les aides' : (r.A[X].b6 > 0 ? 'l’aide à la borne' : 'l’aide')) + ') + '; }
   if (first > 0) { ft += 'premier loyer majoré ' + eur(first) + (fa > 0 ? ' (dont aide ' + eur(fa) + ' versée au financeur)' : '') + ' + '; }
   return ACQ_NAME[mode] + ' ' + ft + eur(d['loy' + X]) + ' × ' + fmt(cnt, 0) + ' mois' + (mode === 'cbail' && m <= 12 * r.n ? ' + option ' + eur(d['opt' + X]) : '');
 }
@@ -2396,7 +2683,7 @@ function annex2(r, d, on) {
           if (d.rechMode === 'pct') { how = fmt(d.partPublic, 1) + ' % de l’énergie'; }
           else if (d.rechMode === 'kwh') { how = fmt(ev.occ, 0) + ' recharges/an × ' + fmt(d.rechKwh, 0) + ' kWh'; }
           else if (d.rechMode === 'dur') { how = fmt(ev.occ, 0) + ' recharges/an × ' + fmt(d.rechPow, 0) + ' kW × ' + fmt(d.rechDurU === 'min' ? d.rechDur / 60 : d.rechDur, 2) + ' h'; }
-          else { how = 'Besoin journalier − min(batterie × ' + fmt(d.socFin - d.socArr, 0) + ' %, ' + fmt(d.bornePuis, 0) + ' kW × ' + fmt(d.fenetre, 1) + ' h), × ' + fmt(r.P.days, 0) + ' jours'; }
+          else { how = 'Besoin journalier − énergie disponible entre ' + fmt(startPct(d), 0) + ' % et la marge de ' + fmt(marginPct(d), 0) + ' % (limitée à ' + fmt(d.fenetre, 1) + ' h de recharge au dépôt), × ' + fmt(r.P.days, 0) + ' jours' + (ev.yr.pause[1] > 0 ? ', dont ' + fmt(ev.yr.pause[1], 0) + ' kWh à la pause' : ''); }
           add('Recharge en borne publique' + nm(X), how + ', à ' + fmt(r.pPubHT, 4) + ' €/kWh', fmt(ev.yr.pub[1], 0) + ' kWh (' + fmt(ev.share1 * 100, 1) + ' %)');
         }
         add('Coût de l’électricité' + nm(X), fmt(ev.yr.dep[1], 0) + ' kWh au dépôt' + (on.recharge ? ' + ' + fmt(ev.yr.pub[1], 0) + ' kWh en public' : '') + (on.contrat ? ' + part fixe' : ''), eur(ev.ene1));
@@ -2423,7 +2710,7 @@ function annex2(r, d, on) {
           : (mode === 'cbail' ? 'Crédit-bail : aide ' + aideCbText(ac, d) : 'Location : loyers inchangés, aide encaissée le ' + AIDE_MOIS + 'e mois')) + ' (année 1) ; acquise car le véhicule est gardé au moins ' + AIDE_MIN_ANS + ' ans', '– ' + eur(ac.aideT));
       });
     }
-    if (on.borne) { add('Borne imputée à chaque camion électrique', '(' + eur(d.borneInv) + (r.aideB > 0 ? ' − aide ' + eur(r.aideB) + ' versée le ' + AIDE_MOIS + 'e mois' + (r.aideB < num(state.aideBorne) ? ' (plafonnée au prix)' : '') : '') + ') ÷ ' + fmt(r.oc.nb, 0) + ' ; abonnement ' + eur(r.oc.borneAboTot) + ' ÷ ' + fmt(r.oc.nb, 0), 'Invest. ' + eur(r.borneNet) + ' · ' + eur(r.oc.borneAbo) + '/an'); }
+    if (on.borne) { add('Borne imputée à chaque camion électrique', '(' + eur(d.borneInv) + (r.aideB > 0 ? ' − aide ' + eur(r.aideB) + ' versée le ' + AIDE_MOIS + 'e mois' + (r.aideB < num(state.aideBorne) ? ' (plafonnée au prix)' : '') : '') + ') ÷ ' + fmt(r.oc.nb, 0) + (r.aideB > 0 ? ' ; aide ' + borneAideText(borneLeaseOk(state) ? state.aideBorneMode : 'client', r.aideBShare, d) : '') + ' ; abonnement ' + eur(r.oc.borneAboTot) + ' ÷ ' + fmt(r.oc.nb, 0), 'Invest. ' + eur(r.borneNet) + ' · ' + eur(r.oc.borneAbo) + '/an'); }
     if (on.fin) {
       var fT = function (X) { return d['mode' + X] === 'achat' ? fmt(d['finPart' + X], 0) + ' % à ' + fmt(d['finTaux' + X], 2) + ' % sur ' + fmt(d['finDuree' + X], 0) + ' ' + d['finU' + X] : 'sans crédit'; };
       add('Intérêts des crédits', esc(N1(d)) + ' : ' + fT('E') + ' ; ' + esc(N2(d)) + ' : ' + fT('D'), pair(d, eur(r.cE.fin), eur(r.cD.fin)));
@@ -2431,7 +2718,15 @@ function annex2(r, d, on) {
     if (on.revente) { add('Valeur de revente', (d.resU === 'eur' ? 'Montants forfaitaires saisis' : 'Prix neuf × % résiduel saisi, sans modèle de marché ni état de batterie') + ', déduite en fin d’année ' + n + ' si le client est propriétaire', pair(d, eur(r.resE), eur(r.resD))); }
     if (on.regl) { add('Taxes à venir', (on.energie && anyTherm(d) ? 'Gazole × ' + fmt(d.carbP, 3) + ' €/L dès l’année ' + fmt(d.carbYear, 0) + ' ; ' : '') + 'péages ' + eur(d.pegE) + ' et ' + eur(d.pegD) + '/an', pair(d, eur(r.cE.taxes), eur(r.cD.taxes))); }
     if (on.fisc) { add('Avantages fiscaux', 'Économie d’impôt ' + eur(d.fiscGain) + (on.energie ? ' + kWh au dépôt × ' + fmt(d.certif, 3) + ' €' : '') + ', par camion électrique', pair(d, '– ' + eur(r.cE.recettes), '– ' + eur(r.cD.recettes))); }
-    if (on.batterie) { Xs.forEach(function (X) { var b = r.V[X].bat; if (b) { add('Batterie LFP' + nm(X), 'Perte ' + fmt(b.degYr, 2) + ' %/an ; surconsommation linéaire jusqu’à ' + fmt(b.eff, 1) + ' % au seuil de ' + fmt(b.seuil, 0) + ' %', 'Santé fin : ' + fmt(b.soh[n], 1) + ' %'); } }); }
+    if (on.batterie) { Xs.forEach(function (X) { var b = r.V[X].bat; if (b && b.K[0]) {
+      var sp = b.spec, K0 = b.K[0], KN = b.K[n];
+      add('Capacité nette' + nm(X), fmt(sp.brut, 0) + ' kWh bruts × ' + fmt(sp.dod, 0) + ' % utilisables', fmt(sp.net, 0) + ' kWh');
+      add('Vieillissement' + nm(X), 'Perte ' + fmt(b.degYr, 2) + ' %/an ; surconsommation linéaire jusqu’à ' + fmt(b.eff, 1) + ' % au seuil de ' + fmt(b.seuil, 0) + ' % ; fin année ' + n + ' : ' + fmt(sp.net, 0) + ' × ' + fmt(b.sohPre[n], 1) + ' %, conso ' + fmt(K0.consKm * 100, 1) + ' × ' + fmt(KN.consKm / K0.consKm, 4), 'Santé ' + fmt(b.sohPre[n], 1) + ' % · ' + fmt(KN.cap, 0) + ' kWh');
+      add('Autonomie totale' + nm(X), fmt(K0.cap, 0) + ' kWh ÷ ' + fmt(K0.consKm * 100, 1) + ' kWh/100 km × 100 (batterie de 100 à 0 %)', fmt(K0.range, 0) + ' km · an ' + n + ' : ' + fmt(KN.range, 0) + ' km');
+      add('Km possibles par jour' + nm(X), 'Batterie : ' + fmt(K0.cap, 0) + ' × (' + fmt(K0.start, 0) + ' − ' + fmt(K0.marge, 0) + ') % ÷ ' + fmt(K0.consKm * 100, 1) + ' × 100 = ' + fmt(K0.kmBat, 0) + ' km' + (K0.pauseCap > 0 ? ' + pause ' + fmt(K0.pauseKm, 0) + ' km' : '') + (K0.kmLegal !== null ? ' ; conduite : ' + fmt(K0.legalH, 0) + ' h × ' + fmt(K0.v, 0) + ' km/h = ' + fmt(K0.kmLegal, 0) + ' km ; on retient le plus petit' : ''), fmt(K0.kmMax, 0) + ' km · an ' + n + ' : ' + fmt(KN.kmMax, 0) + ' km');
+      add('Retour au dépôt' + nm(X), fmt(K0.start, 0) + ' % − ' + fmt(b.dailyKm, 0) + ' km × ' + fmt(K0.consKm * 100, 1) + ' kWh/100 km ÷ ' + fmt(K0.cap, 0) + ' kWh' + (K0.tourPauseE > 0 ? ' + ' + fmt(K0.tourPauseE, 0) + ' kWh rechargés à la pause' : ''), fmt(K0.retPct, 1) + ' % · an ' + n + ' : ' + fmt(KN.retPct, 1) + ' %');
+      add('Recharge au dépôt' + nm(X), 'De ' + fmt(Math.max(0, K0.retEff), 0) + ' à ' + fmt(K0.start, 0) + ' % à ' + fmt(K0.depP, 0) + ' kW (plus basse entre borne et véhicule)' + (taperOn(sp) ? ', ralentie au-delà de ' + fmt(sp.ts, 0) + ' % jusqu’à ' + fmt(sp.tp, 0) + ' % de ' + fmt(sp.dc, 0) + ' kW à 100 %' : ''), hTxt(K0.rechH) + ' · an ' + n + ' : ' + hTxt(KN.rechH));
+    } }); }
     sec('Résultats de l’étude (HT)');
     add('Coût total par camion', 'Somme des postes − aides − recettes − revente', pair(d, eur(r.tcoE), eur(r.tcoD)));
     add('Économie sur ' + ans(n), 'Coût total ' + esc(N2(d)) + ' − coût total ' + esc(N1(d)), eur(r.tcoSav));
@@ -2600,9 +2895,9 @@ function annex5(r, d, on) {
         h += '<div>Plus forte sortie : <b>' + eur(t.minNet) + '</b> (' + (t.minM ? 'M' + t.minM : '–') + ')</div>';
         h += '<div>Sortie mensuelle habituelle (an ' + t.usualYear + ') : <b>' + eur(t.usual) + '</b></div>';
         var ac5 = r.A[X];
-        if (ac5.benef === 'fin') { h += '<div>TVA du 1er loyer majoré à avancer : <b>' + eur(ac5.tvaMaj) + '</b> (M1, récupérable)</div>'; }
-        else if (ac5.benef === 'fin6ht') { h += '<div>TVA du 6e loyer majoré à avancer : <b>' + eur(ac5.tvaMaj) + '</b> (M6, récupérable)</div>'; }
-        else if (ac5.benef === 'fin6') { h += '<div>6e loyer majoré : ' + eur(ac5.maj6) + ' HT, soit ' + eur(ac5.maj6 + ac5.tvaMaj) + ' TTC payés par l’aide : aucune avance. En HT, le M6 affiche +' + eur(ac5.tvaMaj) + ' : c’est la TVA de ce loyer, payée avec l’aide puis récupérée.</div>'; }
+        if (ac5.tvaM1 > 0) { h += '<div>TVA du 1er loyer majoré (aides) à avancer : <b>' + eur(ac5.tvaM1) + '</b> (M1, récupérable)</div>'; }
+        if (ac5.tvaM6 > 0) { h += '<div>TVA du 6e loyer majoré à avancer : <b>' + eur(ac5.tvaM6) + '</b> (M6, récupérable)</div>'; }
+        if (ac5.tva6c > 0) { h += '<div>6e loyer majoré de ' + eur(ac5.t6) + ' HT payé TTC par l’aide de ' + eur(ac5.t6 + ac5.tva6c) + ' : aucune avance. En HT, l’aide dépasse ce loyer de ' + eur(ac5.tva6c) + ' : c’est sa TVA, payée avec l’aide puis récupérée par le client.</div>'; }
         h += '<div>Total sur ' + ans(n) + ' : <b>' + eur(t.cum[T.M]) + '</b></div></div>';
       });
       h += '<div class="tbox vx"><div class="tn">Écart de trésorerie</div>';
@@ -2639,21 +2934,722 @@ function annex5(r, d, on) {
 /* Description du versement de l'aide en crédit-bail */
 function aideCbText(ac, d) {
   var tv = fmt(Math.max(0, d.tvaLoyer), 0) + ' %';
-  if (ac.benef === 'fin') { return 'versée au financeur comme 1er loyer majoré de ' + eur(ac.first) + ' HT, avancé par le client jusqu’au versement de l’aide le ' + AIDE_MOIS + 'e mois ; baisse les loyers et les intérêts'; }
-  if (ac.benef === 'fin6') { return 'versée au financeur pour payer le 6e loyer majoré de ' + eur(ac.maj6) + ' HT (aide − TVA ' + tv + ', soit ' + eur(ac.maj6 + ac.tvaMaj) + ' TTC) : aucune avance de trésorerie ; baisse les loyers et les intérêts'; }
-  if (ac.benef === 'fin6ht') { return 'versée au financeur pour payer le 6e loyer majoré de ' + eur(ac.maj6) + ' HT : le client avance la TVA de ' + eur(ac.tvaMaj) + ' (récupérable) ; loyers encore plus bas'; }
+  if (ac.benef === 'fin') { return 'versée au financeur comme 1er loyer majoré de ' + eur(ac.aideFin) + ' HT, avancé par le client jusqu’au versement de l’aide le ' + AIDE_MOIS + 'e mois ; baisse les loyers et les intérêts'; }
+  if (ac.benef === 'fin6') { return 'versée au financeur pour payer le 6e loyer majoré de ' + eur(ac.t6) + ' HT (aide − TVA ' + tv + ', soit ' + eur(ac.t6 + ac.tvaMaj) + ' TTC) : aucune avance de trésorerie ; baisse les loyers et les intérêts'; }
+  if (ac.benef === 'fin6ht') { return 'versée au financeur pour payer le 6e loyer majoré de ' + eur(ac.t6) + ' HT : le client avance la TVA de ' + eur(ac.tvaMaj) + ' (récupérable) ; loyers encore plus bas'; }
   if (ac.benef === 'client') { return 'encaissée par le client le ' + AIDE_MOIS + 'e mois, loyers inchangés'; }
   return 'encaissée par le client le ' + AIDE_MOIS + 'e mois';
 }
+/* Description du versement de l'aide à la borne (part d'un camion) */
+function borneAideText(mode, share, d) {
+  var tvl = Math.max(0, d.tvaLoyer) / 100, tv = fmt(Math.max(0, d.tvaLoyer), 0) + ' %';
+  if (mode === 'fin') { return 'versée au financeur du tracteur électrique : elle s’ajoute au 1er loyer majoré (' + eur(share) + ' HT par camion), avancé par le client jusqu’au versement le ' + AIDE_MOIS + 'e mois'; }
+  if (mode === 'fin6') { var h6 = share / (1 + tvl); return 'versée au financeur du tracteur électrique : elle s’ajoute au 6e loyer majoré pour ' + eur(h6) + ' HT par camion (aide − TVA ' + tv + ', soit ' + eur(share) + ' TTC) : aucune avance'; }
+  if (mode === 'fin6ht') { return 'versée au financeur du tracteur électrique : elle s’ajoute au 6e loyer majoré pour ' + eur(share) + ' HT par camion ; le client avance la TVA de ' + eur(share * tvl) + ' (récupérable)'; }
+  return 'encaissée par le client le ' + AIDE_MOIS + 'e mois et déduite du prix de la borne';
+}
 
+/* ===================== SEMAINE TYPE DE LA BATTERIE ===================== */
+/* Simulation pas à pas (5 min) d'une semaine du lundi 00:00 au dimanche 23:59.
+   Deux semaines sont simulées : la seconde, en régime établi, est affichée. */
+var WK_STEP = 5;
+function hhmm(min) {
+  var m = Math.round(min) % 1440; if (m < 0) { m += 1440; }
+  var h = Math.floor(m / 60), mm = m % 60;
+  return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
+}
+function durTxt(min) {
+  var h = Math.floor(min / 60), m = Math.round(min - h * 60);
+  if (m === 60) { h++; m = 0; }
+  return h > 0 ? h + ' h ' + (m < 10 ? '0' : '') + m : m + ' min';
+}
+/* État de la batterie pour une semaine donnée : 'first' = semaine 1 (neuve), 'last' = dernière semaine de l'étude */
+function batState(r, d, on, X, which) {
+  var ev = r.V[X], bat = ev && ev.bat;
+  if (!bat || ev.type !== 'elec' || !(bat.cap > 0)) { return null; }
+  var y = which === 'last' ? r.n : 0;
+  var K = bat.K[y], KW = bat.KW[y];
+  if (!K) { return null; }
+  var soh = bat.sohPre[y];
+  return {
+    which: which, year: which === 'last' ? r.n : 1, y: y, soh: soh, mult: multAt(bat, soh), cap: K.cap,
+    consKm: K.consKm, consWinter: KW ? KW.consKm : K.consKm, winterOn: !!KW, K: K, KW: KW
+  };
+}
+/* Kilomètres possibles par jour (même calcul que partout ailleurs) */
+function kmDay(r, d, on, X, cap, consKm) {
+  var bat = r.V[X].bat;
+  return kmCore(bat.spec, d, on, cap, consKm, bat.dailyKm);
+}
+/* Niveau au retour au dépôt année par année (fin de chaque année, avant un éventuel remplacement) */
+function durability(r, d, on, X) {
+  var ev = r.V[X], bat = ev && ev.bat;
+  if (!bat || !(bat.cap > 0) || !(bat.dailyKm > 0)) { return null; }
+  var rows = [], y, k, kw, failAvg = null, failWin = null, mg = marginPct(d);
+  for (y = 0; y <= r.n; y++) {
+    k = bat.K[y]; kw = bat.KW[y];
+    if (!k) { return null; }
+    rows.push({ y: y, soh: bat.sohPre[y], ret: k.retPct, retW: kw ? kw.retPct : null, km: k.kmMax, kmW: kw ? kw.kmMax : null, repl: y > 0 && bat.repl[y] > 0 });
+    if (failAvg === null && !k.okBat) { failAvg = y; }
+    if (kw && failWin === null && !kw.okBat) { failWin = y; }
+  }
+  return { rows: rows, failAvg: failAvg, failWin: failWin, winterOn: !!bat.winterOn, marge: mg, tour: bat.dailyKm };
+}
+
+/* Simulation d'une semaine (pas de 5 min, recharge intégrée minute par minute). opt.which : 'first' | 'last' ; opt.winter : consommation d'hiver.
+   Mêmes règles que le calcul d'une journée (kmCore) : départ au niveau visé, recharge à la pause limitée à ce qui manque,
+   recharge en route déclenchée à la marge de sécurité, recharge au dépôt jusqu'au niveau visé dans le temps disponible. */
+function weekSim(d, on, r, X, opt) {
+  opt = opt || {};
+  var ev = r.V[X], bat = ev.bat;
+  if (!bat || ev.type !== 'elec') { return null; }
+  var BS = batState(r, d, on, X, opt.which || 'first');
+  if (!BS) { return null; }
+  var sp = bat.spec, cap = BS.cap;
+  if (!(cap > 0)) { return null; }
+  var consKm = opt.winter ? BS.consWinter : BS.consKm;
+  var K = opt.winter ? (BS.KW || BS.K) : BS.K;
+  var dailyKm = bat.dailyKm || 0;
+  var dayKWh = dailyKm * consKm;
+  var nDays = Math.min(7, Math.max(0, Math.round(d.semJours)));
+  var hDep = Math.min(23.5, Math.max(0, d.hDep)), hRet = Math.min(24, Math.max(0, d.hRet));
+  if (hRet <= hDep) { hRet = Math.min(24, hDep + 10); }
+  var dep = Math.round(hDep * 12) * 5, td = Math.max(30, Math.round((hRet - hDep) * 60));
+  var v = Math.max(0, d.vitMoy);
+  var pauseOn = K.pauseOn && td > 45 + 30 && dailyKm > K.pauseKmAt;
+  var driveMin = pauseOn ? td - 45 : td;
+  var kmRate = dailyKm / driveMin;
+  var full = cap * startPct(d) / 100;
+  var mgK = cap * marginPct(d) / 100;
+  var pDep = Math.max(1, d.bornePuis), pPub = Math.max(1, d.rechPow || 150), pPause = Math.max(1, d.pausePuis || 1);
+  var win = Math.max(0.5, d.fenetre) * 60;
+  var hcStart = d.chargeStart === '22' ? 22 * 60 : null;
+  var pubOn = !!on.recharge;
+  var N = 7 * 1440 / WK_STEP;
+  var charge = function (soc0, pB, top, minutes) { var sc = soc0, m; for (m = 0; m < minutes && sc < top - 1e-9; m++) { sc = Math.min(top, sc + chargePow(sp, sc / cap * 100, pB) / 60); } return sc; };
+  var soc = full, rec = null, pass, i, t, day, tod, ph;
+  var drive = { active: false };
+  var depot = { on: false, used: 0, startAt: null };
+  for (pass = 0; pass < 2; pass++) {
+    rec = { soc: [], ph: [] };
+    for (i = 0; i < N; i++) {
+      t = i * WK_STEP; day = Math.floor(t / 1440); tod = t - day * 1440;
+      ph = 0;
+      if (tod === dep && day < nDays) { drive = { active: true, kmLeft: dailyKm, km: 0, pub: false, pubTarget: 0, pause: 0, pauseStep: 0, paused: false }; depot.on = false; }
+      if (drive.active) {
+        if (drive.pause > 0) {
+          soc = Math.min(full, soc + drive.pauseStep); ph = drive.pauseStep > 1e-9 ? 4 : 1;
+          drive.pause -= WK_STEP;
+        } else if (drive.pub) {
+          soc = charge(soc, pPub, drive.pubTarget, WK_STEP); ph = 3;
+          if (soc >= drive.pubTarget - 1e-6) { drive.pub = false; }
+        } else {
+          var km = Math.min(drive.kmLeft, kmRate * WK_STEP), e = km * consKm;
+          if (pubOn && soc - e < mgK && drive.kmLeft > 0) { km = Math.max(0, (soc - mgK) / consKm); e = km * consKm; }
+          soc -= e; drive.kmLeft -= km; drive.km += km; ph = 1;
+          if (pauseOn && !drive.paused && drive.km >= K.pauseKmAt - 1e-9 && drive.kmLeft > 1e-9) {
+            drive.paused = true; drive.pause = 45;
+            var need = Math.max(0, drive.kmLeft * consKm - (soc - mgK));
+            var eP = Math.min(need, chargeIn(sp, cap, soc / cap * 100, 0.75, d.pausePuis, startPct(d)).e);
+            drive.pauseStep = eP / (45 / WK_STEP);
+          }
+          if (pubOn && soc <= mgK + 1e-9 && drive.kmLeft > 1e-9 && drive.pause <= 0) {
+            drive.pub = true;
+            drive.pubTarget = Math.min(full, mgK + drive.kmLeft * consKm);
+          }
+          if (drive.kmLeft <= 1e-9) {
+            drive.active = false;
+            depot.used = 0;
+            depot.startAt = hcStart !== null ? Math.max(t + WK_STEP, day * 1440 + hcStart) : t + WK_STEP;
+            depot.on = true;
+          }
+        }
+        if (soc < 0) { soc = 0; }
+      } else if (depot.on && t >= depot.startAt) {
+        if (soc < full - 1e-6 && depot.used < win) {
+          soc = charge(soc, pDep, full, Math.min(WK_STEP, win - depot.used)); depot.used += WK_STEP; ph = 2;
+        } else { depot.on = false; }
+      }
+      rec.soc.push(soc / cap * 100);
+      rec.ph.push(ph);
+    }
+  }
+  /* Segments ; durées de recharge calculées exactement (courbe de charge), pas arrondies au pas de 5 min */
+  var segs = [], k, e2, s1 = 0;
+  for (i = 1; i <= N; i++) {
+    if (i === N || rec.ph[i] !== rec.ph[s1]) {
+      var a0 = s1 > 0 ? rec.soc[s1 - 1] : rec.soc[N - 1], a1 = rec.soc[i - 1];
+      var sg = { ph: rec.ph[s1], a: s1, b: i, s0: a0, s1: a1, kwh: rec.ph[s1] >= 2 ? (a1 - a0) * cap / 100 : 0 };
+      sg.min = rec.ph[s1] === 2 ? chargeHours(sp, cap, a0, a1, pDep) * 60 : (rec.ph[s1] === 3 ? chargeHours(sp, cap, a0, a1, pPub) * 60 : (s1 === i ? 0 : (i - s1) * WK_STEP));
+      segs.push(sg);
+      s1 = i;
+    }
+  }
+  var lows = [], minS = 101, minI = 0, depE = 0, pubE = 0, depMin = 0, depN = 0, pubMin = 0, pzE = 0;
+  for (k = 0; k < segs.length; k++) {
+    e2 = segs[k];
+    if (e2.ph === 2) { depE += e2.kwh; depMin += e2.min; depN++; }
+    if (e2.ph === 3) { pubE += e2.kwh; pubMin += e2.min; }
+    if (e2.ph === 4) { pzE += e2.kwh; }
+  }
+  for (day = 0; day < 7; day++) {
+    var lo = 101, loI = -1;
+    for (i = day * 288; i < (day + 1) * 288; i++) { if (rec.soc[i] < lo) { lo = rec.soc[i]; loI = i; } }
+    if (day < nDays) { lows.push({ day: day, soc: lo, i: loI, km: lo / 100 * cap / consKm, mkm: (lo - marginPct(d)) / 100 * cap / consKm }); }
+    if (lo < minS) { minS = lo; minI = loI; }
+  }
+  var depSoc = rec.soc[Math.max(0, dep / WK_STEP - 1)];
+  var notFull = false;
+  for (day = 0; day < nDays; day++) { var idx = (day * 1440 + dep) / WK_STEP - 1; if (idx >= 0 && rec.soc[idx] < startPct(d) - 0.5) { notFull = true; } }
+  return {
+    X: X, name: ev.name, cap: cap, soc: rec.soc, ph: rec.ph, segs: segs, lows: lows, N: N, BS: BS, K: K, which: BS.which, winter: !!opt.winter,
+    consKm: consKm, nDays: nDays, dailyKm: dailyKm, dayKWh: dayKWh, weekKm: dailyKm * nDays, weekKWh: dayKWh * nDays,
+    depE: depE, pubE: pubE, pauseE: pzE, depMinAvg: depN ? depMin / depN : 0, pubMin: pubMin,
+    minSoc: minS, minI: minI, depSoc: depSoc, fullPct: full / cap * 100, margePct: marginPct(d),
+    minKm: minS / 100 * cap / consKm,
+    dep: dep, td: td, pDep: pDep, pPub: pPub, pPause: pPause, pauseOn: pauseOn, hcStart: hcStart, notFull: notFull,
+    pEffDep: depotPow(d, sp), pEffPub: pubPow(d, sp),
+    deficit: minS < marginPct(d) - 0.05, empty: minS <= 0.5, pubOn: pubOn
+  };
+}
+
+/* Éclair (recharge) */
+function boltPath(x, y, s, fill) {
+  return '<path transform="translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + s + ')" d="M2 -8 L-4 1 L0 1 L-2 8 L4 -1 L0 -1 Z" fill="' + fill + '"/>';
+}
+var WK_DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+var WK_C = { drive: '#6fa8dc', depot: '#34d399', pub: '#fbbf24', idle: 'rgba(255,255,255,.14)', line: '#e9f6ff', cyan: '#39c6f4', reserve: '#ff8a65' };
+
+function weekChart(S, w, h, G, Wn) {
+  var padL = 38, padR = 12, padT = 34, padB = 40;
+  var pw = w - padL - padR, phh = h - padT - padB;
+  var X = function (i) { return padL + i / S.N * pw; };
+  var Y = function (p) { return padT + (100 - Math.max(0, Math.min(100, p))) / 100 * phh; };
+  var id = 'g' + S.X;
+  var s = svgOpen(w, h);
+  s += '<defs><linearGradient id="' + id + 'f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#39c6f4" stop-opacity=".55"/><stop offset=".55" stop-color="#1c7fd0" stop-opacity=".28"/><stop offset="1" stop-color="#00529b" stop-opacity=".04"/></linearGradient>';
+  s += '<linearGradient id="' + id + 'c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34d399" stop-opacity=".30"/><stop offset="1" stop-color="#34d399" stop-opacity=".02"/></linearGradient></defs>';
+  var dd, x0, x1, i, k;
+  /* Nuits et week-end */
+  for (dd = 0; dd < 7; dd++) {
+    x0 = X(dd * 288); x1 = X((dd + 1) * 288);
+    if (dd >= S.nDays) { s += '<rect x="' + x0 + '" y="' + padT + '" width="' + (x1 - x0) + '" height="' + phh + '" fill="rgba(255,255,255,.035)"/>'; }
+    s += '<rect x="' + x0 + '" y="' + padT + '" width="' + (X(dd * 288 + 72) - x0) + '" height="' + phh + '" fill="rgba(0,8,25,.22)"/>';
+    s += '<rect x="' + X(dd * 288 + 264) + '" y="' + padT + '" width="' + (x1 - X(dd * 288 + 264)) + '" height="' + phh + '" fill="rgba(0,8,25,.22)"/>';
+  }
+  /* Grille */
+  for (k = 0; k <= 4; k++) {
+    var gy = Y(k * 25);
+    s += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + gy + '" y2="' + gy + '" stroke="rgba(255,255,255,' + (k === 0 ? '.28' : '.09') + ')" stroke-width="1"/>';
+    s += '<text x="' + (padL - 7) + '" y="' + (gy + 3.5) + '" font-size="9.5" fill="rgba(255,255,255,.62)" text-anchor="end">' + (k * 25) + ' %</text>';
+  }
+  for (dd = 0; dd <= 7; dd++) {
+    x0 = X(dd * 288);
+    s += '<line x1="' + x0 + '" x2="' + x0 + '" y1="' + (padT - 18) + '" y2="' + (padT + phh) + '" stroke="rgba(255,255,255,' + (dd === 0 || dd === 7 ? '.0' : '.16') + ')" stroke-width="1"/>';
+    if (dd < 7) {
+      s += '<text x="' + (x0 + (X(288) - X(0)) / 2) + '" y="' + (padT - 20) + '" font-size="10.5" font-weight="700" letter-spacing=".6" fill="' + (dd >= S.nDays ? 'rgba(255,255,255,.45)' : '#ffffff') + '" text-anchor="middle">' + WK_DAYS[dd].toUpperCase() + '</text>';
+      for (k = 1; k < 4; k++) { var tx = X(dd * 288 + k * 72); s += '<line x1="' + tx + '" x2="' + tx + '" y1="' + (padT + phh) + '" y2="' + (padT + phh + 3) + '" stroke="rgba(255,255,255,.35)"/>'; }
+      s += '<text x="' + X(dd * 288 + 144) + '" y="' + (padT + phh + 12) + '" font-size="7.5" fill="rgba(255,255,255,.45)" text-anchor="middle">12 h</text>';
+    }
+  }
+  /* Zones de recharge (halo vert sous la courbe) */
+  for (k = 0; k < S.segs.length; k++) {
+    var g = S.segs[k];
+    if (g.ph >= 2) {
+      s += '<rect x="' + X(g.a) + '" y="' + padT + '" width="' + Math.max(1, X(g.b) - X(g.a)) + '" height="' + phh + '" fill="' + (g.ph === 2 ? 'url(#' + id + 'c)' : 'rgba(251,191,36,.16)') + '"/>';
+    }
+  }
+  /* Marge de sécurité (la recharge en route se déclenche à ce niveau) */
+  var ry = Y(S.margePct);
+  s += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + ry + '" y2="' + ry + '" stroke="' + WK_C.reserve + '" stroke-width="1.3" stroke-dasharray="5,3" opacity=".95"/>';
+  s += '<text x="' + (w - padR - 2) + '" y="' + (ry - 4) + '" font-size="8.5" font-weight="700" fill="' + WK_C.reserve + '" text-anchor="end">Marge de sécurité ' + fmt(S.margePct, 0) + ' %</text>';
+  /* Courbes fantômes : semaine 1 et hiver */
+  var ghost = function (T, col, dash, wd) {
+    if (!T) { return ''; }
+    var gp = [], gi;
+    for (gi = 0; gi < T.N; gi += 2) { gp.push(X(gi).toFixed(1) + ',' + Y(T.soc[gi]).toFixed(1)); }
+    return '<polyline points="' + gp.join(' ') + '" fill="none" stroke="' + col + '" stroke-width="' + wd + '" stroke-dasharray="' + dash + '" stroke-linejoin="round" opacity=".85"/>';
+  };
+  s += ghost(G, 'rgba(255,255,255,.8)', '1.5,3', 1.9);
+  s += ghost(Wn, '#b4bdff', '6,3', 1.6);
+  /* Courbe du niveau de charge */
+  var pts = [], step = 2;
+  for (i = 0; i < S.N; i += step) { pts.push(X(i).toFixed(1) + ',' + Y(S.soc[i]).toFixed(1)); }
+  pts.push(X(S.N).toFixed(1) + ',' + Y(S.soc[S.N - 1]).toFixed(1));
+  s += '<polygon points="' + padL + ',' + Y(0) + ' ' + pts.join(' ') + ' ' + X(S.N).toFixed(1) + ',' + Y(0) + '" fill="url(#' + id + 'f)"/>';
+  s += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="#39c6f4" stroke-opacity=".35" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>';
+  s += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + WK_C.line + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+  /* Éclairs de recharge */
+  for (k = 0; k < S.segs.length; k++) {
+    g = S.segs[k];
+    if (g.ph >= 2 && g.kwh > 1) {
+      var cx = (X(g.a) + X(g.b)) / 2, cy = Y(0) - 12;
+      s += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="8.5" fill="' + (g.ph === 2 ? WK_C.depot : WK_C.pub) + '"/>' + boltPath(cx, cy, 0.78, '#0a1f3d');
+    }
+  }
+  /* Points bas de chaque journée */
+  for (k = 0; k < S.lows.length; k++) {
+    var lw = S.lows[k], lx = X(lw.i), ly = Y(lw.soc), crit = lw.soc < S.margePct - 0.5;
+    var pyy = ly + 7 + 25 > Y(0) - 22 ? Math.min(ly - 32, Y(0) - 50) : ly + 7;
+    s += '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="3.6" fill="' + (crit ? WK_C.reserve : '#0a1f3d') + '" stroke="#ffffff" stroke-width="1.6"/>';
+    s += '<rect x="' + (lx - 22).toFixed(1) + '" y="' + pyy.toFixed(1) + '" width="44" height="25" rx="8" fill="' + (crit ? WK_C.reserve : 'rgba(255,255,255,.94)') + '"/>';
+    s += '<text x="' + lx.toFixed(1) + '" y="' + (pyy + 11).toFixed(1) + '" font-size="9.5" font-weight="800" fill="' + (crit ? '#ffffff' : '#0a1f3d') + '" text-anchor="middle">' + fmt(lw.soc, 0) + ' %</text>';
+    s += '<text x="' + lx.toFixed(1) + '" y="' + (pyy + 21).toFixed(1) + '" font-size="7.6" font-weight="700" fill="' + (crit ? '#ffffff' : '#1a9b6c') + '" text-anchor="middle">≈ ' + fmt(Math.max(0, lw.km), 0) + ' km</text>';
+  }
+  /* Ruban des activités */
+  var by = padT + phh + 18, bh = 8;
+  for (k = 0; k < S.segs.length; k++) {
+    g = S.segs[k];
+    var col = g.ph === 1 ? WK_C.drive : (g.ph === 2 ? WK_C.depot : (g.ph >= 3 ? WK_C.pub : WK_C.idle));
+    s += '<rect x="' + X(g.a).toFixed(1) + '" y="' + by + '" width="' + Math.max(0.6, X(g.b) - X(g.a)).toFixed(1) + '" height="' + bh + '" fill="' + col + '"/>';
+  }
+  s += '<rect x="' + padL + '" y="' + by + '" width="' + pw + '" height="' + bh + '" rx="4" fill="none" stroke="rgba(255,255,255,.18)"/>';
+  s += '</svg>';
+  return s;
+}
+
+/* Cadran 24 h de la journée type (lundi) */
+function dayDial(S, size) {
+  var cxy = size / 2, R = size / 2 - 24, wdt = 17;
+  var s = svgOpen(size, size);
+  var ang = function (min) { return (min / 1440) * 2 * Math.PI - Math.PI / 2; };
+  var arc = function (a0, a1, rr, col, ww) {
+    if (a1 - a0 < 0.6) { return ''; }
+    var A0 = ang(a0), A1 = ang(a1);
+    var x0 = cxy + rr * Math.cos(A0), y0 = cxy + rr * Math.sin(A0), x1 = cxy + rr * Math.cos(A1), y1 = cxy + rr * Math.sin(A1);
+    return '<path d="M' + x0.toFixed(2) + ' ' + y0.toFixed(2) + ' A' + rr + ' ' + rr + ' 0 ' + (a1 - a0 > 720 ? 1 : 0) + ' 1 ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + '" fill="none" stroke="' + col + '" stroke-width="' + ww + '" stroke-linecap="butt"/>';
+  };
+  s += '<circle cx="' + cxy + '" cy="' + cxy + '" r="' + R + '" fill="none" stroke="#e8eef5" stroke-width="' + wdt + '"/>';
+  var i, a = 0, ph = S.ph[0], col;
+  for (i = 1; i <= 288; i++) {
+    if (i === 288 || S.ph[i] !== ph) {
+      col = ph === 1 ? '#00529b' : (ph === 2 ? '#1a9b6c' : (ph >= 3 ? '#e0a82a' : '#dbe3ec'));
+      s += arc(a * WK_STEP, i * WK_STEP, R, col, wdt);
+      a = i; ph = S.ph[i];
+    }
+  }
+  /* Anneau intérieur : niveau de charge */
+  var Ri = R - 19;
+  for (i = 0; i < 288; i += 3) {
+    var p = S.soc[i] / 100, c = p > 0.5 ? '#39c6f4' : (p > S.margePct / 100 ? '#5b8fd1' : '#ff8a65');
+    s += arc(i * WK_STEP, (i + 3) * WK_STEP, Ri, c, 4 + p * 7);
+  }
+  for (i = 0; i < 24; i += 6) {
+    var A = ang(i * 60), tx = cxy + (R + 17) * Math.cos(A), ty = cxy + (R + 17) * Math.sin(A) + 3.5;
+    s += '<text x="' + tx.toFixed(1) + '" y="' + ty.toFixed(1) + '" font-size="9" font-weight="700" fill="#6b7683" text-anchor="middle">' + (i === 0 ? '0 h' : i + ' h') + '</text>';
+  }
+  s += '<text x="' + cxy + '" y="' + (cxy - 12) + '" font-size="9.5" fill="#6b7683" text-anchor="middle" letter-spacing=".5">JOURNÉE TYPE</text>';
+  s += '<text x="' + cxy + '" y="' + (cxy + 9) + '" font-size="20" font-weight="800" fill="#0b2a4a" text-anchor="middle">' + fmt(S.dailyKm, 0) + ' km</text>';
+  s += '<text x="' + cxy + '" y="' + (cxy + 24) + '" font-size="9.5" fill="#6b7683" text-anchor="middle">' + fmt(S.dayKWh, 0) + ' kWh consommés</text>';
+  s += '</svg>';
+  return s;
+}
+
+function weekPanel(S, d, on, compact, G, Wn, r) {
+  var last = S.which === 'last';
+  var h = '<div class="wk">';
+  h += '<div class="wkh"><div><div class="wkt">' + (last ? 'Niveau de charge · dernière semaine, année ' + r.n : 'Niveau de charge de la batterie · semaine 1') + '</div><div class="wks">' + esc(S.name) + ' · ' + S.nDays + ' × ' + fmt(S.dailyKm, 0) + ' km · ' + fmt(S.cap, 0) + ' kWh nets' + (last ? ', santé ' + fmt(S.BS.soh, 0) + ' %' : ', neuve') + ' · borne ' + fmt(S.pDep, 0) + ' kW</div></div>';
+  h += '<div class="wkl"><span><i style="background:' + WK_C.drive + '"></i>Tournée</span><span><i style="background:' + WK_C.depot + '"></i>Recharge dépôt</span>' + (S.pubE > 0 || S.pauseE > 0 ? '<span><i style="background:' + WK_C.pub + '"></i>' + (S.pauseE > 0 && S.pubE <= 0 ? 'Recharge à la pause' : 'Recharge en route') + '</span>' : '') + '<span><i style="background:rgba(255,255,255,.25)"></i>À l’arrêt</span>' + (G ? '<span><i style="background:none;border-top:2px dotted rgba(255,255,255,.8);height:0;width:14px"></i>Semaine 1</span>' : '') + (Wn ? '<span><i style="background:none;border-top:2px dashed #b4bdff;height:0;width:14px"></i>Hiver</span>' : '') + '</div></div>';
+  h += weekChart(S, 682, compact ? 230 : 268, G, Wn);
+  h += '<div class="wkk">';
+  h += '<div><b>' + fmt(S.weekKm, 0) + ' km</b><span>parcourus dans la semaine</span></div>';
+  h += '<div><b>' + fmt(S.weekKWh, 0) + ' kWh</b><span>consommés' + (last ? ' (+' + fmt((S.BS.mult - 1) * 100, 1) + ' % vieillissement)' : '') + '</span></div>';
+  h += '<div><b>' + durTxt(S.depMinAvg) + '</b><span>de recharge au dépôt par jour' + (G ? (Math.abs(S.depMinAvg - G.depMinAvg) < 2.5 ? ' (comme en semaine 1)' : ' (' + (S.depMinAvg >= G.depMinAvg ? '+' : '−') + durTxt(Math.abs(S.depMinAvg - G.depMinAvg)) + ' vs semaine 1)') : '') + '</span></div>';
+  h += '<div class="' + (S.deficit ? 'bad' : '') + '"><b>' + fmt(S.minSoc, 0) + ' % · ' + fmt(Math.max(0, S.minKm), 0) + ' km</b><span>niveau le plus bas (' + WK_DAYS[Math.floor(S.minI / 288)].toLowerCase() + ' ' + hhmm(S.minI * WK_STEP) + ')' + (G ? ', semaine 1 : ' + fmt(G.minSoc, 0) + ' %' : '') + '</span></div>';
+  if (Wn) { h += '<div class="' + (Wn.deficit ? 'bad' : '') + '"><b>' + fmt(Wn.minSoc, 0) + ' %</b><span>au plus bas en hiver (+' + fmt(d.hivPct, 0) + ' % de conso)</span></div>'; }
+  else if (S.pubE > 0) { h += '<div class="pub"><b>' + fmt(S.pubE, 0) + ' kWh</b><span>en borne publique (' + durTxt(S.pubMin) + ')</span></div>'; }
+  else if (S.pauseE > 0) { h += '<div class="pub"><b>' + fmt(S.pauseE / Math.max(1, S.nDays), 0) + ' kWh</b><span>rechargés à chaque pause de 45 min</span></div>'; }
+  h += '</div></div>';
+  return h;
+}
+
+function pageWeek(r, d, on, which) {
+  which = which || 'first';
+  var last = which === 'last';
+  var sims = ['E', 'D'].map(function (X) { return weekSim(d, on, r, X, { which: which }); }).filter(function (x) { return !!x; });
+  if (!sims.length) { return ''; }
+  var ghosts = sims.map(function (T) { return last ? weekSim(d, on, r, T.X, { which: 'first' }) : null; });
+  var winters = sims.map(function (T) { return last && T.BS.winterOn ? weekSim(d, on, r, T.X, { which: 'last', winter: true }) : null; });
+  var two = sims.length > 1;
+  var h = '<div class="page">' + headHtml(d);
+  h += '<div class="st">' + (last ? 'Dernière semaine de l’année ' + r.n + ' : la batterie vieillie, heure par heure' : 'Une semaine avec ' + (two ? 'vos tracteurs électriques' : esc(sims[0].name)) + ' : la batterie heure par heure') + '</div>';
+  h += '<div class="basis" style="margin-top:0">Simulation du lundi 00:00 au dimanche 23:59, en régime établi : départ à ' + hhmm(sims[0].dep) + ', ' + durTxt(sims[0].td) + ' de tournée' + (sims[0].pauseOn ? ' dont une pause rechargée de 45 min' : '') + ', recharge au dépôt ' + (sims[0].hcStart !== null ? 'à partir de 22:00 (heures creuses)' : 'dès le retour') + ' jusqu’à ' + fmt(sims[0].fullPct, 0) + ' %, ralentie en fin de charge. ' + (last ? 'Batterie et consommation de la fin de l’année ' + r.n + ' ; en pointillés, la semaine 1' + (winters[0] ? ' et, en tirets, la même semaine en hiver' : '') + '.' : 'Batterie neuve, consommation réelle moyenne de l’étude.') + '</div>';
+  var i;
+  for (i = 0; i < sims.length; i++) { h += weekPanel(sims[i], d, on, two, ghosts[i], winters[i], r); }
+  var S = sims[0];
+  if (!two && last) {
+    var du1 = durability(r, d, on, S.X);
+    if (du1) { h += durBox(du1, r.V[S.X], d, on); }
+  } else if (!two) {
+    var g, k, items = [];
+    for (k = 0; k < S.segs.length; k++) {
+      g = S.segs[k];
+      if (g.a >= 288) { break; }
+      if (g.b - g.a < 1) { continue; }
+      var lbl = g.ph === 1 ? 'Tournée' : (g.ph === 2 ? 'Recharge au dépôt' : (g.ph === 3 ? 'Recharge en borne publique' : (g.ph === 4 ? 'Pause rechargée' : 'À l’arrêt')));
+      var col = g.ph === 1 ? '#00529b' : (g.ph === 2 ? '#1a9b6c' : (g.ph >= 3 ? '#e0a82a' : '#b9c4d0'));
+      var det = g.ph === 1 ? fmt(S.soc[g.a > 0 ? g.a - 1 : 0], 0) + ' % → ' + fmt(S.soc[Math.min(287, g.b - 1)], 0) + ' %'
+        : (g.ph >= 2 ? '+' + fmt(g.kwh, 0) + ' kWh, ' + fmt(S.soc[Math.min(287, g.b - 1)], 0) + ' % atteints' : 'batterie à ' + fmt(S.soc[g.a], 0) + ' %');
+      items.push('<div class="dli"><i style="background:' + col + '"></i><b>' + hhmm(g.a * WK_STEP) + ' – ' + (g.b >= 288 ? '24:00' : hhmm(g.b * WK_STEP)) + '</b><span>' + lbl + ' · ' + det + '</span></div>');
+    }
+    h += '<div class="dial"><div>' + dayDial(S, 214) + '</div><div class="dtx"><div class="dtt">Le lundi, heure par heure' + (last ? ' (année ' + r.n + ')' : '') + '</div>' + items.join('') + '<div class="dlg">Anneau extérieur : activité · anneau intérieur : niveau de charge (plus il est épais, plus la batterie est pleine).</div></div></div>';
+  }
+  var bad = false, msgs = sims.map(function (T, ix) {
+    var who = two ? '<b>' + esc(T.name) + ' :</b> ' : '';
+    var Wt = winters[ix], Gt = ghosts[ix];
+    if (T.empty) { bad = true; return who + '<b>autonomie insuffisante</b> : la batterie se vide avant la fin de la tournée. Active la recharge en borne publique ou ajuste la tournée.'; }
+    if (T.deficit) { bad = true; return who + '<b>point de vigilance</b> : le niveau descend à ' + fmt(T.minSoc, 0) + ' %, sous la marge de sécurité de ' + fmt(T.margePct, 0) + ' %, pendant la tournée.' + (T.pubOn ? '' : ' La recharge en borne publique est désactivée.'); }
+    if (T.notFull) { bad = true; return who + '<b>point de vigilance</b> : le temps disponible au dépôt ne permet pas toujours de remonter à ' + fmt(T.fullPct, 0) + ' % avant le départ.'; }
+    var m = who + 'la batterie repart chaque matin à ' + fmt(T.depSoc, 0) + ' % et ne descend jamais sous ' + fmt(T.minSoc, 0) + ' % (≈ ' + fmt(Math.max(0, T.minKm), 0) + ' km d’autonomie restante)';
+    if (Gt) { m += ', contre ' + fmt(Gt.minSoc, 0) + ' % en semaine 1'; }
+    m += '. ';
+    if (Wt) {
+      if (Wt.deficit || Wt.empty) { bad = true; m += '<b>En hiver, le niveau tombe à ' + fmt(Wt.minSoc, 0) + ' %, sous la marge de ' + fmt(Wt.margePct, 0) + ' %</b> : recharge d’appoint à prévoir ces jours-là.'; }
+      else { m += 'Même en hiver, il reste ' + fmt(Wt.minSoc, 0) + ' % au plus bas. '; }
+    }
+    if (!Wt || !(Wt.deficit || Wt.empty)) { m += 'La recharge au dépôt suffit' + (T.pubE > 0 ? ', complétée en tournée par la borne publique' : (T.pauseE > 0 ? ', complétée par la recharge à la pause' : '')) + ' : l’exploitation électrique est compatible avec ce planning' + (last ? ' jusqu’à la fin de l’étude.' : '.'); }
+    return m;
+  });
+  h += '<div class="callout ' + (bad ? 'bad' : 'ok') + '" style="margin-top:8px">' + (two ? '' : '<b>Lecture :</b> ') + msgs.join('<br>') + '<br><span style="color:#6b7683">Bandes sombres : la nuit (22 h – 6 h) ; pastilles : niveau le plus bas de chaque journée et kilomètres encore possibles ; ligne orange : marge de sécurité ; éclairs : recharges.</span></div>';
+  h += footHtml(d, '') + '</div>';
+  return h;
+}
+
+/* ===================== PILE DE LA BATTERIE ===================== */
+function chTxt(kw) { return fmt(kw * 1.36, 0) + ' ch'; }
+function hTxt(h) { return durTxt(h * 60); }
+function pileSvg(o) {
+  var Y0 = 36, H = 368, Y1 = Y0 + H, XL = 34, W = 124;
+  var kpx = H / o.brut;
+  var yNB = Y1 - (o.brut - o.net) * kpx;
+  var yAT = Y0 + o.lost * kpx;
+  var hA = yNB - yAT;
+  var yOf = function (pct) { return yNB - Math.max(0, Math.min(100, pct)) / 100 * hA; };
+  var yDep = yOf(o.depPct), yRet = yOf(o.retPct), yM = yOf(o.marge);
+  var id = 'pl' + o.uid;
+  var s = '<svg width="330" height="432" viewBox="0 0 330 432" style="display:block;margin-top:6px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">';
+  s += '<defs><linearGradient id="' + id + 's" x1="0" x2="1"><stop offset="0" stop-color="#0d2c55"/><stop offset=".5" stop-color="#14467f"/><stop offset="1" stop-color="#0d2c55"/></linearGradient>';
+  s += '<linearGradient id="' + id + 'e" x1="0" x2="1"><stop offset="0" stop-color="#1c7fd0"/><stop offset=".5" stop-color="#5fd6ff"/><stop offset="1" stop-color="#1c7fd0"/></linearGradient>';
+  s += '<linearGradient id="' + id + 'd" x1="0" x2="1"><stop offset="0" stop-color="#16a37a"/><stop offset=".5" stop-color="#4ef0b5"/><stop offset="1" stop-color="#16a37a"/></linearGradient>';
+  s += '<pattern id="' + id + 'h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#1a2f4d"/><line x1="0" y1="0" x2="0" y2="7" stroke="#2c4a72" stroke-width="3"/></pattern>';
+  s += '<pattern id="' + id + 'l" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="6" height="6" fill="#2a1d2e"/><line x1="0" y1="0" x2="0" y2="6" stroke="#7a3b3b" stroke-width="2"/></pattern>';
+  s += '<linearGradient id="' + id + 'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#39c6f4" stop-opacity="0"/><stop offset=".5" stop-color="#39c6f4" stop-opacity=".25"/><stop offset="1" stop-color="#39c6f4" stop-opacity="0"/></linearGradient>';
+  s += '<clipPath id="' + id + 'c"><rect x="' + XL + '" y="' + Y0 + '" width="' + W + '" height="' + H + '" rx="7"/></clipPath></defs>';
+  s += '<ellipse cx="96" cy="230" rx="96" ry="200" fill="url(#' + id + 'g)"/>';
+  s += '<rect x="72" y="10" width="48" height="16" rx="4" fill="#8fa9c8"/><rect x="80" y="4" width="32" height="8" rx="3" fill="#b9cbe0"/>';
+  s += '<rect x="22" y="24" width="148" height="392" rx="16" fill="url(#' + id + 's)" stroke="#5fa8e8" stroke-width="2"/>';
+  var R = function (y0, y1, fill, extra) { return y1 - y0 > 0.3 ? '<rect x="' + XL + '" y="' + y0.toFixed(1) + '" width="' + W + '" height="' + (y1 - y0).toFixed(1) + '" fill="' + fill + '"' + (extra || '') + '/>' : ''; };
+  s += '<g clip-path="url(#' + id + 'c)">';
+  s += R(Y0, yAT, 'url(#' + id + 'l)');
+  s += R(yAT, yDep, 'rgba(255,255,255,.07)');
+  s += R(yDep, yNB, 'url(#' + id + 'e)', ' opacity=".95"');
+  s += R(yDep, Math.max(yDep, yRet), 'url(#' + id + 'd)', ' opacity=".92"');
+  s += R(yNB, Y1, 'url(#' + id + 'h)');
+  s += '</g>';
+  if (yAT - Y0 > 1) { s += '<rect x="' + (XL + 1) + '" y="' + (Y0 + 1) + '" width="' + (W - 2) + '" height="' + (yAT - Y0 - 2).toFixed(1) + '" rx="5" fill="none" stroke="#ff8a65" stroke-width="1.2" stroke-dasharray="4,3"/>'; }
+  /* Packs */
+  var j, sepY = [], np = o.packs;
+  if (np > 1 && np <= 10) {
+    s += '<g stroke="#071a33" stroke-width="3">';
+    for (j = 1; j < np; j++) { var ly = Y0 + H * j / np; sepY.push(ly); s += '<line x1="30" x2="162" y1="' + ly.toFixed(1) + '" y2="' + ly.toFixed(1) + '"/>'; }
+    s += '</g>';
+  }
+  if (np >= 1 && np <= 8 && H / np >= 26) {
+    var bounds = [yAT, yDep, yRet, yM, yNB], free = function (yy) { var q; for (q = 0; q < bounds.length; q++) { if (Math.abs(yy - 3 - bounds[q]) < 9) { return false; } } return true; };
+    s += '<g font-size="8.5" font-weight="700" fill="#ffffff" fill-opacity=".9" text-anchor="middle">';
+    for (j = 0; j < np; j++) {
+      var pt = Y0 + H * j / np, pb = Y0 + H * (j + 1) / np, cand = (pt + pb) / 2 + 3, tries = [0, 10, -10, 18, -18, 26, -26], q2, yy2 = null;
+      for (q2 = 0; q2 < tries.length; q2++) { var c2 = cand + tries[q2]; if (c2 - 9 > pt + 2 && c2 + 2 < pb - 2 && free(c2)) { yy2 = c2; break; } }
+      if (yy2 !== null) { s += '<text x="96" y="' + yy2.toFixed(1) + '">PACK ' + (j + 1) + ' · ' + fmt(o.brut / np, 0) + ' kWh</text>'; }
+    }
+    s += '</g>';
+  }
+  /* Repères dans la pile */
+  s += '<line x1="' + XL + '" x2="' + (XL + W) + '" y1="' + yRet.toFixed(1) + '" y2="' + yRet.toFixed(1) + '" stroke="#ffffff" stroke-width="2" stroke-dasharray="3,2"/>';
+  s += '<line x1="' + XL + '" x2="' + (XL + W) + '" y1="' + yM.toFixed(1) + '" y2="' + yM.toFixed(1) + '" stroke="#ff8a65" stroke-width="2" stroke-dasharray="5,3"/>';
+  /* Éclair sur la séparation la plus proche du centre de la tournée */
+  if (yRet - yDep >= 40) {
+    var cy = (yDep + yRet) / 2, best = cy, bd = 1e9;
+    for (j = 0; j < sepY.length; j++) { if (sepY[j] > yDep + 18 && sepY[j] < yRet - 18 && Math.abs(sepY[j] - cy) < bd) { bd = Math.abs(sepY[j] - cy); best = sepY[j]; } }
+    s += '<circle cx="96" cy="' + best.toFixed(1) + '" r="17" fill="#071a33" fill-opacity=".55"/>' + boltPath(96, best, 1.6, '#ffffff');
+  }
+  /* Étiquettes à droite, sans chevauchement */
+  var L = o.labels.slice().sort(function (a, b) { return a.y - b.y; });
+  var k, prev = 6, lh = 12;
+  for (k = 0; k < L.length; k++) { L[k].h = L[k].t.length * lh; L[k].top = Math.max(L[k].y - L[k].h / 2, prev + 4); prev = L[k].top + L[k].h; }
+  var over = prev - 426;
+  if (over > 0) { for (k = L.length - 1; k >= 0; k--) { L[k].top -= over; if (k > 0) { var gap = L[k].top - (L[k - 1].top + L[k - 1].h) - 4; over = gap < 0 ? -gap : 0; if (!over) { break; } } } }
+  s += '<g font-size="9.5" fill="#ffffff">';
+  for (k = 0; k < L.length; k++) {
+    var a = L[k], tc = a.top + a.h / 2;
+    s += '<polyline points="170,' + a.y.toFixed(1) + ' 178,' + a.y.toFixed(1) + ' 184,' + tc.toFixed(1) + ' 187,' + tc.toFixed(1) + '" fill="none" stroke="' + a.lc + '" stroke-width="' + (a.lw || 1.5) + '"' + (a.dash ? ' stroke-dasharray="' + a.dash + '"' : '') + '/>';
+    for (j = 0; j < a.t.length; j++) {
+      s += '<text x="190" y="' + (a.top + j * lh + 9).toFixed(1) + '"' + (j === 0 ? ' font-weight="800"' : ' fill-opacity=".78"') + (j === 0 && a.c ? ' fill="' + a.c + '"' : (j > 0 && a.c2 ? ' fill="' + a.c2 + '" fill-opacity="1"' : '')) + '>' + a.t[j] + '</text>';
+    }
+  }
+  s += '</g>';
+  /* Accolade de la capacité nette */
+  var bt = o.which === 'last' ? yAT : Y0;
+  s += '<path d="M19 ' + bt.toFixed(1) + ' L14 ' + bt.toFixed(1) + ' L14 ' + yNB.toFixed(1) + ' L19 ' + yNB.toFixed(1) + '" fill="none" stroke="#39c6f4" stroke-width="2"/>';
+  var my = (bt + yNB) / 2;
+  s += '<text x="9" y="' + my.toFixed(1) + '" font-size="10" font-weight="800" fill="#8fd3ff" text-anchor="middle" transform="rotate(-90 9 ' + my.toFixed(1) + ')">' + o.bracket + '</text>';
+  s += '<text x="96" y="429" font-size="8.5" fill="#ffffff" fill-opacity=".6" text-anchor="middle">Hauteurs proportionnelles aux kWh</text>';
+  s += '</svg>';
+  return s;
+}
+
+function pilePanel(r, d, on, X, which, S, K) {
+  var ev = r.V[X], bat = ev.bat, sp = bat.spec, BS = S.BS;
+  var last = which === 'last';
+  var lost = bat.cap - BS.cap;
+  var depPct = Math.min(S.depSoc, startPct(d));
+  var used = K.tourE - K.tourPauseE;
+  var retPct = depPct - used / BS.cap * 100;
+  var retK = Math.max(0, retPct) * BS.cap / 100;
+  var mK = K.marge * BS.cap / 100;
+  var kmAfter = (retPct - K.marge) / 100 * BS.cap / K.consKm;
+  var nm = esc(ev.name);
+  var labels = [];
+  var Y0 = 36, H = 368, kpx = H / sp.brut, yNB = Y0 + H - (sp.brut - sp.net) * kpx, yAT = Y0 + lost * kpx, hA = yNB - yAT;
+  var yOf = function (p) { return yNB - Math.max(0, Math.min(100, p)) / 100 * hA; };
+  if (lost > 0.5) { labels.push({ y: (Y0 + yAT) / 2, t: ['Capacité perdue', '−' + fmt(lost, 0) + ' kWh en ' + ans(r.n)], c: '#ffb199', lc: '#ff8a65' }); }
+  if (yOf(depPct) - yAT > 6) { labels.push({ y: (yAT + yOf(depPct)) / 2, t: ['Non rechargé', fmt(100 - depPct, 0) + ' % au départ'], lc: 'rgba(255,255,255,.5)' }); }
+  labels.push({ y: (yOf(depPct) + yOf(retPct)) / 2, t: ['Tournée du jour', fmt(used, 0) + ' kWh · ' + fmt(K.tour, 0) + ' km', fmt(used / BS.cap * 100, 0) + ' % du net' + (K.tourPauseE > 0 ? ' (pause déduite)' : '')], c: '#4ef0b5', lc: '#4ef0b5', lw: 2 });
+  if (retPct >= 0 && K.okBat) { labels.push({ y: yOf(retPct), t: ['Retour au dépôt : ' + fmt(retPct, 0) + ' %', fmt(retK, 0) + ' kWh · ≈ ' + fmt(retK / K.consKm, 0) + ' km'], lc: '#ffffff', lw: 2, dash: '3,2' }); }
+  else { labels.push({ y: yOf(0), t: ['Batterie insuffisante', fmt(K.enRoute, 0) + ' kWh à recharger en route'], c: '#ff8a65', lc: '#ff8a65', lw: 2 }); }
+  labels.push({ y: yOf(K.marge), t: ['Marge de sécurité ' + fmt(K.marge, 0) + ' %', kmAfter >= 0 ? '+' + fmt(kmAfter, 0) + ' km avant la marge' : 'manque ' + fmt(-kmAfter, 0) + ' km'], c: '#ffb199', c2: kmAfter >= 0 ? '#4ef0b5' : '#ff8a65', lc: '#ff8a65', lw: 2, dash: '5,3' });
+  labels.push({ y: (yNB + Y0 + H) / 2, t: ['Réserve non utilisable', fmt(100 - sp.dod, 0) + ' % · ' + fmt(sp.brut - sp.net, 0) + ' kWh'], lc: '#8fa9c8', lw: 1 });
+  var svg = pileSvg({ uid: X + which, brut: sp.brut, net: sp.net, lost: Math.max(0, lost), packs: sp.packs, depPct: depPct, retPct: retPct, marge: K.marge, which: which, labels: labels,
+    bracket: last ? 'NET ' + fmt(BS.cap, 0) + ' kWh · SANTÉ ' + fmt(BS.soh, 0) + ' %' : 'NET ' + fmt(sp.net, 0) + ' kWh · ' + fmt(sp.dod, 0) + ' %' });
+  var h = '<div class="pl"><div class="pll">';
+  h += '<div class="plhd">Pile de batteries LFP</div>';
+  h += '<div class="plsub">' + (sp.packs > 0 ? sp.packs + ' packs · ' : '') + fmt(sp.brut, 0) + ' kWh bruts · ' + fmt(BS.cap, 0) + ' kWh nets' + (last ? ' en année ' + r.n : '') + '</div>';
+  h += svg + '</div><div class="plr">';
+  h += '<div><div class="plhd">' + nm + (sp.motNom ? ' · ' + esc(sp.motNom) : '') + '</div><div class="plsub">' + (last ? 'Dernière semaine de l’année ' + r.n + ' · batterie à ' + fmt(BS.soh, 0) + ' % de santé' : 'Semaine 1 · batterie neuve') + '</div></div>';
+  h += '<div class="plbig"><div><b>' + fmt(sp.brut, 0) + ' kWh</b><span>capacité brute installée</span></div>';
+  if (last) { h += '<div class="n"><b>' + fmt(BS.cap, 0) + ' kWh</b><span>nets en année ' + r.n + ' · ' + fmt(sp.net, 0) + ' × ' + fmt(BS.soh, 0) + ' %</span></div></div>'; }
+  else { h += '<div class="n"><b>' + fmt(sp.net, 0) + ' kWh</b><span>capacité nette · brut × ' + fmt(sp.dod, 0) + ' %</span></div></div>'; }
+  h += '<div class="plspec"><h5>Brut et net</h5>';
+  h += '<div class="plbl">Brut ' + fmt(sp.brut, 0) + ' kWh</div><div class="plbar"><i style="width:100%;background:linear-gradient(90deg,#3b5e8c,#6f8fb8)"></i></div>';
+  h += '<div class="plbl">Net neuf ' + fmt(sp.net, 0) + ' kWh</div><div class="plbar"><i style="width:' + fmt(sp.dod, 1).replace(',', '.') + '%"></i></div>';
+  if (last) { h += '<div class="plbl">Net en année ' + r.n + ' : ' + fmt(BS.cap, 0) + ' kWh</div><div class="plbar"><i style="width:' + (BS.cap / sp.brut * 100).toFixed(1) + '%;background:linear-gradient(90deg,#16a37a,#4ef0b5)"></i></div>'; }
+  h += '<div class="plnote">' + (last ? 'Le vieillissement retire ' + fmt(lost, 0) + ' kWh à la capacité nette ; les ' + fmt(sp.brut - sp.net, 0) + ' kWh de réserve restent intouchés.' : 'Les ' + fmt(sp.brut - sp.net, 0) + ' kWh d’écart ne sont jamais utilisés : ils allongent la durée de vie des cellules LFP.') + '</div></div>';
+  var pUse = Math.min(d.bornePuis, sp.dc > 0 ? sp.dc : d.bornePuis), p100 = vehAccept(sp, 100);
+  h += '<div class="plspec"><h5>Motorisation et recharge</h5>';
+  if (sp.motKw > 0) { h += '<div class="plrow"><span>Moteur électrique</span><b>' + fmt(sp.motKw, 0) + ' kW · ' + chTxt(sp.motKw) + '</b></div>'; }
+  if (sp.dc > 0) { h += '<div class="plrow"><span>Recharge maximale acceptée (DC)</span><b>' + fmt(sp.dc, 0) + ' kW</b></div>'; }
+  if (sp.ac > 0) { h += '<div class="plrow"><span>Recharge maximale acceptée (AC)</span><b>' + fmt(sp.ac, 0) + ' kW</b></div>'; }
+  if (taperOn(sp)) { h += '<div class="plrow"><span>Fin de charge ralentie</span><b>dès ' + fmt(sp.ts, 0) + ' % · ' + fmt(sp.tp, 0) + ' % à 100 %</b></div>'; }
+  h += '<div class="plrow"><span>Borne du dépôt</span><b>' + fmt(d.bornePuis, 0) + ' kW</b></div>';
+  h += '<div class="plrow"><span>Puissance réellement utilisée</span><b style="color:#4ef0b5">' + fmt(pUse, 0) + ' kW' + (p100 < pUse - 0.5 ? ' → ' + fmt(p100, 0) + ' kW à 100 %' : '') + '</b></div>';
+  h += '</div>';
+  var full = sp.dc > 0 ? chargeHours(sp, BS.cap, K.marge, K.start, sp.dc) : 0;
+  h += '<div class="plspec"><h5>' + (last ? 'Ce que ça donne en année ' + r.n : 'Ce que ça donne au quotidien') + '</h5>';
+  h += '<div class="plrow"><span>Autonomie totale, 100 → 0 % (' + fmt(K.consKm * 100, 1) + ' kWh/100 km)</span><b>' + fmt(K.range, 0) + ' km</b></div>';
+  h += '<div class="plrow"><span>Km possibles par jour (' + fmt(K.start, 0) + ' → ' + fmt(K.marge, 0) + ' %' + (K.pauseCap > 0 ? ', pause comprise' : '') + (K.limit === 'conduite' ? ', limite conduite' : '') + ')</span><b style="color:#4ef0b5">' + fmt(K.kmMax, 0) + ' km</b></div>';
+  h += '<div class="plrow"><span>Recharge de la tournée au dépôt (' + fmt(K.depP, 0) + ' kW)</span><b>' + hTxt(K.rechH) + '</b></div>';
+  if (full > 0) { h += '<div class="plrow"><span>Recharge ' + fmt(K.marge, 0) + ' → ' + fmt(K.start, 0) + ' % sur une borne de ' + fmt(sp.dc, 0) + ' kW</span><b>' + hTxt(full) + '</b></div>'; }
+  if (last) {
+    var resOn = on.revente && (X === 'E' ? r.ownE : r.ownD);
+    h += '<div class="plrow"><span>' + (resOn ? 'À la revente (fin année ' + r.n + ')' : 'En fin d’étude (année ' + r.n + ')') + '</span><b>' + fmt(BS.soh, 0) + ' % · ' + fmt(BS.cap, 0) + ' kWh nets</b></div>';
+  } else {
+    h += '<div class="plrow"><span>Santé après ' + ans(r.n) + ' (−' + fmt(bat.degYr, 1) + ' %/an)</span><b>' + fmt(bat.soh[r.n], 0) + ' % · ' + fmt(bat.cap * bat.soh[r.n] / 100, 0) + ' kWh nets</b></div>';
+  }
+  h += '</div></div></div>';
+  return h;
+}
+
+/* Encadré : kilomètres possibles par jour */
+function kmBox(K, d, title, compact) {
+  var h = '<div class="kmb"><div class="kmt">' + title + '</div><div class="kmg">';
+  h += '<div' + (K.limit === 'batterie' ? ' class="win"' : '') + '><i>Batterie</i><b>' + fmt(K.kmBat, 0) + ' km</b><span>de ' + fmt(K.start, 0) + ' % au départ à ' + fmt(K.marge, 0) + ' % au retour, à ' + fmt(K.consKm * 100, 1) + ' kWh/100 km</span></div>';
+  if (K.pauseOn) { h += '<div><i>Pause rechargée</i><b>+' + fmt(K.pauseKm, 0) + ' km</b><span>' + fmt(K.pauseE, 0) + ' kWh en 45 min sur ' + fmt(d.pausePuis, 0) + ' kW, après 4 h 30 de conduite</span></div>'; }
+  if (K.kmLegal !== null) { h += '<div' + (K.limit === 'conduite' ? ' class="win"' : '') + '><i>Temps de conduite</i><b>' + fmt(K.kmLegal, 0) + ' km</b><span>' + fmt(K.legalH, 0) + ' h de conduite au plus × ' + fmt(K.v, 0) + ' km/h de moyenne</span></div>'; }
+  else { h += '<div class="dim"><i>Temps de conduite</i><b>–</b><span>vitesse moyenne à renseigner</span></div>'; }
+  h += '<div class="' + (K.kmMax >= K.tour ? '' : 'dim') + '"><i>Tournée prévue</i><b>' + fmt(K.tour, 0) + ' km</b><span>' + (K.driveH !== null ? '≈ ' + hTxt(K.driveH) + ' de conduite' : 'par jour de tournée') + '</span></div>';
+  h += '</div>';
+  /* Jauge */
+  if (compact) {
+    h += '<div class="kmm">' + (K.kmMax >= K.tour ? '<b class="ok">Tournée faisable</b> avec ' + fmt(K.kmMax - K.tour, 0) + ' km de réserve avant la marge de sécurité de ' + fmt(K.marge, 0) + ' %.' : '<b class="ko">Tournée trop longue</b> : il manque ' + fmt(K.tour - K.kmMax, 0) + ' km pour rentrer avec la marge de ' + fmt(K.marge, 0) + ' %.') + ' Limite retenue : ' + (K.limit === 'conduite' ? 'le temps de conduite' : 'la batterie') + '.</div></div>';
+    return h;
+  }
+  var w = 678, hh = 47, max = Math.max(K.kmBatAll, K.kmLegal || 0, K.tour) * 1.06, x = function (v) { return 4 + Math.max(0, v) / max * (w - 8); };
+  var g = svgOpen(w, hh);
+  g += '<rect x="4" y="16" width="' + (w - 8) + '" height="14" rx="7" fill="#e3eaf2"/>';
+  g += '<rect x="4" y="16" width="' + (x(K.kmMax) - 4).toFixed(1) + '" height="14" rx="7" fill="#9fd6f5"/>';
+  g += '<rect x="4" y="16" width="' + (x(Math.min(K.tour, K.kmMax)) - 4).toFixed(1) + '" height="14" rx="7" fill="#1a9b6c"/>';
+  if (K.tour > K.kmMax) { g += '<rect x="' + x(K.kmMax).toFixed(1) + '" y="16" width="' + (x(K.tour) - x(K.kmMax)).toFixed(1) + '" height="14" fill="#e0642a"/>'; }
+  var tick = function (v, lbl, col, up) {
+    var xx = x(v), anc = xx > w - 90 ? 'end' : (xx < 90 ? 'start' : 'middle');
+    return '<line x1="' + xx.toFixed(1) + '" x2="' + xx.toFixed(1) + '" y1="' + (up ? 11 : 16) + '" y2="' + (up ? 30 : 35) + '" stroke="' + col + '" stroke-width="2"/><text x="' + xx.toFixed(1) + '" y="' + (up ? 9 : 45) + '" font-size="9.5" font-weight="700" fill="' + col + '" text-anchor="' + anc + '">' + lbl + '</text>';
+  };
+  g += tick(K.tour, 'Tournée ' + fmt(K.tour, 0) + ' km', '#0d6b49', true);
+  g += tick(K.kmMax, 'Maximum ' + fmt(K.kmMax, 0) + ' km', '#00529b', false);
+  g += '</svg>';
+  h += '<div class="kmv">' + g + '</div>';
+  var ok = K.kmMax >= K.tour;
+  h += '<div class="kmm">' + (ok ? '<b class="ok">Tournée faisable</b> avec ' + fmt(K.kmMax - K.tour, 0) + ' km de réserve avant la marge de sécurité de ' + fmt(K.marge, 0) + ' %' + (K.okLegal ? '' : ' mais <b class="ko">au-delà du temps de conduite</b>') + '.'
+    : '<b class="ko">Tournée trop longue</b> : il manque ' + fmt(K.tour - K.kmMax, 0) + ' km pour rentrer avec la marge de ' + fmt(K.marge, 0) + ' %' + (K.limit === 'conduite' ? ' (limite du temps de conduite)' : ' : recharge en route à prévoir') + '.') + ' Limite retenue : ' + (K.limit === 'conduite' ? 'le temps de conduite' : 'la batterie') + '.</div>';
+  h += '</div>';
+  return h;
+}
+
+/* Encadré : niveau au retour, année par année */
+function durBox(du, ev, d, on, small) {
+  var rows = du.rows, n = rows.length, w = 678, hh = small ? 100 : 128, padL = 34, padB = 20, padT = 14;
+  var mx = 0, k;
+  for (k = 0; k < n; k++) { mx = Math.max(mx, rows[k].ret, rows[k].retW || 0); }
+  var top = Math.max(20, Math.ceil((mx + 4) / 10) * 10);
+  var ph = hh - padT - padB, pw = w - padL - 6, bw = pw / n;
+  var Y = function (p) { return padT + (1 - Math.max(0, Math.min(top, p)) / top) * ph; };
+  var g = svgOpen(w, hh);
+  for (k = 0; k <= top; k += 10) { g += '<line x1="' + padL + '" x2="' + (w - 6) + '" y1="' + Y(k).toFixed(1) + '" y2="' + Y(k).toFixed(1) + '" stroke="#e3e9f0"/><text x="' + (padL - 5) + '" y="' + (Y(k) + 3).toFixed(1) + '" font-size="8.5" fill="#8a94a1" text-anchor="end">' + k + ' %</text>'; }
+  for (k = 0; k < n; k++) {
+    var R0 = rows[k], cx = padL + bw * (k + 0.5), wd = Math.min(26, bw * 0.34), bad = R0.ret < du.marge - 0.05;
+    var xA = du.winterOn ? cx - wd - 1 : cx - wd / 2;
+    g += '<rect x="' + xA.toFixed(1) + '" y="' + Y(R0.ret).toFixed(1) + '" width="' + wd.toFixed(1) + '" height="' + (Y(0) - Y(R0.ret)).toFixed(1) + '" rx="3" fill="' + (bad ? '#e0642a' : '#1c7fd0') + '"/>';
+    g += '<text x="' + (xA + wd / 2).toFixed(1) + '" y="' + (Y(R0.ret) - 3).toFixed(1) + '" font-size="8.5" font-weight="800" fill="' + (bad ? '#c2410c' : '#0b2a4a') + '" text-anchor="middle">' + fmt(R0.ret, 0) + '</text>';
+    if (du.winterOn && R0.retW !== null) {
+      var badW = R0.retW < du.marge - 0.05;
+      g += '<rect x="' + (cx + 1).toFixed(1) + '" y="' + Y(R0.retW).toFixed(1) + '" width="' + wd.toFixed(1) + '" height="' + (Y(0) - Y(Math.max(0, R0.retW))).toFixed(1) + '" rx="3" fill="' + (badW ? '#e0642a' : '#8b9cf7') + '"/>';
+      g += '<text x="' + (cx + 1 + wd / 2).toFixed(1) + '" y="' + (Y(R0.retW) - 3).toFixed(1) + '" font-size="8.5" font-weight="800" fill="' + (badW ? '#c2410c' : '#4c4fb0') + '" text-anchor="middle">' + fmt(R0.retW, 0) + '</text>';
+    }
+    g += '<text x="' + cx.toFixed(1) + '" y="' + (hh - 7) + '" font-size="9" font-weight="700" fill="#3a4552" text-anchor="middle">' + (R0.y === 0 ? 'Neuve' : 'Année ' + R0.y) + (R0.repl ? ' ↻' : '') + '</text>';
+  }
+  var ym = Y(du.marge);
+  g += '<line x1="' + padL + '" x2="' + (w - 6) + '" y1="' + ym.toFixed(1) + '" y2="' + ym.toFixed(1) + '" stroke="#e0642a" stroke-width="1.6" stroke-dasharray="5,3"/>';
+  g += '</svg>';
+  var h = '<div class="kmb"><div class="kmt" style="display:flex;justify-content:space-between;gap:10px"><span>Niveau de la batterie au retour au dépôt, année après année</span><span style="font-size:9.5px;font-weight:600;color:#5d6876;display:inline-flex;gap:10px;align-items:center"><span><i style="display:inline-block;width:10px;height:8px;border-radius:2px;background:#1c7fd0;margin-right:4px"></i>moyenne de l’année</span>' + (du.winterOn ? '<span><i style="display:inline-block;width:10px;height:8px;border-radius:2px;background:#8b9cf7;margin-right:4px"></i>hiver</span>' : '') + '<span><i style="display:inline-block;width:14px;height:0;border-top:2px dashed #e0642a;margin-right:4px;vertical-align:middle"></i>marge ' + fmt(du.marge, 0) + ' %</span></span></div>' + g;
+  var yTxt = function (y) { return y === 0 ? 'dès la mise en service' : 'à partir de l’année ' + y; };
+  var msg, pub = !!(on && on.recharge), fix = pub ? 'la recharge publique prévue prend le relais ces jours-là' : 'recharge d’appoint à prévoir ces jours-là';
+  if (du.failAvg === null && du.failWin === null) { msg = '<b class="ok">La tournée de ' + fmt(du.tour, 0) + ' km reste faisable jusqu’à la fin de l’année ' + (n - 1) + '</b>, en gardant la marge de ' + fmt(du.marge, 0) + ' %' + (du.winterOn ? ', hiver compris' : '') + '.'; }
+  else if (du.failAvg === null) { msg = 'En moyenne, la tournée de ' + fmt(du.tour, 0) + ' km passe toute l’étude ; <b class="ko">en hiver, la marge de ' + fmt(du.marge, 0) + ' % n’est plus tenue ' + yTxt(du.failWin) + '</b> : ' + fix + '.'; }
+  else { var yt = yTxt(du.failAvg); msg = '<b class="ko">' + yt.charAt(0).toUpperCase() + yt.slice(1) + ', la tournée de ' + fmt(du.tour, 0) + ' km ne tient plus avec la marge de ' + fmt(du.marge, 0) + ' %</b>' + (du.failWin !== null && du.failWin < du.failAvg ? ' (' + yTxt(du.failWin) + ' en hiver)' : '') + ' : ' + (pub ? 'la recharge publique prévue prend le relais.' : 'recharge en route ou tournée raccourcie à prévoir.'); }
+  h += '<div class="kmm">' + msg + ' Départ à ' + fmt(startPct(d), 0) + ' % du net de l’année, consommation majorée par le vieillissement' + (d.pauseCharge === 'oui' ? ', recharge à la pause comprise' : '') + ', sans recharge publique.</div></div>';
+  return h;
+}
+
+function pagePile(r, d, on, X, which) {
+  var ev = r.V[X];
+  var S = weekSim(d, on, r, X, { which: which });
+  if (!S) { return ''; }
+  var K = S.K;
+  if (!K) { return ''; }
+  var last = which === 'last';
+  var h = '<div class="page">' + headHtml(d);
+  h += '<div class="st">' + (last ? 'La batterie en fin d’étude : dernière semaine de l’année ' + r.n : 'La batterie : capacité brute, capacité nette et recharge') + (cmpOf(d) === 'ee' ? ' · ' + esc(ev.name) : '') + '</div>';
+  h += '<div class="basis" style="margin-top:0">' + (last ? 'Même tournée qu’en semaine 1, batterie vieillie : santé ' + fmt(S.BS.soh, 0) + ' %, ' + fmt(S.cap, 0) + ' kWh nets, consommation +' + fmt((S.BS.mult - 1) * 100, 1) + ' %.' : 'Capacité nette = brute × part utilisable (' + fmt(ev.bat.spec.dod, 0) + ' %). Tournée de ' + fmt(K.tour, 0) + ' km à la consommation réelle de l’étude ; recharge à la puissance la plus basse entre borne et véhicule, ralentie en fin de charge.') + '</div>';
+  h += pilePanel(r, d, on, X, which, S, K);
+  var ee = cmpOf(d) === 'ee';
+  h += kmBox(K, d, last ? 'Combien de kilomètres par jour en année ' + r.n + ' ?' : 'Combien de kilomètres par jour ?', last && ee);
+  if (last && ee) {
+    var du = durability(r, d, on, X);
+    if (du) { h += durBox(du, ev, d, on, true); }
+  } else if (!last) {
+    h += '<div class="plfoot"><b>Lecture :</b> vert = énergie de la tournée, bleu = ce qui reste au retour, orange = marge de sécurité pour l’imprévu (bouchon, surconsommation, tournée en plus), hachures = réserve jamais utilisée par le système de gestion.</div>';
+  }
+  h += footHtml(d, '') + '</div>';
+  return h;
+}
+
+/* Page de synthèse : l'essentiel en un coup d'œil */
+function pageSynth(r, d, on) {
+  var a = esc(N1(d)), b = esc(N2(d)), sav = r.tcoSav, good = sav >= 0;
+  var resOn = on.revente && (r.ownE || r.ownD);
+  var h = '<div class="page">' + headHtml(d);
+  h += '<div class="st" style="margin-top:0">L’essentiel en un coup d’œil</div>';
+  var mx = Math.max(r.tcoE, r.tcoD, 1);
+  h += '<div class="syh"><div class="v"><i>' + (good ? 'Économie' : 'Surcoût') + ' sur ' + ans(r.n) + '</i><b>' + eur(Math.abs(sav)) + '</b><span>' + (good ? a + ' coûte moins cher que ' + b : a + ' coûte plus cher que ' + b) + ', soit ' + eur(Math.abs(sav) / r.n) + ' par an et ' + fmt(Math.abs(sav) / Math.max(1, r.tcoD) * 100, 0) + ' % du coût total de ' + b + '.</span></div>';
+  h += '<div class="bars"><div style="font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:#8fd3ff;font-weight:800">Coût total de possession par camion · HT</div>';
+  h += '<div class="syb"><div><span>' + a + '</span><b>' + eur(r.tcoE) + '</b></div><p><i style="width:' + Math.max(2, r.tcoE / mx * 100).toFixed(1) + '%;background:linear-gradient(90deg,#16a37a,#4ef0b5)"></i></p></div>';
+  h += '<div class="syb"><div><span>' + b + '</span><b>' + eur(r.tcoD) + '</b></div><p><i style="width:' + Math.max(2, r.tcoD / mx * 100).toFixed(1) + '%;background:linear-gradient(90deg,#3b5e8c,#8fa9c8)"></i></p></div>';
+  h += '<div style="font-size:9.5px;color:rgba(255,255,255,.65)">Tous postes retenus' + (resOn ? ', valeur de revente déduite' : '') + ((r.A.E.aideT + r.A.D.aideT) > 0 || r.aideBShare > 0 ? ', aides déduites' : '') + '.</div></div></div>';
+  /* Indicateurs */
+  var aid = r.A.E.aideT + r.A.D.aideT + (r.V.E.type === 'elec' ? r.aideBShare : 0) + (r.V.D.type === 'elec' ? r.aideBShare : 0);
+  h += '<div class="syk">';
+  h += '<div><i>Équilibre économique</i><b>' + beMain(r) + '</b><span>' + (resOn && beWithRes(r) !== beMain(r) ? 'avec revente : ' + beWithRes(r) : 'surcoût de départ rattrapé') + '</span></div>';
+  h += '<div' + (r.opSav >= 0 ? ' class="ok"' : ' class="ko"') + '><i>Exploitation</i><b>' + eur(Math.abs(r.opSav)) + '</b><span>' + (r.opSav >= 0 ? 'de moins' : 'de plus') + ' par an à l’usage (hors acquisition)</span></div>';
+  h += '<div><i>Aides</i><b>' + (aid > 0 ? eur(aid) : '–') + '</b><span>' + (aid > 0 ? 'versées le ' + AIDE_MOIS + 'e mois, déduites' : 'aucune aide retenue') + '</span></div>';
+  h += '<div' + (on.co2 && r.co2Year > 0 ? ' class="ok"' : '') + '><i>CO₂ évité sur ' + ans(r.n) + '</i><b>' + (on.co2 ? fmtT(r.co2Total) + ' t' : '–') + '</b><span>' + (on.co2 ? fmtT(r.co2Year) + ' t par an' : 'poste non pris en compte') + '</span></div>';
+  h += '</div>';
+  /* D'où vient l'écart */
+  var parts = [['Achat', 'achat'], ['Loyers', 'loyer'], ['Borne', 'borne'], ['Énergie', 'ene'], ['Entretien', 'ent'], ['AdBlue', 'adb'], ['Assurance et taxes', 'ass'], ['Intérêts', 'fin'], ['Batterie (remplacement)', 'batt'], ['Temps chauffeur', 'chauf'], ['Taxes à venir', 'taxes']].map(function (q) { return [q[0], r.cD[q[1]] - r.cE[q[1]]]; });
+  parts.push(['Aides', r.cE.aides - r.cD.aides], ['Avantages fiscaux', r.cE.recettes - r.cD.recettes], ['Revente', (r.ownE ? r.resE : 0) - (r.ownD ? r.resD : 0)]);
+  parts = parts.filter(function (q) { return Math.abs(q[1]) >= 1; }).sort(function (x, y) { return Math.abs(y[1]) - Math.abs(x[1]); }).slice(0, 8);
+  if (parts.length) {
+    var pm = 1, q;
+    for (q = 0; q < parts.length; q++) { pm = Math.max(pm, Math.abs(parts[q][1])); }
+    var W = 706, rh = 21, cx0 = 150 + (W - 150) / 2, half = (W - 150) / 2 - 70;
+    var g = svgOpen(W, parts.length * rh + 6);
+    g += '<line x1="' + cx0 + '" x2="' + cx0 + '" y1="0" y2="' + (parts.length * rh + 6) + '" stroke="#b9c4d0"/>';
+    for (q = 0; q < parts.length; q++) {
+      var v = parts[q][1], y0 = q * rh + 3, bw = Math.abs(v) / pm * half, pos = v >= 0;
+      g += '<text x="0" y="' + (y0 + 13) + '" font-size="11" fill="#3a4552">' + parts[q][0] + '</text>';
+      g += '<rect x="' + (pos ? cx0 : cx0 - bw).toFixed(1) + '" y="' + (y0 + 2) + '" width="' + Math.max(1.5, bw).toFixed(1) + '" height="' + (rh - 6) + '" rx="4" fill="' + (pos ? '#1a9b6c' : '#e0642a') + '"/>';
+      g += '<text x="' + (pos ? cx0 + bw + 5 : cx0 - bw - 5).toFixed(1) + '" y="' + (y0 + 13) + '" font-size="10.5" font-weight="800" fill="' + (pos ? '#0d6b49' : '#c2410c') + '" text-anchor="' + (pos ? 'start' : 'end') + '">' + (pos ? '+' : '−') + eur(Math.abs(v)) + '</text>';
+    }
+    g += '</svg>';
+    h += '<div class="st">D’où vient l’écart sur ' + ans(r.n) + '</div><div style="font-size:10.5px;color:#6b7683;margin:-2px 0 4px"><span style="color:#0d6b49;font-weight:700">vert</span> : en faveur de ' + a + ' · <span style="color:#c2410c;font-weight:700">orange</span> : en faveur de ' + b + '</div>' + g;
+  }
+  /* Trésorerie */
+  var T = null;
+  try { T = monthlyCash(d, on, r); } catch (e) { T = null; }
+  if (T) {
+    h += '<div class="st">Trésorerie</div><div class="callout ' + (T.worst >= 0 ? 'ok' : '') + '" style="margin-top:4px">';
+    if (T.worst >= 0) { h += a + ' demande moins de trésorerie que ' + b + ' <b>tous les mois</b> de l’étude.'; }
+    else { h += 'Avance maximale à prévoir avec ' + a + ' : <b>' + eur(-T.worst) + '</b> au mois ' + T.worstM + '. ' + (T.cross ? a + ' redevient plus avantageux en trésorerie <b>à partir du mois ' + T.cross + '</b>.' : a + ' ne rattrape pas ' + b + ' en trésorerie sur la période.'); }
+    h += ' Écart cumulé en fin d’étude : <b>' + eur(T.gap[T.M]) + '</b> (détail mois par mois en annexe).</div>';
+  }
+  /* Batterie */
+  var Xs = on.batterie ? ['E', 'D'].filter(function (X) { return r.V[X].type === 'elec' && r.V[X].bat && r.V[X].bat.cap > 0 && r.V[X].bat.dailyKm > 0; }) : [];
+  Xs.forEach(function (X) {
+    var ev = r.V[X], bat = ev.bat;
+    var S1 = weekSim(d, on, r, X, { which: 'first' }), SL = weekSim(d, on, r, X, { which: 'last' });
+    if (!S1 || !SL) { return; }
+    var K1 = bat.K[0], KL = bat.K[r.n], du = durability(r, d, on, X);
+    if (!K1 || !KL) { return; }
+    var okAll = du && du.failAvg === null && du.failWin === null && !S1.notFull && !SL.notFull;
+    h += '<div class="st">Autonomie et recharge' + (Xs.length > 1 || cmpOf(d) === 'ee' ? ' · ' + esc(ev.name) : '') + '</div>';
+    h += '<div class="syk">';
+    h += '<div class="' + (KL.kmMax >= KL.tour ? 'ok' : 'ko') + '"><i>Km possibles par jour</i><b>' + fmt(K1.kmMax, 0) + ' → ' + fmt(KL.kmMax, 0) + ' km</b><span>neuve → année ' + r.n + ', marge de ' + fmt(K1.marge, 0) + ' % gardée</span></div>';
+    h += '<div class="' + (okAll ? 'ok' : 'ko') + '"><i>Tournée de ' + fmt(K1.tour, 0) + ' km</i><b>' + (okAll ? 'Faisable' : (du && du.failAvg !== null ? (du.failAvg === 0 ? 'Trop longue' : 'Limite an ' + du.failAvg) : (du && du.failWin !== null ? (du.failWin === 0 ? 'Hiver limite' : 'Hiver : an ' + du.failWin) : 'À surveiller'))) + '</b><span>' + (okAll ? 'jusqu’à la fin de l’année ' + r.n + (du && du.winterOn ? ', hiver compris' : '') : 'recharge d’appoint à prévoir') + '</span></div>';
+    h += '<div class="' + (bat.okWindow ? '' : 'ko') + '"><i>Recharge au dépôt</i><b>' + hTxt(K1.rechH) + '</b><span>par jour à ' + fmt(K1.depP, 0) + ' kW (' + hTxt(KL.rechH) + ' en année ' + r.n + '), pour ' + fmt(d.fenetre, 0) + ' h disponibles</span></div>';
+    h += '<div><i>Batterie en fin d’étude</i><b>' + fmt(bat.sohPre[r.n], 0) + ' %</b><span>' + fmt(KL.cap, 0) + ' kWh nets sur ' + fmt(bat.spec.net, 0) + ' (' + fmt(bat.spec.brut, 0) + ' bruts)</span></div>';
+    h += '</div>';
+  });
+  /* À retenir */
+  var keys = [];
+  keys.push(good ? 'Sur ' + ans(r.n) + ', <b>' + a + '</b> fait économiser <b>' + eur(sav) + '</b> par camion par rapport à ' + b + '.' : 'Sur ' + ans(r.n) + ', <b>' + a + '</b> coûte <b>' + eur(-sav) + '</b> de plus par camion que ' + b + ' dans cette simulation.');
+  if (on.energie) { keys.push('Énergie : ' + (r.an.ecoHT >= 0 ? eur(r.an.ecoHT) + ' d’économie' : eur(-r.an.ecoHT) + ' de surcoût') + ' la première année (' + fmt(Math.abs(r.an.pctHT), 0) + ' %).'); }
+  if (CUR_SENS) { CUR_SENS.thr.forEach(function (t) { if (t.key === 'km' && t.seuil !== null) { keys.push('Seuil de rentabilité : ' + fmt(t.seuil, 0) + ' km par an (actuel ' + fmt(t.cur, 0) + ' km).'); } }); }
+  h += '<div class="st">À retenir</div><ul class="keys"><li>' + keys.join('</li><li>') + '</li></ul>';
+  h += footHtml(d, '') + '</div>';
+  return h;
+}
+
+/* Pages batterie : pile et semaine, en semaine 1 puis en dernière semaine de l'étude */
+function batteryPages(r, d, on) {
+  var out = [], Xs = ['E', 'D'].filter(function (X) { return r.V[X].type === 'elec' && r.V[X].bat && r.V[X].bat.cap > 0; });
+  if (!Xs.length) { return out; }
+  var add = function (h) { if (h) { out.push(h); } };
+  Xs.forEach(function (X) { add(pagePile(r, d, on, X, 'first')); });
+  add(pageWeek(r, d, on, 'first'));
+  Xs.forEach(function (X) { add(pagePile(r, d, on, X, 'last')); });
+  add(pageWeek(r, d, on, 'last'));
+  return out;
+}
 function buildPages(r, d, on) {
   var pages;
   CUR_RP = on.scen ? compute(prudentData(d), on) : null;
   CUR_SENS = (on.sens && r.valid) ? sensitivity(d, on, isComplet(), r) : null;
   if (isComplet()) {
-    pages = [pageComplet1(r, d, on), pageComplet2(r, d, on), pageComplet3(r, d, on)];
+    pages = [];
+    if (r.valid) { pages.push(pageSynth(r, d, on)); }
+    pages.push(pageComplet1(r, d, on), pageComplet2(r, d, on), pageComplet3(r, d, on));
     if (CUR_SENS) { pages.push(pageSens(r, d, on, CUR_SENS)); }
     pages.push(pageComplet4(r, d, on));
+    if (on.batterie && r.V.E.bat && r.V.D.bat) { pages.push('<div class="page">' + headHtml(d) + batteryBlock(r, d, on, 'E', true) + batteryBlock(r, d, on, 'D', true) + footHtml(d, '') + '</div>'); }
+    if (on.batterie) { pages = pages.concat(batteryPages(r, d, on)); }
   } else {
     pages = [pageConso1(r, d, on), pageConso2(r, d, on)];
     if (CUR_SENS) { pages.push(pageSens(r, d, on, CUR_SENS)); }
@@ -2686,6 +3682,9 @@ function migrateValues(v) {
     }
   }
   if (typeof m.cbPremierMontantE === 'string' && typeof m.cbPremierUE !== 'string') { m.cbPremierUE = 'eur'; }
+  /* Ancienne capacité unique : reprise comme capacité brute (la nette est calculée) */
+  if (typeof m.capBat === 'string' && typeof m.capBrut !== 'string') { m.capBrut = m.capBat; }
+  if (typeof m.capBat2 === 'string' && typeof m.capBrut2 !== 'string') { m.capBrut2 = m.capBat2; }
   if (typeof m.cbPremierMontantD === 'string' && typeof m.cbPremierUD !== 'string') { m.cbPremierUD = 'eur'; }
   return m;
 }
@@ -2877,6 +3876,26 @@ function updateInfos(r) {
     }
     setInfo(X === 'E' ? 'aideT' : 'aideT2', at, alertA);
   });
+  var bInfo = '', bAlert = false;
+  if (eo.borne && eo.aides && num(state.aideBorne) > 0) {
+    var bm = state.aideBorneMode;
+    if (bm !== 'client' && !borneLeaseOk(state)) { bInfo = 'Aucun tracteur électrique n’est en crédit-bail : l’aide à la borne est donc versée au client le ' + AIDE_MOIS + 'e mois.'; bAlert = true; }
+    else {
+      bInfo = 'Aide à la borne ' + borneAideText(bm, r.aideBShare, r.d) + '.';
+      if (bm !== 'client' && isElec(state, 'E') && isElec(state, 'D') && !(borneLeaseX(state, 'E') && borneLeaseX(state, 'D'))) { bInfo += ' Pour le tracteur électrique qui n’est pas en crédit-bail, sa part est versée au client.'; }
+    }
+  }
+  setInfo('aideB', bInfo, bAlert);
+  var kmTxt = [];
+  ['E', 'D'].forEach(function (X) {
+    var ev = r.V[X], bt = ev.bat, sp, K;
+    if (!eo.batterie || ev.type !== 'elec' || !bt || !(bt.cap > 0)) { setInfo(X === 'E' ? 'batNet' : 'batNet2', '', false); return; }
+    sp = bt.spec;
+    setInfo(X === 'E' ? 'batNet' : 'batNet2', 'Capacité nette calculée : <b>' + fmt(sp.net, 0) + ' kWh</b> (' + fmt(sp.brut, 0) + ' kWh bruts × ' + fmt(sp.dod, 0) + ' %)' + (sp.packs > 0 ? ', soit ' + fmt(sp.brut / sp.packs, 0) + ' kWh bruts par pack' : '') + '.', false);
+    K = kmDay(r, r.d, eo, X, bt.cap, ev.cReal / 100);
+    if (K) { kmTxt.push((cmpOf(state) === 'ee' ? esc(ev.name) + ' : ' : '') + '<b>' + fmt(K.kmMax, 0) + ' km par jour</b> possibles neuve (limite : ' + (K.limit === 'conduite' ? 'temps de conduite' : 'batterie') + '), pour ' + fmt(K.tour, 0) + ' km prévus' + (K.kmMax >= K.tour ? '' : ' : <b>tournée trop longue</b>')); }
+  });
+  setInfo('kmJour', kmTxt.join(' · ') + (kmTxt.length ? '.' : ''), false);
   if (state.kmUnit === 'an') { s = 'Kilométrage annuel d’étude : <b>' + fmt(r.kmAn, 0) + ' km par an</b>'; }
   else { s = fmt(num(state.kmPer), 0) + ' km × ' + fmt(num(state.kmNb), 0) + ' ' + (DYN[state.kmUnit] || '') + ' = <b>' + fmt(r.kmAn, 0) + ' km par an</b>'; }
   if (needD(state, eo)) { s += ' · ' + fmt(r.P.days, 0) + ' jours d’exploitation par an'; }
@@ -2890,8 +3909,8 @@ function updateInfos(r) {
     else { setInfo('rech', 'Année 1 : ' + els.map(function (X) { var ev = r.V[X]; return (two ? esc(ev.name) + ' ' : '') + '<b>' + fmt(ev.yr.pub[1], 0) + ' kWh</b> en borne publique (' + fmt(ev.share1 * 100, 0) + ' %)' + (eo.chauf ? ', ' + fmt(ev.yr.hours[1], 0) + ' h de chauffeur' : ''); }).join(' · ') + '.', false); }
   } else { setInfo('rech', '', false); }
   ['E', 'D'].forEach(function (X) {
-    var ac = r.A[X], first = ac.first, fa = ac.aideFin;
-    setInfo('acq' + X, (state['mode' + X] === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du premier loyer éventuel et de la valeur résiduelle. ' + (first > 0 ? 'Premier loyer majoré : <b>' + eur(first) + '</b>' + (fa > 0 ? ' (dont aide ' + eur(fa) + ')' : '') + ', puis ' + fmt(ac.lm - 1 - (ac.maj6 > 0 ? 1 : 0), 0) + ' loyers de <b>' + eur(r.d['loy' + X]) + '</b>. ' : '') + (ac.maj6 > 0 ? '6e loyer majoré payé par l’aide : <b>' + eur(ac.maj6) + '</b> HT. ' : '') + 'Valeur résiduelle due en fin de contrat : <b>' + eur(r.d['opt' + X]) + '</b>. ' : '') + ((eo.achat && ac.leaseShort) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state['mode' + X] === 'cbail' || (eo.achat && ac.leaseShort));
+    var ac = r.A[X], first = ac.first, fa = ac.aideFin + ac.bFin;
+    setInfo('acq' + X, (state['mode' + X] === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du premier loyer éventuel et de la valeur résiduelle. ' + (first > 0 ? 'Premier loyer majoré : <b>' + eur(first) + '</b>' + (fa > 0 ? ' (dont aide ' + eur(fa) + ')' : '') + ', puis ' + fmt(ac.lm - 1 - (ac.maj6 > 0 ? 1 : 0), 0) + ' loyers de <b>' + eur(r.d['loy' + X]) + '</b>. ' : '') + (ac.maj6 > 0 ? '6e loyer majoré payé par ' + (ac.t6 > 0 && ac.b6 > 0 ? 'les aides' : (ac.b6 > 0 ? 'l’aide à la borne' : 'l’aide')) + ' : <b>' + eur(ac.maj6) + '</b> HT. ' : '') + 'Valeur résiduelle due en fin de contrat : <b>' + eur(r.d['opt' + X]) + '</b>. ' : '') + ((eo.achat && ac.leaseShort) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state['mode' + X] === 'cbail' || (eo.achat && ac.leaseShort));
   });
 }
 
@@ -2907,7 +3926,7 @@ function updateLive() {
     h += '<div style="margin-top:6px;font-size:14px;opacity:.9">Renseigne le kilométrage et les consommations (ou désactive l’énergie) pour obtenir les résultats.</div>';
   } else if (!isComplet()) {
     h += '<div class="lgrid">' + consoBox;
-    h += '<div class="lbox"><div class="t">CO₂ évité par an</div><div class="v">' + (on.co2 ? fmt(r.co2Year, 0) + ' t' : '–') + '</div></div>';
+    h += '<div class="lbox"><div class="t">CO₂ évité par an</div><div class="v">' + (on.co2 ? fmtT(r.co2Year) + ' t' : '–') + '</div></div>';
     h += '<div class="lbox"><div class="t">Économie annuelle</div><div class="v">' + eur(r.an.ecoHT) + '</div></div>';
     h += '<div class="lbox"><div class="t">Économie ' + ans(r.n) + '</div><div class="v">' + eur(r.totEneHT) + '</div></div>';
     h += '</div>';
@@ -2917,7 +3936,7 @@ function updateLive() {
     h += '<div class="lbox"><div class="t">Économie annuelle d’exploitation</div><div class="v">' + eur(r.opSav) + '</div></div>';
     h += '<div class="lbox"><div class="t">Économie ' + ans(r.n) + ' (coût total)</div><div class="v">' + eur(r.tcoSav) + '</div></div>';
     h += '<div class="lbox"><div class="t">Temps d’équilibre économique</div><div class="v">' + beMain(r) + '</div></div>';
-    h += '<div class="lbox"><div class="t">CO₂ évité par an</div><div class="v">' + (on.co2 ? fmt(r.co2Year, 0) + ' t' : '–') + '</div></div>';
+    h += '<div class="lbox"><div class="t">CO₂ évité par an</div><div class="v">' + (on.co2 ? fmtT(r.co2Year) + ' t' : '–') + '</div></div>';
     h += '</div>';
   }
   document.getElementById('liveBox').innerHTML = h;
@@ -2984,10 +4003,10 @@ function modelWarnings(d, on, r) {
     if (anyElec(d) && !on.batterie) { w.push('Vieillissement et remplacement de batterie désactivés : aucune dégradation ni aucun coût de remplacement n’est intégré.'); }
     if (!on.assur) { w.push('Assurance désactivée : ce poste est exclu du coût total.'); }
     if (anyElec(d) && !on.borne) { w.push('Investissement et abonnement de recharge au dépôt désactivés : vérifier qu’ils sont déjà pris en charge ailleurs.'); }
-    if (on.energie && !on.recharge && bats.some(function (b) { return !b.okRange; })) { w.push('L’autonomie estimée est inférieure au kilométrage journalier : la recharge en route n’est pas chiffrée car la recharge publique est désactivée.'); }
+    if (on.energie && !on.recharge && bats.some(function (b) { return !b.okRange; })) { w.push('La tournée dépasse les km possibles par jour avec la marge de sécurité : la recharge en route n’est pas chiffrée car la recharge publique est désactivée.'); }
     if (on.recharge && d.rechMode === 'auto' && !on.batterie) { w.push('Le mode de recharge publique automatique nécessite le modèle de batterie ; la recharge automatique ne peut pas être estimée correctement.'); }
-    if (on.batterie && d.bornePuis > 0 && bats.some(function (b) { return b.cap > 0 && b.needHN > d.fenetre; })) { w.push('Le temps de recharge estimé au dépôt dépasse la fenêtre disponible ; une borne plus puissante ou une recharge complémentaire peut être nécessaire.'); }
-    if (on.batterie && (d.socArr < 0 || d.socFin > 100 || d.socFin <= d.socArr)) { w.push('Les seuils de charge de la batterie sont incohérents : vérifier le SOC d’arrivée et le SOC cible.'); }
+    if (on.batterie && d.bornePuis > 0 && bats.some(function (b) { return b.cap > 0 && !b.okWindow; })) { w.push('Le temps de recharge estimé au dépôt dépasse la fenêtre disponible ; une borne plus puissante ou une recharge complémentaire peut être nécessaire.'); }
+    if (on.batterie && (d.socFin > 100 || d.socFin <= marginPct(d))) { w.push('Les niveaux de charge sont incohérents : le niveau de recharge visé doit être supérieur à la marge de sécurité.'); }
     if (on.recharge && (d.rechPow <= 0 || (d.rechMode === 'dur' && d.rechDur <= 0))) { w.push('Les paramètres de puissance ou de durée de recharge publique ne permettent pas d’estimer une recharge exploitable.'); }
     if (on.revente) { w.push('La valeur de revente est une estimation forfaitaire saisie par l’utilisateur ; elle n’est pas prédite à partir du kilométrage, de l’âge ou de l’état de santé de la batterie.'); }
   }
