@@ -364,7 +364,7 @@ table.a4 tr.cum td{font-weight:700;color:#00529b}
 <body>
 <div id="app">
   <header class="top">
-    <div class="brand"><div class="wm"><span class="a">Master</span><span class="b">TCO</span></div><span class="tag">Coût total de possession<br>électrique et diesel<br><span style="opacity:.7;font-size:10px">version du 18/10/2026 · batterie</span></span></div>
+    <div class="brand"><div class="wm"><span class="a">Master</span><span class="b">TCO</span></div><span class="tag">Coût total de possession<br>électrique et diesel<br><span style="opacity:.7;font-size:10px">version 8 du 18/10/2026</span></span></div>
     <div class="tabs">
       <button class="tab on" type="button" data-action="tab" data-tab="saisie" id="tab-saisie">Données</button>
       <button class="tab" type="button" data-action="tab" data-tab="rapport" id="tab-rapport">Rapport</button>
@@ -497,7 +497,7 @@ var DEFAULTS = {
   pHC: '0,15', pHP: '0,19', hcDeb1: '', hcFin1: '', hcDeb2: '', hcFin2: '', pilotHC: 'hc', kva: '170', prixKva: '25', contratNb: '1',
   hivPct: '15', hivMois: '4', chargePct: '0',
   rembTicpe: '0',
-  rechMode: 'pct', partPublic: '20', rechKwh: '200', rechDur: '45', rechDurU: 'min', rechPow: '150',
+  rechMode: 'auto', partPublic: '20', rechKwh: '200', rechDur: '45', rechDurU: 'min', rechPow: '150',
   rechFreq: '1', rechFreqU: 'jour', pPublic: '0,55', pPublicBase: 'ttc',
   coutChauf: '35',
   modeE: 'achat', prixE: '290000', loyE: '5200', durLocE: '5', durLocUE: 'ans', optE: '2900', cbTauxE: '5', cbPremierE: 'non', cbPremierMontantE: '10', cbPremierUE: 'pct', cbResE: '10', cbResUE: 'pct',
@@ -512,22 +512,21 @@ var DEFAULTS = {
   assE: '7500', assD: '7000', assU: 'an',
   motNom: 'PACCAR EX-D1', motKw: '270', capBrut: '525', packs: '5', dod: '88', dcMax: '325', acMax: '22', taperSoc: '80', taperPct: '30',
   motNom2: 'PACCAR EX-D1', motKw2: '270', capBrut2: '525', packs2: '5', dod2: '88', dcMax2: '325', acMax2: '22', taperSoc2: '80', taperPct2: '30',
-  batDeg: '1,5', batDegU: 'an', batSeuil: '70', batRempl: '70000', batEff: '3',
-  batDeg2: '1,5', batDegU2: 'an', batSeuil2: '70', batRempl2: '70000', batEff2: '3',
-  vitMoy: '55', conduiteMax: '9', margeRet: '5', pauseCharge: 'non', pausePuis: '150',
-  bornePuis: '150', socFin: '100', rechPlage: 'libre', hRechDeb: '', hRechFin: '', semJours: '5', hDep: '6', hRet: '17',
+  batDeg: '1,5', batDegU: 'an',
+  batDeg2: '1,5', batDegU2: 'an',
+  bornePuis: '150', socFin: '100', tJour: '', hRet: '',
   carbP: '0,12', carbYear: '2', pegD: '0', pegE: '0',
   fiscGain: '0', certif: '0',
   evElec: '0', evDiesel: '0', evAutres: '0',
-  scDiesel: '-10', scElec: '10', scKm: '-10', scBatDegP: '0,5', scRes: '-20', chargeT: '', entHC: 'non', entDurE: '', entMajE: '', entDurD: '', entMajD: '',
+  scDiesel: '-10', scElec: '10', scKm: '-10', scBatDegP: '0,5', scRes: '-20', chargeT: '', rembOn: 'non', hcOn: 'non', borneFin: 'comptant', borneTaux: '', borneDuree: '', entHC: 'non', entDurE: '', entMajE: '', entDurD: '', entMajD: '',
   sensAmp: '10',
   co2D: '2,65', co2E: '0,06'
 };
 
 var DEFAULT_ON = {
-  energie: true, contrat: false, saison: true, recharge: false, chauf: true, remb: false,
+  energie: true, contrat: false, saison: true, recharge: false, chauf: false, remb: false,
   achat: true, aides: false, fin: false, revente: true, borne: true, entretien: true, adblue: true,
-  assur: true, batterie: true, regl: false, fisc: false, evol: true, scen: true, sens: true, co2: true
+  assur: true, batterie: true, vieil: true, regl: false, fisc: false, evol: true, scen: false, sens: true, co2: true
 };
 var CONSO_OFF = ['achat', 'aides', 'fin', 'revente', 'borne', 'entretien', 'adblue', 'assur', 'batterie', 'chauf', 'regl', 'fisc'];
 
@@ -570,21 +569,25 @@ function priceUsed(s, o, X) {
 function V1(s) { return vehName(s, 'E'); }
 function V2(s) { return vehName(s, 'D'); }
 var GROUPS = [
-  { id: 'cmp', title: 'Comparaison', note: 'Le véhicule 1 est celui que tu proposes ; le véhicule 2 sert de référence (véhicule actuel ou concurrent). Les résultats sont exprimés comme l’économie du véhicule proposé.', fields: [
+  { id: 'cmp', title: 'L’étude', note: 'Le véhicule 1 est celui que tu proposes ; le véhicule 2 sert de référence (véhicule actuel ou concurrent). Les résultats sont exprimés comme l’économie du véhicule proposé.', fields: [
     { k: 'cmp', l: 'Type de comparaison', select: [['ed', 'Électrique vs Thermique'], ['dd', 'Thermique vs Thermique'], ['ee', 'Électrique vs Électrique']] },
     { k: 'nom1', l: 'Véhicule 1 : proposé', text: true, optional: true, hint: 'nom ou modèle, ex. DAF XD Electric' },
-    { k: 'nom2', l: 'Véhicule 2 : référence', text: true, optional: true, hint: 'nom ou modèle, ex. véhicule actuel' }
+    { k: 'nom2', l: 'Véhicule 2 : référence', text: true, optional: true, hint: 'nom ou modèle, ex. véhicule actuel' },
+    { k: 'client', l: 'Client / référence', text: true },
+    { k: 'auteur', l: 'Établi par', text: true }
   ]},
-  { id: 'proj', title: 'Projection et chargement', note: 'Kilométrage annuel, durée de l’étude et charge transportée : tous les calculs en dépendent.', fields: [
+  { id: 'proj', title: 'Usage et chargement', note: 'Kilométrage, durée de l’étude et journée de travail : tous les calculs en dépendent. Le reste de la journée, le camion est à l’arrêt au dépôt et se recharge dès son retour.', fields: [
     { k: 'kmPer', l: 'Kilométrage', unitKey: 'kmUnit', units: U_KM, pos: true, hint: 'changer l’unité conserve le total annuel' },
     { k: 'kmNb', l: 'Durée d’usage dans l’année', dynUnit: true, pos: true, vis: function (s) { return s.kmUnit !== 'an'; } },
     { k: 'joursAn', l: 'Jours d’exploitation par an', u: 'jours', pos: true, max: 366, vis: function (s, o) { return showJoursAn(s, o); } },
     { k: 'joursSem', l: 'Jours d’exploitation par semaine', u: 'jours', pos: true, max: 7, hint: 'conversions jours, semaines, mois', vis: function (s, o) { return showJoursSem(s, o); } },
     { info: 'km' },
     { k: 'annees', l: 'Durée de la comparaison', u: 'ans', pos: true, max: 15, hint: '1 à 15 ans' },
-    { k: 'chargeT', l: 'Charge transportée en moyenne', u: 't', pos: true, hint: 'marchandise seule ; sert au CO₂ par tonne transportée' }
+    { k: 'chargeT', l: 'Charge transportée en moyenne', u: 't', optional: true, hint: 'facultatif : CO₂ par tonne transportée' },
+    { k: 'tJour', l: 'Temps de travail du chauffeur par jour', u: 'h', optional: true, pos: true, max: 23, hint: 'du départ au retour au dépôt, livraisons et pauses comprises ; vide : règle des 11 h de repos journalier', vis: function (s) { return anyElec(s); } },
+    { info: 'rechWin' }
   ]},
-  { id: 'energie', on: 'energie', title: 'Consommation des véhicules', note: 'L’essai sert uniquement à déterminer la consommation : le kilométrage annuel vient de « Projection ».', fields: [
+  { id: 'energie', on: 'energie', title: 'Consommation des véhicules', note: 'L’essai sert uniquement à déterminer la consommation : le kilométrage annuel vient de « Usage et chargement ».', fields: [
     { sep: V1 },
     { k: 'consMode', slot: 'E', l: 'Saisie de la consommation', select: [['essai', 'Essai : distance et énergie'], ['direct', 'Consommation directe']], vis: function (s) { return isElec(s, 'E'); } },
     { k: 'km', slot: 'E', l: 'Distance de l’essai', u: 'km', pos: true, vis: function (s) { return isElec(s, 'E') && s.consMode === 'essai'; } },
@@ -598,113 +601,77 @@ var GROUPS = [
     { k: 'consDirect2', slot: 'D', l: 'Consommation', u: 'kWh/100 km', pos: true, vis: function (s) { return isElec(s, 'D') && s.consMode2 === 'direct'; } },
     { k: 'cDiesel', slot: 'D', l: 'Consommation', u: 'L/100 km', pos: true, vis: function (s) { return !isElec(s, 'D'); } }
   ]},
-  { id: 'prix', dep: 'energie', title: 'Prix de l’énergie', note: 'Prix communs aux deux véhicules.', fields: [
+  { id: 'prix', dep: 'energie', title: 'Prix de l’énergie et TICPE', note: 'Prix communs aux deux véhicules.', fields: [
     { sep: 'Électricité au dépôt' },
     { k: 'pElec', l: 'Prix du kWh', unitKey: 'pElecBase', units: U_BASE_KWH, pos: true, vis: function (s, o) { return anyElec(s) && !o.contrat; } },
     { k: 'tvaElec', l: 'TVA sur l’électricité', u: '%', vis: function (s, o) { return anyElec(s) && ((!o.contrat && s.pElecBase === 'ttc') || (!!o.recharge && s.pPublicBase === 'ttc')); } },
-    { info: 'contrat' },
     { sep: 'Gazole' },
     { k: 'pDiesel', l: 'Prix du gazole', unitKey: 'pDieselBase', units: U_BASE_L, pos: true, vis: function (s) { return anyTherm(s); } },
     { k: 'tvaDiesel', l: 'TVA sur le gazole', u: '%', vis: function (s) { return anyTherm(s) && s.pDieselBase === 'ttc'; } },
-    { k: 'ticpe', l: 'TICPE comprise dans le prix', u: '€/L HT', hint: 'information : n’influe pas sur les économies', vis: function (s) { return anyTherm(s); } }
+    { k: 'ticpe', l: 'TICPE comprise dans le prix', u: '€/L HT', hint: 'pour information', vis: function (s) { return anyTherm(s); } },
+    { k: 'rembOn', l: 'Remboursement partiel de TICPE', select: [['oui', 'Oui'], ['non', 'Non']], vis: function (s) { return anyTherm(s); } },
+    { k: 'rembTicpe', l: 'Montant remboursé', u: '€/L HT', hint: '0,1556 €/L en 2026 pour un poids lourd de 7,5 t et plus, hors Corse', vis: function (s) { return anyTherm(s) && s.rembOn === 'oui'; } }
   ]},
-  { id: 'remb', on: 'remb', req: 'energie', need: 'therm', title: 'Remboursement partiel de TICPE', note: 'Déduit du coût HT du gazole.', fields: [
-    { k: 'rembTicpe', l: 'Remboursement', u: '€/L HT', hint: '0,1556 €/L en 2026 pour un poids lourd de 7,5 t et plus, hors Corse' }
-  ]},
-  { id: 'saison', on: 'saison', need: 'elec', title: 'Consommation réelle en électrique', note: 'Corrige la consommation de l’essai des tracteurs électriques : surconsommation en hiver et écart dû à la charge. La consommation thermique saisie est considérée comme une moyenne réelle.', fields: [
+  { id: 'saison', on: 'saison', need: 'elec', title: 'Consommation réelle en électrique', note: 'Corrige la consommation de l’essai : surconsommation en hiver et écart dû à la charge. La consommation thermique saisie est considérée comme une moyenne réelle.', fields: [
     { k: 'hivPct', l: 'Surconsommation en hiver', u: '%' },
     { k: 'hivMois', l: 'Nombre de mois d’hiver', u: 'mois', max: 12 },
     { k: 'chargePct', l: 'Écart de consommation dû à la charge (par rapport à l’essai)', u: '%', hint: 'positif si le camion roule plus chargé qu’à l’essai' },
     { info: 'saison' }
   ]},
-  { id: 'contrat', on: 'contrat', req: 'energie', need: 'elec', title: 'Contrat électrique du dépôt', note: 'Remplace le prix unique du kWh : prix en heures creuses et pleines, plus la part fixe liée à la puissance souscrite.', fields: [
-    { k: 'pHC', l: 'Prix du kWh en heures creuses', u: '€/kWh HT', pos: true },
-    { k: 'pHP', l: 'Prix du kWh en heures pleines', u: '€/kWh HT', pos: true },
-    { k: 'kva', l: 'Puissance souscrite', u: 'kVA', pos: true },
-    { k: 'prixKva', l: 'Part fixe du contrat', u: '€ HT/kVA/an' },
-    { k: 'contratNb', l: 'Nombre de camions rechargés sur ce contrat', u: 'camions', pos: true }
-  ]},
-  { id: 'hc', dep: 'contrat', need: 'elec', title: 'Heures creuses du contrat', note: 'La part en heures creuses est calculée en croisant ces horaires avec la plage de recharge au dépôt et la durée réelle de la recharge.', fields: [
-    { k: 'hcDeb1', l: 'Heures creuses : début', u: 'h', max: 24, hint: 'selon le contrat, ex. 22' },
-    { k: 'hcFin1', l: 'Heures creuses : fin', u: 'h', max: 24, hint: 'ex. 6 pour 6 h le lendemain' },
-    { k: 'hcDeb2', l: '2e plage d’heures creuses : début', u: 'h', optional: true, max: 24, hint: 'facultatif, ex. 12,5' },
-    { k: 'hcFin2', l: '2e plage d’heures creuses : fin', u: 'h', optional: true, max: 24, hint: 'facultatif, ex. 14,5' },
-    { k: 'pilotHC', l: 'Pilotage de la recharge', select: [['hc', 'Priorité aux heures creuses'], ['direct', 'Dès que la plage de recharge le permet']] },
-    { info: 'hcPlan' }
-  ]},
-  { id: 'depot', dep: ['batterie', 'contrat'], need: 'elec', title: 'Recharge au dépôt', note: 'Puissance de la borne, niveau visé et horaires où la recharge est possible.', fields: [
-    { k: 'bornePuis', l: 'Puissance de la borne au dépôt', u: 'kW', pos: true },
-    { k: 'socFin', l: 'Niveau de recharge visé', u: '%', max: 100, hint: 'LFP : 100 % possible' },
-    { k: 'rechPlage', l: 'Plage de recharge au dépôt', select: [['libre', 'Dès le retour, jusqu’au départ suivant'], ['horaire', 'Horaires de recharge à renseigner']] },
-    { k: 'hRechDeb', l: 'Début de la recharge', u: 'h', optional: true, max: 24, hint: 'ex. 22 pour 22 h', vis: function (s) { return s.rechPlage === 'horaire'; } },
-    { k: 'hRechFin', l: 'Fin de la recharge', u: 'h', optional: true, max: 24, hint: 'ex. 6 pour 6 h le lendemain', vis: function (s) { return s.rechPlage === 'horaire'; } },
-    { info: 'rechWin' }
-  ]},
-  { id: 'tour', dep: ['batterie', 'contrat'], need: 'elec', title: 'Tournée type', note: 'Horaires de la tournée : ils fixent la plage où le camion est au dépôt.', fields: [
-    { k: 'hDep', l: 'Heure de départ du dépôt', u: 'h', max: 23.5, hint: 'ex. 6 ou 5,5 pour 5 h 30' },
-    { k: 'hRet', l: 'Heure de retour au dépôt', u: 'h', pos: true, max: 24, hint: 'pauses comprises, après l’heure de départ' },
-    { k: 'semJours', l: 'Jours de tournée dans la semaine', u: 'jours', pos: true, max: 7, hint: 'semaine type du rapport', vis: function (s, o) { return !!o.batterie; } },
-    { k: 'vitMoy', l: 'Vitesse moyenne en roulage', u: 'km/h', pos: true, hint: 'exemple, à remplacer par la moyenne réelle', vis: function (s, o) { return !!o.batterie; } },
-    { k: 'conduiteMax', l: 'Temps de conduite maximal par jour', select: [['9', '9 h (règle générale)'], ['10', '10 h (2 fois par semaine au plus)']], vis: function (s, o) { return !!o.batterie; } }
-  ]},
-  { id: 'secu', dep: 'batterie', cx: true, need: 'elec', title: 'Autonomie : marge de sécurité et pause', note: 'Kilomètres possibles par jour en rentrant au dépôt avec la marge choisie.', fields: [
-    { k: 'margeRet', l: 'Marge de sécurité au retour au dépôt', u: '%', max: 50, hint: 'bouchon, surconsommation, tournée imprévue' },
-    { k: 'pauseCharge', l: 'Recharge pendant la pause de 45 min', select: [['non', 'Non'], ['oui', 'Oui']] },
-    { k: 'pausePuis', l: 'Puissance de la borne pendant la pause', u: 'kW', pos: true, vis: function (s) { return s.pauseCharge === 'oui'; } },
-    { info: 'kmJour' }
-  ]},
-  { id: 'batterie', on: 'batterie', cx: true, need: 'elec', show: function (s) { return isElec(s, 'E'); }, title: 'Batterie et recharge acceptée', note: 'Capacité brute et nette (brute × part utilisable), puissances acceptées et ralentissement en fin de charge. Valeurs pré-remplies : fiche DAF XD Electric ou exemples à remplacer.', fields: [
+  { id: 'batterie', on: 'batterie', cx: true, need: 'elec', title: 'Batterie et recharge au dépôt', note: 'Capacité nette = brute × part utilisable. La recharge se fait à la puissance la plus basse entre la borne et le véhicule, ralentie en fin de charge, et vise un retour au dépôt avec 5 % de marge de sécurité.', fields: [
     { sep: V1 },
-    { k: 'motNom', slot: 'E', l: 'Motorisation', text: true, optional: true, hint: 'ex. PACCAR EX-D1', vis: function (s) { return isElec(s, 'E'); } },
-    { k: 'motKw', slot: 'E', l: 'Puissance du moteur', u: 'kW', optional: true, hint: 'EX-D1 : 170, 220 ou 270 kW', vis: function (s) { return isElec(s, 'E'); } },
     { k: 'capBrut', slot: 'E', l: 'Capacité brute de la batterie', u: 'kWh', pos: true, hint: 'DAF XD : 210 à 525 kWh', vis: function (s) { return isElec(s, 'E'); } },
-    { k: 'packs', slot: 'E', l: 'Nombre de packs', u: 'packs', optional: true, max: 12, hint: 'DAF : packs de 105 kWh', vis: function (s) { return isElec(s, 'E'); } },
     { k: 'dod', slot: 'E', l: 'Part utilisable (profondeur de décharge)', u: '%', pos: true, max: 100, hint: 'LFP DAF : 88 %', vis: function (s) { return isElec(s, 'E'); } },
     { info: 'batNet' },
     { k: 'dcMax', slot: 'E', l: 'Recharge maximale acceptée en DC', u: 'kW', pos: true, hint: 'DAF : 150 ou 325 kW', vis: function (s) { return isElec(s, 'E'); } },
-    { k: 'acMax', slot: 'E', l: 'Recharge maximale acceptée en AC', u: 'kW', optional: true, hint: 'DAF : 22 kW', vis: function (s) { return isElec(s, 'E'); } },
-    { k: 'taperSoc', slot: 'E', l: 'Début du ralentissement de fin de charge', u: '%', pos: true, max: 100, hint: 'exemple, à remplacer par la courbe constructeur', vis: function (s) { return isElec(s, 'E'); } },
-    { k: 'taperPct', slot: 'E', l: 'Puissance encore acceptée à 100 %', u: '% du max', pos: true, max: 100, hint: 'exemple, à remplacer par la courbe constructeur', vis: function (s) { return isElec(s, 'E'); } }
-  ]},
-  { id: 'batterie2', dep: 'batterie', cx: true, need: 'elec', show: function (s) { return isElec(s, 'D'); }, title: 'Batterie et recharge acceptée · véhicule 2', note: '', fields: [
     { sep: V2 },
-    { k: 'motNom2', slot: 'D', l: 'Motorisation', text: true, optional: true, hint: 'ex. PACCAR EX-D1', vis: function (s) { return isElec(s, 'D'); } },
-    { k: 'motKw2', slot: 'D', l: 'Puissance du moteur', u: 'kW', optional: true, hint: 'EX-D1 : 170, 220 ou 270 kW', vis: function (s) { return isElec(s, 'D'); } },
     { k: 'capBrut2', slot: 'D', l: 'Capacité brute de la batterie', u: 'kWh', pos: true, hint: 'DAF XD : 210 à 525 kWh', vis: function (s) { return isElec(s, 'D'); } },
-    { k: 'packs2', slot: 'D', l: 'Nombre de packs', u: 'packs', optional: true, max: 12, hint: 'DAF : packs de 105 kWh', vis: function (s) { return isElec(s, 'D'); } },
     { k: 'dod2', slot: 'D', l: 'Part utilisable (profondeur de décharge)', u: '%', pos: true, max: 100, hint: 'LFP DAF : 88 %', vis: function (s) { return isElec(s, 'D'); } },
     { info: 'batNet2' },
     { k: 'dcMax2', slot: 'D', l: 'Recharge maximale acceptée en DC', u: 'kW', pos: true, hint: 'DAF : 150 ou 325 kW', vis: function (s) { return isElec(s, 'D'); } },
-    { k: 'acMax2', slot: 'D', l: 'Recharge maximale acceptée en AC', u: 'kW', optional: true, hint: 'DAF : 22 kW', vis: function (s) { return isElec(s, 'D'); } },
-    { k: 'taperSoc2', slot: 'D', l: 'Début du ralentissement de fin de charge', u: '%', pos: true, max: 100, hint: 'exemple, à remplacer par la courbe constructeur', vis: function (s) { return isElec(s, 'D'); } },
-    { k: 'taperPct2', slot: 'D', l: 'Puissance encore acceptée à 100 %', u: '% du max', pos: true, max: 100, hint: 'exemple, à remplacer par la courbe constructeur', vis: function (s) { return isElec(s, 'D'); } }
+    { sep: 'Recharge au dépôt' },
+    { k: 'bornePuis', l: 'Puissance de la borne au dépôt', u: 'kW', pos: true },
+    { k: 'socFin', l: 'Niveau de recharge visé', u: '%', pos: true, max: 100, hint: 'niveau de la batterie au départ de chaque tournée ; LFP : 100 % possible au quotidien' },
+    { info: 'kmJour' }
   ]},
-  { id: 'vieil', dep: 'batterie', cx: true, need: 'elec', title: 'Vieillissement de la batterie', note: 'Perte de capacité, remplacement éventuel et surconsommation liée à l’usure.', fields: [
-    { sep: V1 },
-    { k: 'batDeg', slot: 'E', l: 'Perte de capacité (scénario réaliste)', unitKey: 'batDegU', units: [['an', '% / an'], ['cycle', '% / 1000 cycles']], hint: '1 à 2 % par an en général', vis: function (s) { return isElec(s, 'E'); } },
-    { k: 'batSeuil', slot: 'E', l: 'État de santé minimal (fin de vie)', u: '%', pos: true, max: 100, vis: function (s) { return isElec(s, 'E'); } },
-    { k: 'batRempl', slot: 'E', l: 'Coût de remplacement de la batterie', u: '€ HT', vis: function (s) { return isElec(s, 'E'); } },
-    { k: 'batEff', slot: 'E', l: 'Surconsommation au seuil de fin de vie', u: '%', vis: function (s) { return isElec(s, 'E'); } },
-    { sep: V2 },
-    { k: 'batDeg2', slot: 'D', l: 'Perte de capacité (scénario réaliste)', unitKey: 'batDegU2', units: [['an', '% / an'], ['cycle', '% / 1000 cycles']], hint: '1 à 2 % par an en général', vis: function (s) { return isElec(s, 'D'); } },
-    { k: 'batSeuil2', slot: 'D', l: 'État de santé minimal (fin de vie)', u: '%', pos: true, max: 100, vis: function (s) { return isElec(s, 'D'); } },
-    { k: 'batRempl2', slot: 'D', l: 'Coût de remplacement de la batterie', u: '€ HT', vis: function (s) { return isElec(s, 'D'); } },
-    { k: 'batEff2', slot: 'D', l: 'Surconsommation au seuil de fin de vie', u: '%', vis: function (s) { return isElec(s, 'D'); } }
+  { id: 'vieil', on: 'vieil', req: 'batterie', cx: true, need: 'elec', title: 'Vieillissement de la batterie', note: 'Perte de capacité année après année : autonomie et temps de recharge en tiennent compte.', fields: [
+    { k: 'batDeg', slot: 'E', l: 'Perte de capacité', unitKey: 'batDegU', units: [['an', '% / an'], ['cycle', '% / 1000 cycles']], hint: '1 à 2 % par an en général', vis: function (s) { return isElec(s, 'E'); } },
+    { k: 'batDeg2', slot: 'D', l: 'Perte de capacité', unitKey: 'batDegU2', units: [['an', '% / an'], ['cycle', '% / 1000 cycles']], hint: '1 à 2 % par an en général', vis: function (s) { return isElec(s, 'D'); } }
   ]},
-  { id: 'recharge', on: 'recharge', req: 'energie', need: 'elec', title: 'Recharge en borne publique', note: 'Une partie de l’énergie est rechargée hors dépôt, à un prix plus élevé. Mêmes conditions pour chaque tracteur électrique.', fields: [
-    { k: 'rechMode', l: 'Mode de calcul', select: [['pct', 'Part de l’énergie (%)'], ['kwh', 'Énergie par recharge (kWh)'], ['dur', 'Durée et puissance'], ['auto', 'Automatique : autonomie et temps au dépôt']] },
-    { k: 'partPublic', l: 'Part de l’énergie rechargée en borne publique', u: '%', max: 100, vis: function (s) { return s.rechMode === 'pct'; } },
+  { id: 'contrat', on: 'contrat', req: 'energie', need: 'elec', title: 'Contrat électrique du dépôt', note: 'Remplace le prix unique du kWh. Avec les heures creuses, la part de la recharge en heures creuses est calculée en croisant leurs horaires avec la période où le camion est à l’arrêt.', fields: [
+    { k: 'hcOn', l: 'Heures creuses', select: [['non', 'Non : prix unique du kWh'], ['oui', 'Oui : heures creuses et pleines']] },
+    { k: 'pHP', l: function (s) { return s.hcOn === 'oui' ? 'Prix du kWh en heures pleines' : 'Prix du kWh'; }, u: '€/kWh HT', pos: true },
+    { k: 'pHC', l: 'Prix du kWh en heures creuses', u: '€/kWh HT', pos: true, vis: function (s) { return s.hcOn === 'oui'; } },
+    { k: 'hcDeb1', l: 'Heures creuses : début', u: 'h', max: 24, hint: 'selon le contrat, ex. 22', vis: function (s) { return s.hcOn === 'oui'; } },
+    { k: 'hcFin1', l: 'Heures creuses : fin', u: 'h', max: 24, hint: 'ex. 6 pour 6 h le lendemain', vis: function (s) { return s.hcOn === 'oui'; } },
+    { k: 'hcDeb2', l: '2e plage d’heures creuses : début', u: 'h', optional: true, max: 24, hint: 'facultatif', vis: function (s) { return s.hcOn === 'oui'; } },
+    { k: 'hcFin2', l: '2e plage d’heures creuses : fin', u: 'h', optional: true, max: 24, hint: 'facultatif', vis: function (s) { return s.hcOn === 'oui'; } },
+    { k: 'hRet', l: 'Heure de retour au dépôt', select: [['', 'À renseigner'], ['0', '0 h'], ['1', '1 h'], ['2', '2 h'], ['3', '3 h'], ['4', '4 h'], ['5', '5 h'], ['6', '6 h'], ['7', '7 h'], ['8', '8 h'], ['9', '9 h'], ['10', '10 h'], ['11', '11 h'], ['12', '12 h'], ['13', '13 h'], ['14', '14 h'], ['15', '15 h'], ['16', '16 h'], ['17', '17 h'], ['18', '18 h'], ['19', '19 h'], ['20', '20 h'], ['21', '21 h'], ['22', '22 h'], ['23', '23 h']], hint: 'pour placer la recharge par rapport aux heures creuses', vis: function (s) { return s.hcOn === 'oui'; } },
+    { k: 'pilotHC', l: 'Pilotage de la recharge', select: [['hc', 'Priorité aux heures creuses'], ['direct', 'Recharge immédiate au retour']], vis: function (s) { return s.hcOn === 'oui'; } },
+    { info: 'hcPlan' },
+    { k: 'kva', l: 'Puissance souscrite', u: 'kVA', pos: true },
+    { k: 'prixKva', l: 'Part fixe du contrat', u: '€ HT/kVA/an' },
+    { k: 'contratNb', l: 'Nombre de camions rechargés sur ce contrat', u: 'camions', pos: true },
+    { info: 'contrat' }
+  ]},
+  { id: 'borne', on: 'borne', cx: true, need: 'elec', title: 'Borne de recharge', note: 'Montants totaux de l’installation : le rapport en impute la part de chaque tracteur électrique (total ÷ nombre de camions).', fields: [
+    { k: 'borneInv', l: 'Achat et installation (total)', u: '€ HT', pos: true },
+    { k: 'borneNb', l: 'Nombre de camions utilisant la borne', u: 'camions', pos: true },
+    { k: 'borneAbo', l: 'Abonnement et maintenance (total)', unitKey: 'borneAboU', units: U_AN_MOIS },
+    { k: 'borneFin', l: 'Financement de la borne', select: [['comptant', 'Comptant'], ['credit', 'Crédit']] },
+    { k: 'borneTaux', l: 'Taux du crédit borne', u: '%/an', vis: function (s) { return s.borneFin === 'credit'; } },
+    { k: 'borneDuree', l: 'Durée du crédit borne', u: 'ans', pos: true, vis: function (s) { return s.borneFin === 'credit'; } }
+  ]},
+  { id: 'recharge', on: 'recharge', req: 'energie', need: 'elec', title: 'Recharge en borne publique', note: 'Mode automatique : chaque jour, l’énergie qui manque pour faire la tournée avec la batterie rechargée au dépôt (en gardant 5 % de marge) est rechargée en borne publique, au prix saisi. Nécessite la carte Batterie.', fields: [
+    { k: 'rechMode', l: 'Mode de calcul', select: [['auto', 'Automatique : selon l’autonomie'], ['kwh', 'Énergie par recharge (kWh)'], ['dur', 'Durée et puissance']] },
     { k: 'rechKwh', l: 'Énergie rechargée à chaque fois', u: 'kWh', pos: true, vis: function (s) { return s.rechMode === 'kwh'; } },
     { k: 'rechDur', l: 'Durée de chaque recharge', unitKey: 'rechDurU', units: [['min', 'min'], ['h', 'heures']], pos: true, vis: function (s) { return s.rechMode === 'dur'; } },
-    { k: 'rechPow', l: 'Puissance délivrée par la borne publique', u: 'kW', pos: true },
+    { k: 'rechPow', l: 'Puissance de la borne publique', u: 'kW', pos: true },
     { k: 'rechFreq', l: 'Récurrence', unitKey: 'rechFreqU', units: [['jour', 'fois/jour'], ['sem', 'fois/semaine'], ['mois', 'fois/mois']], vis: function (s) { return s.rechMode === 'kwh' || s.rechMode === 'dur'; } },
     { k: 'pPublic', l: 'Prix du kWh en borne publique', unitKey: 'pPublicBase', units: U_BASE_KWH, pos: true },
     { info: 'rech' }
   ]},
-  { id: 'chauf', on: 'chauf', cx: true, req: 'recharge', need: 'elec', title: 'Temps chauffeur pendant la recharge', note: 'Coût du temps passé par le chauffeur à recharger en borne publique.', fields: [
-    { k: 'coutChauf', l: 'Coût horaire du chauffeur', u: '€ HT/h' }
-  ]},
-  { id: 'achat', on: 'achat', cx: true, title: 'Acquisition du matériel neuf', note: 'Achat, location ou crédit-bail pour chaque tracteur. Désactive pour comparer uniquement les coûts d’usage. Montants HT.', fields: [
+  { id: 'achat', on: 'achat', cx: true, title: 'Acquisition · véhicule 1', note: 'Achat, location ou crédit-bail pour chaque tracteur. Désactive pour comparer uniquement les coûts d’usage. Montants HT.', fields: [
     { sep: V1 },
     { k: 'modeE', slot: 'E', l: 'Mode d’acquisition', select: U_ACQ },
     { k: 'prixE', slot: 'E', l: 'Prix d’achat', u: '€ HT', pos: true, vis: function (s, o) { return priceUsed(s, o, 'E'); } },
@@ -716,7 +683,7 @@ var GROUPS = [
     { k: 'cbResE', slot: 'E', l: 'Valeur résiduelle du crédit-bail', unitKey: 'cbResUE', units: U_RES, max: function (s) { return s.cbResUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE === 'cbail'; } },
     { info: 'acqE' }
   ]},
-  { id: 'achat2', dep: 'achat', cx: true, title: 'Acquisition du matériel neuf · véhicule 2', note: '', fields: [
+  { id: 'achat2', dep: 'achat', cx: true, title: 'Acquisition · véhicule 2', note: '', fields: [
     { sep: V2 },
     { k: 'modeD', slot: 'D', l: 'Mode d’acquisition', select: U_ACQ },
     { k: 'prixD', slot: 'D', l: 'Prix d’achat', u: '€ HT', pos: true, vis: function (s, o) { return priceUsed(s, o, 'D'); } },
@@ -754,11 +721,6 @@ var GROUPS = [
     { k: 'resE', l: V1, unitKey: 'resU', units: U_RES, vis: function (s) { return ownsS(s, 'E'); } },
     { k: 'resD', l: V2, unitKey: 'resU', units: U_RES, vis: function (s) { return ownsS(s, 'D'); } }
   ]},
-  { id: 'borne', on: 'borne', cx: true, need: 'elec', title: 'Borne de recharge', note: 'Montants totaux de l’installation : le rapport en impute la part de chaque tracteur électrique (total ÷ nombre de camions).', fields: [
-    { k: 'borneInv', l: 'Achat et installation (total)', u: '€ HT', pos: true },
-    { k: 'borneNb', l: 'Nombre de camions utilisant la borne', u: 'camions', pos: true },
-    { k: 'borneAbo', l: 'Abonnement et maintenance (total)', unitKey: 'borneAboU', units: U_AN_MOIS }
-  ]},
   { id: 'entretien', on: 'entretien', cx: true, title: 'Entretien', note: 'Contrat ou coût d’entretien par camion. Option : majorer l’entretien d’un tracteur thermique après la fin de son contrat.', fields: [
     { k: 'entE', l: V1, unitKey: 'entU', units: U_AN_MOIS },
     { k: 'entD', l: V2, unitKey: 'entU', units: U_AN_MOIS },
@@ -777,39 +739,24 @@ var GROUPS = [
     { k: 'assE', l: V1, unitKey: 'assU', units: U_AN_MOIS },
     { k: 'assD', l: V2, unitKey: 'assU', units: U_AN_MOIS }
   ]},
-  { id: 'regl', on: 'regl', cx: true, title: 'Taxes à venir', note: 'Non applicables à ce jour : taxe carbone sur les carburants (ETS2) et péages ou taxes kilométriques. À activer quand ils seront en vigueur.', fields: [
+  { id: 'regl', on: 'regl', cx: true, title: 'Fiscalité et taxes à venir', note: 'Non applicables à ce jour : taxe carbone sur le gazole, péages ou taxe kilométrique, économie d’impôt et certificats sur l’électricité. À activer quand ils seront en vigueur.', fields: [
     { k: 'carbP', l: 'Taxe carbone sur le gazole', u: '€/L HT', vis: function (s, o) { return !!o.energie && anyTherm(s); } },
     { k: 'carbYear', l: 'Appliquée à partir de l’année n°', pos: true, max: function (s) { return Math.min(15, Math.max(1, Math.round(posNum(s.annees)))); }, vis: function (s, o) { return !!o.energie && anyTherm(s); } },
     { k: 'pegE', l: function (s) { return 'Péages ou taxe kilométrique, ' + V1(s); }, u: '€ HT/an' },
-    { k: 'pegD', l: function (s) { return 'Péages ou taxe kilométrique, ' + V2(s); }, u: '€ HT/an' }
-  ]},
-  { id: 'fisc', on: 'fisc', cx: true, need: 'elec', title: 'Avantages fiscaux et certificats', note: 'Non applicables à ce jour : économie d’impôt (suramortissement) et recettes de certificats sur l’électricité rechargée au dépôt, pour chaque tracteur électrique. À vérifier avant usage.', fields: [
+    { k: 'pegD', l: function (s) { return 'Péages ou taxe kilométrique, ' + V2(s); }, u: '€ HT/an' },
     { k: 'fiscGain', l: 'Économie d’impôt, versée en année 1', u: '€' },
     { k: 'certif', l: 'Recette des certificats sur la recharge au dépôt', u: '€/kWh', vis: function (s, o) { return !!o.energie; } }
   ]},
   { id: 'evol', on: 'evol', title: 'Évolution des prix', note: 'Appliquée à partir de la 2e année.', fields: [
     { k: 'evElec', l: 'Prix de l’électricité', u: '%/an', vis: function (s, o) { return !!o.energie && anyElec(s); } },
     { k: 'evDiesel', l: 'Prix du gazole', u: '%/an', vis: function (s, o) { return !!o.energie && anyTherm(s); } },
-    { k: 'evAutres', l: 'Autres coûts (entretien, assurance, AdBlue, borne, chauffeur, péages)', u: '%/an', cx: true, vis: function (s, o) { return !!(o.entretien || o.assur || o.adblue || o.borne || o.chauf || o.regl); } }
+    { k: 'evAutres', l: 'Autres coûts (entretien, assurance, AdBlue, borne, péages)', u: '%/an', cx: true, vis: function (s, o) { return !!(o.entretien || o.assur || o.adblue || o.borne || o.regl); } }
   ]},
-  { id: 'scen', on: 'scen', title: 'Scénario prudent', note: 'Le rapport compare le scénario réaliste (données saisies) à un scénario prudent, avec les écarts ci-dessous.', fields: [
-    { k: 'scDiesel', l: 'Prix du gazole', u: '% d’écart', vis: function (s, o) { return !!o.energie && anyTherm(s); } },
-    { k: 'scElec', l: 'Prix de l’électricité', u: '% d’écart', vis: function (s, o) { return !!o.energie && anyElec(s); } },
-    { k: 'scKm', l: 'Kilométrage annuel', u: '% d’écart' },
-    { k: 'scBatDegP', l: 'Perte de capacité des batteries en plus', u: '%/an en plus', cx: true, hint: 's’ajoute à la perte du scénario réaliste', vis: function (s, o) { return !!o.batterie; } },
-    { k: 'scRes', l: function (s) { return 'Valeur de revente : ' + V1(s); }, u: '% d’écart', cx: true, vis: function (s, o) { return !!o.revente && ownsS(s, 'E'); } }
-  ]},
-  { id: 'sens', on: 'sens', title: 'Seuils de rentabilité et sensibilité', note: 'Ajoute au rapport une page de seuils de rentabilité, un graphique de sensibilité et une carte kilométrage × prix de l’énergie.', fields: [
-    { k: 'sensAmp', l: 'Variation testée (±)', u: '%', pos: true, max: 50 }
+  { id: 'sens', on: 'sens', title: 'Seuils de rentabilité et sensibilité', note: 'Ajoute au rapport une page de seuils de rentabilité, un graphique de sensibilité (chaque donnée variée de ± 10 %) et une carte kilométrage × prix de l’énergie.', fields: [
   ]},
   { id: 'co2', on: 'co2', title: 'Émissions de CO₂', note: 'Émissions à l’usage (combustion ou électricité).', fields: [
     { k: 'co2D', l: 'Gazole', u: 'kg CO₂/L', vis: function (s) { return anyTherm(s); } },
     { k: 'co2E', l: 'Électricité', u: 'kg CO₂/kWh', vis: function (s) { return anyElec(s); } }
-  ]},
-  { id: 'info', title: 'Informations du rapport', note: '', fields: [
-    { k: 'titre', l: 'Titre', text: true },
-    { k: 'client', l: 'Client / référence', text: true },
-    { k: 'auteur', l: 'Établi par', text: true }
   ]}
 ];
 /* Exemples de départ selon le type de comparaison (nouvelle étude) */
@@ -871,9 +818,10 @@ function readData(s) {
       d[k] = isText(k) ? s[k] : num(s[k]);
     }
   }
-  d.win = depotWin(s);
+  d.hcAsk = s.hcOn === 'oui' && !!effOn().contrat && anyElec(s);
+  d.win = depotWin(s, d.hcAsk);
   d.fenetre = d.win.hours;
-  d.hcR = hcRanges(s);
+  d.hcR = d.hcAsk && d.win.clock ? hcRanges(s) : null;
   d.firstE = creditLeaseFirst(s, 'E');
   d.aideFinE = aideLeaseFin(s, 'E');
   d.aideFinD = aideLeaseFin(s, 'D');
@@ -889,22 +837,25 @@ function readData(s) {
   return d;
 }
 /* Plage de recharge au dépôt : présence du camion (retour → départ suivant), limitée aux horaires saisis */
-function depotWin(s) {
-  var dep = Math.min(23.5, Math.max(0, num(s.hDep))), ret = Math.min(24, Math.max(0, num(s.hRet)));
-  if (ret <= dep) { ret = Math.min(24, dep + 10); }
-  var depM = Math.round(dep * 60), retM = Math.round(ret * 60) % 1440;
-  var deb = String(s.hRechDeb === undefined ? '' : s.hRechDeb).replace(/\s/g, ''), fin = String(s.hRechFin === undefined ? '' : s.hRechFin).replace(/\s/g, '');
-  var hor = s.rechPlage === 'horaire' && deb !== '' && fin !== '';
-  var debM = hor ? Math.round(Math.min(24, Math.max(0, num(deb))) * 60) % 1440 : 0, finM = hor ? Math.round(Math.min(24, Math.max(0, num(fin))) * 60) % 1440 : 0;
+/* Repos journalier minimal d'un chauffeur seul (règlement CE 561/2006) : sans temps de travail saisi, la journée dure au plus 24 − 11 = 13 h */
+var REPOS_MIN = 11;
+/* Journée type : tournée de D heures (temps de travail saisi ou règle des 11 h), puis arrêt au dépôt avec recharge dès le retour.
+   Sans heures creuses, aucune heure d'horloge : la journée est repérée depuis le départ (0 = départ, D = retour).
+   Avec heures creuses : l'heure de retour saisie place la journée sur l'horloge pour la croiser avec les heures creuses. */
+function depotWin(s, hcAsk) {
+  var tj = String(s.tJour === undefined || s.tJour === null ? '' : s.tJour).replace(/\s/g, '');
+  var given = tj !== '' && num(tj) > 0 && num(tj) < 24;
+  var Dm = Math.max(5, Math.min(1435, Math.round((given ? num(tj) : 24 - REPOS_MIN) * 12) * 5));
+  var hr = String(s.hRet === undefined || s.hRet === null ? '' : s.hRet);
+  var clock = !!hcAsk && hr !== '' && !!hcRanges(s);
+  var retM = clock ? Math.round(num(hr) * 60) % 1440 : Dm;
+  var depM = clock ? ((retM - Dm) % 1440 + 1440) % 1440 : 0;
   var inC = function (m, a, b) { return a === b ? true : (a < b ? (m >= a && m < b) : (m >= a || m < b)); };
-  var present = function (m) { return inC(m, retM, depM); };
-  var ok = function (m) { return present(m) && (!hor || inC(m, debM, finM)); };
-  var n = 0, m, first = null;
-  for (m = 0; m < 1440; m++) { if (ok(m)) { n++; } }
-  for (m = 0; m < 1440; m++) { var mm = (retM + m) % 1440; if (ok(mm)) { first = mm; break; } }
-  return { hor: hor, asked: s.rechPlage === 'horaire', missing: s.rechPlage === 'horaire' && !hor, debM: hor ? debM : retM, finM: hor ? finM : depM, retM: retM, depM: depM, hours: n / 60, startM: first === null ? retM : first, ok: ok, okRech: function (m) { return !hor || inC(m, debM, finM); } };
+  var ok = function (m) { return inC(m, retM, depM); };
+  return { known: true, given: given, rule: !given, clock: clock, hcWait: !!hcAsk && !clock, D: Dm / 60, driveH: Dm / 60, hor: false, debM: retM, finM: depM, retM: retM, depM: depM, hours: (1440 - Dm) / 60, startM: retM, ok: ok, okRech: function () { return true; } };
 }
-function hTxtClock(m) { var h = Math.floor(m / 60) % 24, mm = Math.round(m % 60); return h + '\u00a0h' + (mm ? '\u00a0' + (mm < 10 ? '0' : '') + mm : ''); }
+/* Texte de la journée type */
+function dayTxt(W) { return 'journée de ' + durTxt(W.D * 60) + (W.rule ? ' au plus, selon la règle des ' + REPOS_MIN + ' h de repos journalier d’un chauffeur seul' : ''); }
 /* Plages d'heures creuses saisies (null si aucune) */
 function hcRanges(s) {
   var out = [], i, a, b, A, B;
@@ -950,7 +901,8 @@ function chargePlan(d, sp, cap, fromPct, toPct) {
   return { sel: sel, eHC: eHC, eHP: eHP, share: R && eHC + eHP > 0 ? eHC / (eHC + eHP) : null, pilot: pilot, R: R, minutes: used, startM: st, endM: en, split: used > 0 && span > used + 1, timeShare: nW ? nWH / nW : 0 };
 }
 function hcPlanTxt(P) { return P.startM === null ? 'non planifiée' : (P.split ? 'en plusieurs fois entre ' + hTxtClock(P.startM) + ' et ' + hTxtClock(P.endM) : 'de ' + hTxtClock(P.startM) + ' à ' + hTxtClock(P.endM)) + (P.pilot ? ', pilotée en heures creuses' : ''); }
-function winTxt(W) { return 'de ' + hTxtClock(W.startM) + ' à ' + hTxtClock(W.hor ? (W.ok((W.finM + 1439) % 1440) ? W.finM : W.depM) : W.depM); }
+function hTxtClock(m) { var h = Math.floor(m / 60) % 24, mm = Math.round(m % 60); return h + '\u00a0h' + (mm ? '\u00a0' + (mm < 10 ? '0' : '') + mm : ''); }
+function winTxt(W) { return W.clock ? 'de ' + hTxtClock(W.retM) + ' à ' + hTxtClock(W.depM) : 'pendant les ' + durTxt(W.hours * 60) + ' d’arrêt au dépôt'; }
 function copyObj(o) {
   var c = {};
   var k;
@@ -1138,10 +1090,8 @@ function batSpec(d, X) {
   if (!(dod > 0)) { dod = 100; }
   dod = Math.min(100, dod);
   return {
-    brut: brut, dod: dod, net: brut * dod / 100, packs: Math.max(0, Math.round(d[eKey(X, 'packs')])),
-    dc: Math.max(0, d[eKey(X, 'dcMax')]), ac: Math.max(0, d[eKey(X, 'acMax')]),
-    ts: d[eKey(X, 'taperSoc')], tp: d[eKey(X, 'taperPct')],
-    motKw: Math.max(0, d[eKey(X, 'motKw')]), motNom: String(d[eKey(X, 'motNom')] || '').replace(/^\s+|\s+$/g, '')
+    brut: brut, dod: dod, net: brut * dod / 100, packs: (brut > 0 && Math.abs(brut / PACK_KWH - Math.round(brut / PACK_KWH)) < 0.02) ? Math.round(brut / PACK_KWH) : 0,
+    dc: Math.max(0, d[eKey(X, 'dcMax')]), ac: 0, ts: TAPER_SOC, tp: TAPER_PCT, motKw: 0, motNom: ''
   };
 }
 function taperOn(sp) { return sp.ts > 0 && sp.ts < 100 && sp.tp > 0 && sp.tp < 100; }
@@ -1182,7 +1132,8 @@ function chargeIn(sp, capK, from, hrs, pB, maxPct) {
 }
 /* Surconsommation liée au vieillissement pour un état de santé donné */
 function multAt(bat, soh) { return bat.seuil < 100 ? 1 + Math.max(0, bat.eff / 100 * (100 - soh) / (100 - bat.seuil)) : 1; }
-function marginPct(d) { return Math.min(50, Math.max(0, d.margeRet)); }
+var MARGE_RET = 5, TAPER_SOC = 80, TAPER_PCT = 30, PACK_KWH = 105;
+function marginPct(d) { return MARGE_RET; }
 function startPct(d) { return Math.min(100, Math.max(1, d.socFin)); }
 /* Puissance de recharge réellement disponible au dépôt et en route (plus basse entre borne et véhicule) */
 function depotPow(d, sp) { return d.bornePuis > 0 ? Math.min(d.bornePuis, sp.dc > 0 ? sp.dc : d.bornePuis) : 0; }
@@ -1201,13 +1152,13 @@ function depotSupply(sp, d, cap) {
    Départ au niveau visé ; retour avec la marge de sécurité ; pause de 45 min après 4 h 30 de conduite. */
 function kmCore(sp, d, on, cap, consKm, tour) {
   if (!(cap > 0) || !(consKm > 0)) { return null; }
-  var st = startPct(d), mg = marginPct(d), v = Math.max(0, d.vitMoy), legalH = num(d.conduiteMax) || 9;
+  var st = startPct(d), mg = marginPct(d), v = 0, legalH = 0;
   var o = { cap: cap, consKm: consKm, start: st, marge: mg, v: v, legalH: legalH, tour: tour || 0 };
   o.range = cap / consKm;
   o.eUse = cap * Math.max(0, st - mg) / 100;
   o.kmBat = o.eUse / consKm;
   o.kmLegal = v > 0 ? legalH * v : null;
-  o.pauseOn = d.pauseCharge === 'oui' && v > 0 && d.pausePuis > 0;
+  o.pauseOn = false;
   o.pauseP = o.pauseOn ? Math.min(d.pausePuis, sp.dc > 0 ? sp.dc : d.pausePuis) : 0;
   o.pauseKmAt = 4.5 * v;
   o.pauseCap = 0;
@@ -1247,10 +1198,8 @@ function batteryModel(d, on, X, cReal, c100, kwhAn0, ctx) {
   var sp = batSpec(d, X);
   var cap = sp.net;
   var cyclesYr = cap > 0 ? kwhAn0 / cap : 0;
-  var degYr = (d[eKey(X, 'batDegU')] === 'cycle' ? d[eKey(X, 'batDeg')] * cyclesYr / 1000 : d[eKey(X, 'batDeg')]) + (d.batDegPlus || 0);
-  var seuil = d[eKey(X, 'batSeuil')];
-  var rempl = d[eKey(X, 'batRempl')];
-  var eff = d[eKey(X, 'batEff')];
+  var degYr = on.vieil ? (d[eKey(X, 'batDegU')] === 'cycle' ? d[eKey(X, 'batDeg')] * cyclesYr / 1000 : d[eKey(X, 'batDeg')]) : 0;
+  var seuil = 0, rempl = 0, eff = 0; /* remplacement et surconsommation d'usure non modélisés */
   var cur = 100, start, end, avg, overc;
   var bat = {
     cap: cap, cyclesYr: cyclesYr, degYr: degYr, seuil: seuil, rempl: rempl, eff: eff,
@@ -1501,6 +1450,8 @@ function compute(d, on) {
   };
   var aideB = (on.borne && on.aides) ? Math.min(Math.max(0, d.aideBorne), Math.max(0, d.borneInv)) : 0;
   var borneGross = on.borne ? d.borneInv / nb : 0;
+  var borneLoan = (on.borne && d.borneFin === 'credit' && d.borneDuree > 0) ? borneGross : 0;
+  var borneInt = loanInterestByYear(borneLoan, d.borneTaux, d.borneDuree, 'ans', n);
   var aideBShare = on.borne ? aideB / nb : 0;
 
   /* Postes année par année, pour chaque véhicule (indice 0 = départ) */
@@ -1523,7 +1474,7 @@ function compute(d, on) {
       it.ent.push(oc['ent' + X] * fA * entMult(d, on, X, y));
       it.adb.push(el ? 0 : ev.adbCost * fA);
       it.ass.push(oc['ass' + X] * fA);
-      it.fin.push(ac.int[y]);
+      it.fin.push(ac.int[y] + (el ? borneInt[y] : 0));
       it.batt.push(ev.yr.batt[y]);
       it.chauf.push(ev.yr.chauf[y]);
       it.taxes.push(ev.yr.carb[y] + (on.regl ? d['peg' + X] * fA : 0));
@@ -1609,7 +1560,7 @@ function compute(d, on) {
     n: n, kmAn: kmAn, P: P, adj: adj, hivF: hivF, chgF: chgF, cmp: cmpOf(d),
     pSimpleHT: pSimpleHT, pDepHT: pDepHT, pPubHT: pPubHT, pDieHT: pDieHT, pDieHTnet: pDieHTnet, rembU: rembU,
     fixedContrat: fixedContrat, V: V, A: A, IT: IT, an: an, ref: ref, oc: oc,
-    aideB: aideB, aideBShare: aideBShare, borneGross: borneGross, borneNet: borneGross - aideBShare,
+    aideB: aideB, aideBShare: aideBShare, borneGross: borneGross, borneLoan: borneLoan, borneInt: borneInt, borneNet: borneGross - aideBShare,
     d: d, lmE: A.E.lm, lmD: A.D.lm, ownE: A.E.own, ownD: A.D.own, leaseShortE: A.E.leaseShort, leaseShortD: A.D.leaseShort,
     cE: cE, cD: cD, stackE: stackE, stackD: stackD,
     resE: resE, resD: resD, tcoE: tcoE, tcoD: tcoD, tcoSav: tcoD - tcoE,
@@ -1659,7 +1610,13 @@ function monthlyCash(d, on, r) {
         if (ac.lm >= 1 && ac.lm <= M) { acq[ac.lm] -= d['opt' + X]; }
       }
     }
-    if (el && on.borne) { acq[1] -= r.borneGross; }
+    if (el && on.borne) {
+      if (r.borneLoan > 0) {
+        var schB = loanSchedule(r.borneLoan, d.borneTaux, d.borneDuree, 'ans', M);
+        for (m = 1; m <= M; m++) { acq[m] -= schB.pay[m]; }
+        acq[M] -= schB.rest;
+      } else { acq[1] -= r.borneGross; }
+    }
     /* Usage, réparti uniformément sur les 12 mois de chaque année */
     for (m = 1; m <= M; m++) {
       y = Math.ceil(m / 12);
@@ -1738,7 +1695,7 @@ function solveFactor(d, on, complet, apply, lo, hi) {
 }
 
 function sensitivity(d, on, complet, r) {
-  var amp = Math.min(50, Math.max(1, d.sensAmp)) / 100;
+  var amp = 0.10;
   var base = metricOf(r, complet);
   var thr = [];
   var N1 = vehName(d, 'E'), N2 = vehName(d, 'D');
@@ -2089,6 +2046,9 @@ function effOn() {
     g = GROUPS[i];
     if (g.on && g.req && !o[g.req]) { o[g.on] = false; }
   }
+  o.remb = !!(o.energie && anyTherm(state) && state.rembOn === 'oui');
+  o.chauf = false; o.scen = false;
+  o.fisc = !!(o.regl && anyElec(state));
   if (o.aides && !((o.achat && anyElec(state)) || o.borne)) { o.aides = false; }
   if (o.fin && !(state.modeE === 'achat' || state.modeD === 'achat')) { o.fin = false; }
   if (o.revente && !(ownsS(state, 'E') || ownsS(state, 'D'))) { o.revente = false; }
@@ -2139,6 +2099,7 @@ function missReason(k) {
   var f = FIELD[k];
   if (!f || !fieldActive(k)) { return ''; }
   if (k === 'rechMode' && state.rechMode === 'auto' && !effOn().batterie) { return 'nécessite la carte Batterie (étude complète)'; }
+  if (k === 'hRet' && String(state.hRet === undefined || state.hRet === null ? '' : state.hRet) === '') { return 'à renseigner'; }
   if (f.select) { return ''; }
   var v = String(state[k] === undefined || state[k] === null ? '' : state[k]).replace(/^\s+|\s+$/g, '');
   if (v === '') { return f.optional ? '' : 'à renseigner'; }
@@ -2165,7 +2126,6 @@ function missReason(k) {
     else if (aideLeaseFin(state, AX) > 0 && creditLeaseFirst(state, AX) + av + creditLeaseResidual(state, AX) >= num(state['prix' + AX])) { return 'aide + premier loyer + valeur résiduelle doivent rester inférieurs au prix'; }
     else if (aideLease6(state, AX) > 0 && creditLeaseMonthly(state, AX) <= 0) { return 'aide trop élevée pour ce crédit-bail'; }
   }
-  if (k === 'hRet' && parseFloat(s) <= num(state.hDep)) { return 'doit être après l’heure de départ'; }
   if ((k === 'hcFin1' && num(state.hcDeb1) === parseFloat(s)) || (k === 'hcFin2' && String(state.hcDeb2 || '') !== '' && num(state.hcDeb2) === parseFloat(s))) { return 'début et fin identiques'; }
   if (k === 'rembTicpe' && num(state.ticpe) > 0 && parseFloat(s) >= num(state.ticpe)) { return 'égal ou supérieur à toute la TICPE : vérifie le taux'; }
   if (k === 'aideBorne') {
@@ -2235,7 +2195,7 @@ function headHtml(d) {
   var sub = (isComplet() ? 'Étude comparative du coût total de possession' : 'Comparatif des consommations d’énergie') + ' · ' + CMP_LABEL[cmpOf(d)].toLowerCase() + ' · montants hors taxes';
   var h = '<div class="ph"><div class="ph-top"><div class="wmwrap"><div class="wm"><span class="a">Master</span><span class="b">TCO</span></div><div class="wmbar"></div></div>';
   h += '<div class="ph-r">' + date + (d.client ? '<br>' + esc(d.client) : '') + '</div></div>';
-  h += '<div class="ph-t">' + esc(d.titre || (N1(d) + ' vs ' + N2(d))) + '</div>';
+  h += '<div class="ph-t">' + esc(N1(d) + ' vs ' + N2(d)) + '</div>';
   h += '<div class="ph-s">' + sub + '</div></div>';
   return h;
 }
@@ -2282,7 +2242,7 @@ function basisLine(r, d, on) {
   var p = [];
   if (anyElec(d)) { p.push('électricité ' + fmt(elecPriceShown(r), 3) + ' €/kWh HT'); }
   if (anyTherm(d)) { p.push('gazole ' + fmt(r.pDieHT, 3) + ' €/L HT' + (r.pDieHTnet < r.pDieHT - 1e-9 ? ' (' + fmt(r.pDieHTnet, 3) + ' après remboursement TICPE)' : '')); }
-  return '<div class="basis">Scénario réaliste · ' + fmt(r.kmAn, 0) + ' km/an sur ' + ans(r.n) + ' · ' + esc(N1(d)) + ' : ' + consText(r.V.E, on, r) + ' · ' + esc(N2(d)) + ' : ' + consText(r.V.D, on, r) + (p.length ? ' · ' + p.join(' · ') : '') + '.</div>';
+  return '<div class="basis">' + fmt(r.kmAn, 0) + ' km/an sur ' + ans(r.n) + ' · ' + esc(N1(d)) + ' : ' + consText(r.V.E, on, r) + ' · ' + esc(N2(d)) + ' : ' + consText(r.V.D, on, r) + (p.length ? ' · ' + p.join(' · ') : '') + '.</div>';
 }
 function pctText(r, d) {
   var p = r.an.pctHT;
@@ -2341,7 +2301,7 @@ function co2Block(r, d) {
 /* Lien entre CO₂ et marchandise transportée (charge moyenne saisie) */
 function co2FreightBlock(r, d) {
   var t = d.chargeT, tkmAn = t * r.kmAn;
-  if (!(t > 0) || !(tkmAn > 0)) { return '<div class="basis">Renseigne la charge transportée moyenne (Projection et chargement) pour rapporter le CO₂ aux tonnes transportées.</div>'; }
+  if (!(t > 0) || !(tkmAn > 0)) { return '<div class="basis">Renseigne la charge transportée moyenne (carte Usage et chargement) pour rapporter le CO₂ aux tonnes transportées.</div>'; }
   var day = r.P.days > 0 ? r.kmAn / r.P.days : 0;
   var gE = r.V.E.kg1 * 1000 / tkmAn, gD = r.V.D.kg1 * 1000 / tkmAn;
   var a = esc(N1(d)), b = esc(N2(d));
@@ -2354,10 +2314,10 @@ function co2FreightBlock(r, d) {
   h += '<table class="t sm">' + th2(d, 'Évité par ' + a);
   h += '<tr><td>Par tonne-kilomètre</td><td>' + fmt(gE, 1) + ' g</td><td>' + fmt(gD, 1) + ' g</td><td>' + fmt(gD - gE, 1) + ' g</td></tr>';
   if (day > 0) { h += '<tr><td>Par tonne livrée sur la tournée type (' + fmt(day, 0) + ' km)</td><td>' + fmt(gE * day / 1000, 1) + ' kg</td><td>' + fmt(gD * day / 1000, 1) + ' kg</td><td>' + fmt((gD - gE) * day / 1000, 1) + ' kg</td></tr>'; }
-  h += '<tr class="hl"><td>Par an, pour ' + fmt(tkmAn / 1e6, 2) + ' million de t·km</td><td>' + fmt(r.V.E.kg1 / 1000, 1) + ' t</td><td>' + fmt(r.V.D.kg1 / 1000, 1) + ' t</td><td>' + fmt(r.co2Year, 1) + ' t</td></tr>';
+  h += '<tr class="hl"><td>Par an, pour ' + fmt(tkmAn / 1e6, 2) + (tkmAn / 1e6 >= 2 ? ' millions' : ' million') + ' de t·km</td><td>' + fmt(r.V.E.kg1 / 1000, 1) + ' t</td><td>' + fmt(r.V.D.kg1 / 1000, 1) + ' t</td><td>' + fmt(r.co2Year, 1) + ' t</td></tr>';
   h += '</table>';
   var ok = r.co2Total >= 0;
-  h += '<div class="callout ' + (ok ? 'ok' : 'bad') + '">Avec ' + fmt(t, 1) + ' t de marchandise en moyenne, ' + a + ' transporte ' + fmt(tkmAn * r.n / 1e6, 2) + ' million de tonnes-kilomètres sur ' + ans(r.n) + ' en émettant <b>' + fmt(gE, 1) + ' g de CO₂ par tonne-kilomètre</b>, contre ' + fmt(gD, 1) + ' g pour ' + b + '. ' + (ok ? 'Chaque tonne livrée sur la tournée type évite ' + fmt((gD - gE) * day / 1000, 1) + ' kg de CO₂, soit ' + fmtT(r.co2Total) + ' t évitées sur la période.' : a + ' émet davantage de CO₂ par tonne transportée.') + '</div>';
+  h += '<div class="callout ' + (ok ? 'ok' : 'bad') + '">Avec ' + fmt(t, 1) + ' t de marchandise en moyenne, ' + a + ' transporte ' + fmt(tkmAn * r.n / 1e6, 2) + (tkmAn * r.n / 1e6 >= 2 ? ' millions' : ' million') + ' de tonnes-kilomètres sur ' + ans(r.n) + ' en émettant <b>' + fmt(gE, 1) + ' g de CO₂ par tonne-kilomètre</b>, contre ' + fmt(gD, 1) + ' g pour ' + b + '. ' + (ok ? 'Chaque tonne livrée sur la tournée type évite ' + fmt((gD - gE) * day / 1000, 1) + ' kg de CO₂, soit ' + fmtT(r.co2Total) + ' t évitées sur la période.' : a + ' émet davantage de CO₂ par tonne transportée.') + '</div>';
   return h;
 }
 
@@ -2459,7 +2419,7 @@ function pageComplet1(r, d, on) {
     ['Entretien', r.cE.ent, r.cD.ent, on.entretien],
     ['AdBlue', r.cE.adb, r.cD.adb, on.adblue && anyTherm(d)],
     ['Assurance et taxes', r.cE.ass, r.cD.ass, on.assur],
-    ['Financement (intérêts)', r.cE.fin, r.cD.fin, on.fin],
+    ['Financement (intérêts)', r.cE.fin, r.cD.fin, on.fin || r.cE.fin > 0 || r.cD.fin > 0],
     ['Remplacement de la batterie', r.cE.batt, r.cD.batt, on.batterie && (r.cE.batt > 0 || r.cD.batt > 0)],
     ['Temps chauffeur en recharge', r.cE.chauf, r.cD.chauf, on.chauf && anyElec(d)],
     ['Taxes à venir (carbone, péages)', r.cE.taxes, r.cD.taxes, on.regl]
@@ -2613,7 +2573,7 @@ var BLOCK_NAMES = [
   ['energie', 'Énergie'], ['contrat', 'Contrat électrique'], ['saison', 'Hiver et charge'], ['achat', 'Acquisition'],
   ['aides', 'Aides'], ['fin', 'Crédit'], ['revente', 'Valeur de revente'], ['borne', 'Borne de recharge'],
   ['entretien', 'Entretien'], ['adblue', 'AdBlue'], ['assur', 'Assurance et taxes'], ['batterie', 'Batterie LFP'],
-  ['recharge', 'Recharge publique'], ['chauf', 'Temps chauffeur'], ['remb', 'Remboursement de TICPE'],
+  ['recharge', 'Recharge publique'], ['remb', 'Remboursement de TICPE'],
   ['regl', 'Taxes à venir'], ['fisc', 'Avantages fiscaux'], ['evol', 'Évolution des prix'], ['co2', 'CO₂']
 ];
 var ACQ_NAME = { achat: 'achat', location: 'location', cbail: 'crédit-bail' };
@@ -2635,15 +2595,12 @@ function batteryBlock(r, d, on, X, two) {
   h += '<div class="basis" style="margin:3px 0 0;font-size:10px">Autonomie totale : batterie nette de 100 à 0 %. Km possibles par jour : départ à ' + fmt(b.K[0].start, 0) + ' %, retour avec la marge de ' + fmt(b.K[0].marge, 0) + ' %' + (b.K[0].pauseOn ? ', recharge à la pause comprise' : '') + (b.K[0].kmLegal !== null ? ', dans la limite de ' + fmt(b.K[0].legalH, 0) + ' h de conduite' : '') + '. Retour et recharge pour la tournée de ' + fmt(b.dailyKm, 0) + ' km.</div>';
   var keys = [];
   keys.push('Perte de capacité estimée : <b>' + fmt(b.degYr, 2) + ' % par an</b> (' + fmt(b.cyclesYr, 0) + ' cycles équivalents par an).');
-  if (b.seuilYear === null) { keys.push('Le seuil de ' + fmt(b.seuil, 0) + ' % n’est pas atteint sur ' + ans(n) + '.'); }
-  else if (b.replYears.length > 0) { keys.push('Seuil de ' + fmt(b.seuil, 0) + ' % atteint en année ' + b.seuilYear + ' : remplacement de la batterie intégré au coût (' + eur(b.rempl) + ').'); }
-  else { keys.push('Seuil de ' + fmt(b.seuil, 0) + ' % atteint en année ' + b.seuilYear + '.'); }
-  if (!two) { keys.push('Effet sur l’énergie : consommation moyenne ' + fmt((b.avgMult - 1) * 100, 1) + ' % plus élevée que neuve, déjà comprise dans les coûts.'); }
+  keys.push('État de santé en fin d’étude : <b>' + fmt(b.sohPre[n], 1) + ' %</b>.');
   h += '<div style="margin-top:5px;font-size:11.5px;color:#3a4552">' + keys.join(' ') + '</div>';
   if (b.dailyKm > 0) {
     var K0 = b.K[0], KN = b.K[n], W0 = b.KW[0];
     var t1 = 'Tournée de ' + fmt(b.dailyKm, 0) + ' km par jour : <b>' + fmt(K0.kmMax, 0) + ' km possibles par jour</b> batterie neuve' + (W0 ? ' (' + fmt(W0.kmMax, 0) + ' km en hiver)' : '') + ' et ' + fmt(KN.kmMax, 0) + ' km en fin d’année ' + n + ', marge de ' + fmt(K0.marge, 0) + ' % gardée. ' + (b.okRange ? 'Aucune recharge en route nécessaire.' : (on.recharge && d.rechMode === 'auto' ? 'La recharge en route nécessaire est calculée et comptée dans les coûts.' : 'Une recharge en route sera nécessaire : utiliser la recharge publique en mode automatique pour la chiffrer.'));
-    var t2 = 'Recharge au dépôt à ' + fmt(K0.depP, 0) + ' kW (borne ' + fmt(d.bornePuis, 0) + ' kW, véhicule ' + fmt(b.spec.dc, 0) + ' kW) : ' + hTxt(K0.rechH) + ' par jour neuve et ' + hTxt(KN.rechH) + ' en fin d’année ' + n + ', pour ' + fmt(d.fenetre, 0) + ' h disponibles (' + winTxt(d.win) + '). ' + (b.okWindow ? 'Le créneau est suffisant.' : 'Le créneau est insuffisant : borne plus puissante ou recharge complémentaire à prévoir.');
+    var t2 = 'Recharge au dépôt à ' + fmt(K0.depP, 0) + ' kW (borne ' + fmt(d.bornePuis, 0) + ' kW, véhicule ' + fmt(b.spec.dc, 0) + ' kW) : ' + hTxt(K0.rechH) + ' par jour neuve et ' + hTxt(KN.rechH) + ' en fin d’année ' + n + ', pour ' + durTxt(d.fenetre * 60) + ' d’arrêt au dépôt (' + dayTxt(d.win) + (d.win.clock ? ', ' + winTxt(d.win) : '') + '). ' + (b.okWindow ? 'Le temps d’arrêt suffit.' : 'Le temps d’arrêt ne suffit pas : borne plus puissante ou recharge complémentaire à prévoir.');
     h += '<div class="callout ' + (b.okRange && b.okWindow ? 'ok' : 'bad') + '" style="font-size:11.5px;padding:6px 10px;margin:6px 0">' + t1 + '<br>' + t2 + '</div>';
   }
   return h;
@@ -2701,6 +2658,7 @@ function pageComplet4(r, d, on) {
   h += '</div>';
   var two = !!(r.V.E.bat && r.V.D.bat);
   if (on.batterie && !two) { h += batteryBlock(r, d, on, 'E', false) + batteryBlock(r, d, on, 'D', false); }
+  if (on.co2 && !(d.chargeT > 0)) { h += co2Block(r, d); }
   h += disclaimer();
   h += footHtml(d, '') + '</div>';
   return h;
@@ -2745,8 +2703,9 @@ function annex1(r, d, on) {
       if (f.sep) { if (rows.length) { segs.push({ title: segT, rows: rows }); } rows = []; segT = g.title.split(' : ')[0] + ' · ' + sepText(f); continue; }
       if (!f.k || !fieldVisible(f)) { continue; }
       if (TEXT_KEYS[f.k] && String(state[f.k]) === '') { continue; }
+      if (f.k === 'tJour' && d.win.rule) { rows.push([labelText(f), 'non renseigné : ' + durTxt(d.win.D * 60) + ' au plus (règle des ' + REPOS_MIN + ' h de repos journalier)']); continue; }
       if (f.optional && String(state[f.k] === undefined ? '' : state[f.k]).replace(/\s/g, '') === '') { continue; }
-      if (f.k === 'pilotHC' && !hcRanges(state)) { continue; }
+      if (f.k === 'pilotHC' && state.hcOn !== 'oui') { continue; }
       rows.push(reportRow(f, d));
     }
     if (rows.length) { segs.push({ title: segT, rows: rows }); }
@@ -2826,7 +2785,7 @@ function annex2(r, d, on) {
       if (ev.consMode === 'direct') { add('Consommation à l’essai' + nm(X), 'Saisie directe', fmt(ev.c100, 1) + ' kWh/100 km'); }
       else { add('Consommation à l’essai' + nm(X), fmt(ev.testKwh, 1) + ' kWh ÷ ' + fmt(ev.testKm, 1) + ' km × 100', fmt(ev.c100, 1) + ' kWh/100 km'); }
       if (on.saison) { add('Consommation réelle' + nm(X), fmt(ev.c100, 1) + ' × (1 + ' + fmt(d.hivPct, 1) + ' % × ' + fmt(d.hivMois, 0) + '/12) × (1 + ' + fmt(d.chargePct, 1) + ' %)', fmt(ev.cReal, 1) + ' kWh/100 km'); }
-      add('Énergie électrique (année 1)' + nm(X), fmt(ev.cReal, 1) + ' × ' + fmt(r.kmAn, 0) + ' ÷ 100' + (ev.bat ? ' × vieillissement' : ''), fmt(ev.yr.qty[1], 0) + ' kWh');
+      add('Énergie électrique (année 1)' + nm(X), fmt(ev.cReal, 1) + ' × ' + fmt(r.kmAn, 0) + ' ÷ 100', fmt(ev.yr.qty[1], 0) + ' kWh');
     } else {
       add('Gazole annuel' + nm(X), fmt(ev.c100, 1) + ' L/100 km × ' + fmt(r.kmAn, 0) + ' ÷ 100', fmt(ev.qty0, 0) + ' L/an');
     }
@@ -2848,7 +2807,7 @@ function annex2(r, d, on) {
           if (d.rechMode === 'pct') { how = fmt(d.partPublic, 1) + ' % de l’énergie'; }
           else if (d.rechMode === 'kwh') { how = fmt(ev.occ, 0) + ' recharges/an × ' + fmt(d.rechKwh, 0) + ' kWh'; }
           else if (d.rechMode === 'dur') { how = fmt(ev.occ, 0) + ' recharges/an × ' + fmt(d.rechPow, 0) + ' kW × ' + fmt(d.rechDurU === 'min' ? d.rechDur / 60 : d.rechDur, 2) + ' h'; }
-          else { how = 'Besoin journalier − énergie disponible entre ' + fmt(startPct(d), 0) + ' % et la marge de ' + fmt(marginPct(d), 0) + ' % (limitée à ' + fmt(d.fenetre, 1) + ' h de recharge au dépôt), × ' + fmt(r.P.days, 0) + ' jours' + (ev.yr.pause[1] > 0 ? ', dont ' + fmt(ev.yr.pause[1], 0) + ' kWh à la pause' : ''); }
+          else { how = 'Besoin journalier − énergie disponible entre ' + fmt(startPct(d), 0) + ' % et la marge de ' + fmt(marginPct(d), 0) + ' % (recharge au dépôt limitée aux ' + durTxt(d.fenetre * 60) + ' d’arrêt), × ' + fmt(r.P.days, 0) + ' jours' + (ev.yr.pause[1] > 0 ? ', dont ' + fmt(ev.yr.pause[1], 0) + ' kWh à la pause' : ''); }
           add('Recharge en borne publique' + nm(X), how + ', à ' + fmt(r.pPubHT, 4) + ' €/kWh', fmt(ev.yr.pub[1], 0) + ' kWh (' + fmt(ev.share1 * 100, 1) + ' %)');
         }
         add('Coût de l’électricité' + nm(X), fmt(ev.yr.dep[1], 0) + ' kWh au dépôt' + (on.recharge ? ' + ' + fmt(ev.yr.pub[1], 0) + ' kWh en public' : '') + (on.contrat ? ' + part fixe' : ''), eur(ev.ene1));
@@ -2879,6 +2838,7 @@ function annex2(r, d, on) {
       });
     }
     if (on.borne) { add('Borne imputée à chaque camion électrique', '(' + eur(d.borneInv) + (r.aideB > 0 ? ' − aide ' + eur(r.aideB) + ' versée le ' + AIDE_MOIS + 'e mois' + (r.aideB < num(state.aideBorne) ? ' (plafonnée au prix)' : '') : '') + ') ÷ ' + fmt(r.oc.nb, 0) + (r.aideB > 0 ? ' ; aide ' + borneAideText(borneLeaseOk(state) ? state.aideBorneMode : 'client', r.aideBShare, d) : '') + ' ; abonnement ' + eur(r.oc.borneAboTot) + ' ÷ ' + fmt(r.oc.nb, 0), 'Invest. ' + eur(r.borneNet) + ' · ' + eur(r.oc.borneAbo) + '/an'); }
+    if (on.borne && r.borneLoan > 0) { add('Crédit de la borne', fmt(r.borneLoan, 0) + ' € par camion sur ' + fmt(d.borneDuree, 1) + ' an(s) à ' + fmt(d.borneTaux, 2) + ' %', eur(r.borneInt.reduce(function (a0, v0) { return a0 + v0; }, 0)) + ' d’intérêts sur ' + ans(n)); }
     if (on.fin) {
       var fT = function (X) { return d['mode' + X] === 'achat' ? fmt(d['finPart' + X], 0) + ' % à ' + fmt(d['finTaux' + X], 2) + ' % sur ' + fmt(d['finDuree' + X], 0) + ' ' + d['finU' + X] : 'sans crédit'; };
       add('Intérêts des crédits', esc(N1(d)) + ' : ' + fT('E') + ' ; ' + esc(N2(d)) + ' : ' + fT('D'), pair(d, eur(r.cE.fin), eur(r.cD.fin)));
@@ -2886,10 +2846,13 @@ function annex2(r, d, on) {
     if (on.revente) { add('Valeur de revente', (d.resU === 'eur' ? 'Montants forfaitaires saisis' : 'Prix neuf × % résiduel saisi, sans modèle de marché ni état de batterie') + ', déduite en fin d’année ' + n + ' si le client est propriétaire', pair(d, eur(r.resE), eur(r.resD))); }
     if (on.regl) { add('Taxes à venir', (on.energie && anyTherm(d) ? 'Gazole × ' + fmt(d.carbP, 3) + ' €/L dès l’année ' + fmt(d.carbYear, 0) + ' ; ' : '') + 'péages ' + eur(d.pegE) + ' et ' + eur(d.pegD) + '/an', pair(d, eur(r.cE.taxes), eur(r.cD.taxes))); }
     if (on.fisc) { add('Avantages fiscaux', 'Économie d’impôt ' + eur(d.fiscGain) + (on.energie ? ' + kWh au dépôt × ' + fmt(d.certif, 3) + ' €' : '') + ', par camion électrique', pair(d, '– ' + eur(r.cE.recettes), '– ' + eur(r.cD.recettes))); }
+    if (on.batterie && Xs.some(function (X) { return r.V[X].bat && r.V[X].bat.K[0]; })) {
+      add('Temps à l’arrêt au dépôt', '24 h − ' + dayTxt(d.win) + (d.win.clock ? ' ; retour à ' + hTxtClock(d.win.retM) + ', départ à ' + hTxtClock(d.win.depM) : '') + ' ; la recharge démarre au retour' + (d.hcR && d.pilotHC === 'hc' ? ', pilotée en heures creuses' : ''), durTxt(d.fenetre * 60) + ' par jour');
+    }
     if (on.batterie) { Xs.forEach(function (X) { var b = r.V[X].bat; if (b && b.K[0]) {
       var sp = b.spec, K0 = b.K[0], KN = b.K[n];
       add('Capacité nette' + nm(X), fmt(sp.brut, 0) + ' kWh bruts × ' + fmt(sp.dod, 0) + ' % utilisables', fmt(sp.net, 0) + ' kWh');
-      add('Vieillissement' + nm(X), 'Perte ' + fmt(b.degYr, 2) + ' %/an ; surconsommation linéaire jusqu’à ' + fmt(b.eff, 1) + ' % au seuil de ' + fmt(b.seuil, 0) + ' % ; fin année ' + n + ' : ' + fmt(sp.net, 0) + ' × ' + fmt(b.sohPre[n], 1) + ' %, conso ' + fmt(K0.consKm * 100, 1) + ' × ' + fmt(KN.consKm / K0.consKm, 4), 'Santé ' + fmt(b.sohPre[n], 1) + ' % · ' + fmt(KN.cap, 0) + ' kWh');
+      add('Vieillissement' + nm(X), 'Perte ' + fmt(b.degYr, 2) + ' %/an ; fin année ' + n + ' : ' + fmt(sp.net, 0) + ' kWh × ' + fmt(b.sohPre[n], 1) + ' %', 'Santé ' + fmt(b.sohPre[n], 1) + ' % · ' + fmt(KN.cap, 0) + ' kWh');
       add('Autonomie totale' + nm(X), fmt(K0.cap, 0) + ' kWh ÷ ' + fmt(K0.consKm * 100, 1) + ' kWh/100 km × 100 (batterie de 100 à 0 %)', fmt(K0.range, 0) + ' km · an ' + n + ' : ' + fmt(KN.range, 0) + ' km');
       add('Km possibles par jour' + nm(X), 'Batterie : ' + fmt(K0.cap, 0) + ' × (' + fmt(K0.start, 0) + ' − ' + fmt(K0.marge, 0) + ') % ÷ ' + fmt(K0.consKm * 100, 1) + ' × 100 = ' + fmt(K0.kmBat, 0) + ' km' + (K0.pauseCap > 0 ? ' + pause ' + fmt(K0.pauseKm, 0) + ' km' : '') + (K0.kmLegal !== null ? ' ; conduite : ' + fmt(K0.legalH, 0) + ' h × ' + fmt(K0.v, 0) + ' km/h = ' + fmt(K0.kmLegal, 0) + ' km ; on retient le plus petit' : ''), fmt(K0.kmMax, 0) + ' km · an ' + n + ' : ' + fmt(KN.kmMax, 0) + ' km');
       add('Retour au dépôt' + nm(X), fmt(K0.start, 0) + ' % − ' + fmt(b.dailyKm, 0) + ' km × ' + fmt(K0.consKm * 100, 1) + ' kWh/100 km ÷ ' + fmt(K0.cap, 0) + ' kWh' + (K0.tourPauseE > 0 ? ' + ' + fmt(K0.tourPauseE, 0) + ' kWh rechargés à la pause' : ''), fmt(K0.retPct, 1) + ' % · an ' + n + ' : ' + fmt(KN.retPct, 1) + ' %');
@@ -2908,9 +2871,9 @@ function annex2(r, d, on) {
     add('CO₂ évité par an', co2f('D') + ' − ' + co2f('E') + ' kg (année 1)', fmt(r.co2Year, 1) + ' t/an');
   }
   if ((on.scen && CUR_RP && CUR_RP.valid) || (on.sens && CUR_SENS)) {
-    sec('Scénarios et sensibilité');
+    sec('Seuils et sensibilité');
     if (on.scen && CUR_RP && CUR_RP.valid) { add('Scénario prudent', 'Mêmes calculs avec : ' + scenarioText(d, on), isComplet() ? eur(CUR_RP.tcoSav) : eur(CUR_RP.totEneHT)); }
-    if (on.sens && CUR_SENS) { add('Seuils et sensibilité', 'Seuil recherché sur un facteur de 0,02 à 20 (s’il n’est pas trouvé, il est hors plage ou absent) ; autres données inchangées ; sensibilité à ± ' + fmt(CUR_SENS.amp * 100, 0) + ' %', ''); }
+    if (on.sens && CUR_SENS) { add('Seuils et sensibilité', 'Seuil recherché sur un facteur de 0,02 à 20 (s’il n’est pas trouvé, il est hors plage ou absent) ; autres données inchangées', 'variation ± ' + fmt(CUR_SENS.amp * 100, 0) + ' %'); }
   }
 
   /* Découpage en pages : estimation du nombre de lignes de chaque calcul */
@@ -3197,18 +3160,15 @@ function weekSim(d, on, r, X, opt) {
   var K = opt.winter ? (BS.KW || BS.K) : BS.K;
   var dailyKm = bat.dailyKm || 0;
   var dayKWh = dailyKm * consKm;
-  var nDays = Math.min(7, Math.max(0, Math.round(d.semJours)));
-  var hDep = Math.min(23.5, Math.max(0, d.hDep)), hRet = Math.min(24, Math.max(0, d.hRet));
-  if (hRet <= hDep) { hRet = Math.min(24, hDep + 10); }
-  var dep = Math.round(hDep * 12) * 5, td = Math.max(30, Math.round((hRet - hDep) * 60));
-  var v = Math.max(0, d.vitMoy);
+  var DW = d.win || depotWin(d);
+  var nDays = Math.min(7, Math.max(1, Math.round(r.P.weeks > 0 ? r.P.days / r.P.weeks : r.P.days / WEEKS_PER_YEAR)));
+  var dep = DW.depM, td = Math.max(30, Math.round(DW.D * 60));
   var pauseOn = K.pauseOn && td > 45 + 30 && dailyKm > K.pauseKmAt;
   var driveMin = pauseOn ? td - 45 : td;
   var kmRate = dailyKm / driveMin;
   var full = cap * startPct(d) / 100;
   var mgK = cap * marginPct(d) / 100;
   var pDep = Math.max(1, d.bornePuis), pPub = Math.max(1, d.rechPow), pPause = Math.max(1, d.pausePuis);
-  var DW = d.win || depotWin(d);
   var PL = chargePlan(d, sp, cap, Math.max(0, K.retEff), startPct(d));
   var canCharge = function (tod) { return PL.pilot ? PL.sel[tod] : DW.okRech(tod); };
   var hcStart = DW.hor ? DW.startM : null;
@@ -3274,28 +3234,33 @@ function weekSim(d, on, r, X, opt) {
     }
   }
   var lows = [], minS = 101, minI = 0, depE = 0, pubE = 0, depMin = 0, depN = 0, pubMin = 0, pzE = 0;
+  var depMins = [];
   for (k = 0; k < segs.length; k++) {
     e2 = segs[k];
-    if (e2.ph === 2) { depE += e2.kwh; depMin += e2.min; depN++; }
+    if (e2.ph === 2) { depE += e2.kwh; depMin += e2.min; depN++; depMins.push(e2.min); }
     if (e2.ph === 3) { pubE += e2.kwh; pubMin += e2.min; }
     if (e2.ph === 4) { pzE += e2.kwh; }
   }
-  for (day = 0; day < 7; day++) {
-    var lo = 101, loI = -1;
-    for (i = day * 288; i < (day + 1) * 288; i++) { if (rec.soc[i] < lo) { lo = rec.soc[i]; loI = i; } }
-    if (day < nDays) { lows.push({ day: day, soc: lo, i: loI, km: lo / 100 * cap / consKm, mkm: (lo - marginPct(d)) / 100 * cap / consKm }); }
-    if (lo < minS) { minS = lo; minI = loI; }
+  /* Point bas de chaque tournée (d'un départ au départ suivant) et de la semaine */
+  for (i = 0; i < N; i++) { if (rec.soc[i] < minS) { minS = rec.soc[i]; minI = i; } }
+  for (day = 0; day < nDays; day++) {
+    var lo = 101, loI = -1, i0 = (day * 1440 + dep) / WK_STEP, jj, ii;
+    for (jj = 0; jj < 288; jj++) { ii = (i0 + jj) % N; if (rec.soc[ii] < lo) { lo = rec.soc[ii]; loI = ii; } }
+    lows.push({ day: day, soc: lo, i: loI, km: lo / 100 * cap / consKm, mkm: (lo - marginPct(d)) / 100 * cap / consKm });
   }
-  var depSoc = rec.soc[Math.max(0, dep / WK_STEP - 1)];
+  /* Recharge à cheval sur la fin de la semaine : une seule recharge */
+  if (segs.length > 1 && segs[0].ph === 2 && segs[segs.length - 1].ph === 2 && depMins.length > 1) { depMins[0] += depMins.pop(); depN--; }
+  var depEven = depMins.every(function (x) { return Math.abs(x - depMins[0]) < 5; });
+  var depSoc = rec.soc[(dep / WK_STEP - 1 + N) % N];
   var notFull = false;
   for (day = 0; day < nDays; day++) { var idx = (day * 1440 + dep) / WK_STEP - 1; if (idx >= 0 && rec.soc[idx] < startPct(d) - 0.5) { notFull = true; } }
   return {
     X: X, name: ev.name, plan: PL, hcR: on.contrat ? d.hcR : null, cap: cap, soc: rec.soc, ph: rec.ph, segs: segs, lows: lows, N: N, BS: BS, K: K, which: BS.which, winter: !!opt.winter,
     consKm: consKm, nDays: nDays, dailyKm: dailyKm, dayKWh: dayKWh, weekKm: dailyKm * nDays, weekKWh: dayKWh * nDays,
-    depE: depE, pubE: pubE, pauseE: pzE, depMinAvg: depN ? depMin / depN : 0, pubMin: pubMin,
+    depE: depE, pubE: pubE, pauseE: pzE, depMinAvg: depN ? depMin / depN : 0, depEven: depEven, pubMin: pubMin,
     minSoc: minS, minI: minI, depSoc: depSoc, fullPct: full / cap * 100, margePct: marginPct(d),
     minKm: minS / 100 * cap / consKm,
-    dep: dep, td: td, pDep: pDep, pPub: pPub, pPause: pPause, pauseOn: pauseOn, hcStart: hcStart, notFull: notFull,
+    dep: dep, td: td, rel: !DW.clock, rule: DW.rule, pDep: pDep, pPub: pPub, pPause: pPause, pauseOn: pauseOn, hcStart: hcStart, notFull: notFull,
     pEffDep: depotPow(d, sp), pEffPub: pubPow(d, sp),
     deficit: minS < marginPct(d) - 0.05, empty: minS <= 0.5, pubOn: pubOn
   };
@@ -3340,8 +3305,18 @@ function weekChart(S, w, h, G, Wn) {
     s += '<line x1="' + x0 + '" x2="' + x0 + '" y1="' + (padT - 18) + '" y2="' + (padT + phh) + '" stroke="' + (dd === 0 || dd === 7 ? 'rgba(0,0,0,0)' : '#d6dee8') + '" stroke-width="1"/>';
     if (dd < 7) {
       s += '<text x="' + (x0 + (X(288) - X(0)) / 2) + '" y="' + (padT - 20) + '" font-size="10.5" font-weight="700" letter-spacing=".6" fill="' + (dd >= S.nDays ? '#9aa5b1' : '#0b2a4a') + '" text-anchor="middle">' + WK_DAYS[dd].toUpperCase() + '</text>';
-      for (k = 1; k < 4; k++) { var tx = X(dd * 288 + k * 72); s += '<line x1="' + tx + '" x2="' + tx + '" y1="' + (padT + phh) + '" y2="' + (padT + phh + 3) + '" stroke="#9aa8b8"/>'; }
-      s += '<text x="' + X(dd * 288 + 144) + '" y="' + (padT + phh + 12) + '" font-size="7.5" fill="#8a94a1" text-anchor="middle">12 h</text>';
+      if (S.rel) {
+        if (dd < S.nDays) {
+          var tR = X(dd * 288 + S.td / WK_STEP);
+          s += '<line x1="' + (x0 + 0.5) + '" x2="' + (x0 + 0.5) + '" y1="' + (padT + phh) + '" y2="' + (padT + phh + 3) + '" stroke="#9aa8b8"/>';
+          s += '<text x="' + (x0 + 2) + '" y="' + (padT + phh + 12) + '" font-size="7.2" fill="#8a94a1" text-anchor="start">départ</text>';
+          s += '<line x1="' + tR + '" x2="' + tR + '" y1="' + (padT + phh) + '" y2="' + (padT + phh + 3) + '" stroke="#9aa8b8"/>';
+          s += '<text x="' + tR + '" y="' + (padT + phh + 12) + '" font-size="7.2" fill="#8a94a1" text-anchor="middle">retour</text>';
+        }
+      } else {
+        for (k = 1; k < 4; k++) { var tx = X(dd * 288 + k * 72); s += '<line x1="' + tx + '" x2="' + tx + '" y1="' + (padT + phh) + '" y2="' + (padT + phh + 3) + '" stroke="#9aa8b8"/>'; }
+        s += '<text x="' + X(dd * 288 + 144) + '" y="' + (padT + phh + 12) + '" font-size="7.5" fill="#8a94a1" text-anchor="middle">12 h</text>';
+      }
     }
   }
   /* Zones de recharge (halo vert sous la courbe) */
@@ -3402,7 +3377,7 @@ function weekChart(S, w, h, G, Wn) {
 
 /* Cadran 24 h de la journée type (lundi) */
 function dayDial(S, size) {
-  var cxy = size / 2, R = size / 2 - 24, wdt = 17;
+  var cxy = size / 2, R = size / 2 - (S.rel ? 32 : 24), wdt = 17;
   var s = svgOpen(size, size);
   var ang = function (min) { return (min / 1440) * 2 * Math.PI - Math.PI / 2; };
   var arc = function (a0, a1, rr, col, ww) {
@@ -3427,8 +3402,8 @@ function dayDial(S, size) {
     s += arc(i * WK_STEP, (i + 3) * WK_STEP, Ri, c, 4 + p * 7);
   }
   for (i = 0; i < 24; i += 6) {
-    var A = ang(i * 60), tx = cxy + (R + 17) * Math.cos(A), ty = cxy + (R + 17) * Math.sin(A) + 3.5;
-    s += '<text x="' + tx.toFixed(1) + '" y="' + ty.toFixed(1) + '" font-size="9" font-weight="700" fill="#6b7683" text-anchor="middle">' + (i === 0 ? '0 h' : i + ' h') + '</text>';
+    var A = ang(i * 60), lr = R + (S.rel ? 19 : 17), tx = cxy + lr * Math.cos(A), ty = cxy + lr * Math.sin(A) + 3.5;
+    s += '<text x="' + tx.toFixed(1) + '" y="' + ty.toFixed(1) + '" font-size="' + (S.rel ? 8.5 : 9) + '" font-weight="700" fill="#6b7683" text-anchor="middle">' + (S.rel ? (i === 0 ? 'départ' : '+' + i + ' h') : (i === 0 ? '0 h' : i + ' h')) + '</text>';
   }
   s += '<text x="' + cxy + '" y="' + (cxy - 12) + '" font-size="9.5" fill="#6b7683" text-anchor="middle" letter-spacing=".5">JOURNÉE TYPE</text>';
   s += '<text x="' + cxy + '" y="' + (cxy + 9) + '" font-size="20" font-weight="800" fill="#0b2a4a" text-anchor="middle">' + fmt(S.dailyKm, 0) + ' km</text>';
@@ -3437,6 +3412,12 @@ function dayDial(S, size) {
   return s;
 }
 
+/* Moment d'un point de la simulation : heure d'horloge, ou repère depuis le départ */
+function lowWhen(S, i) {
+  var t = ((i + 1) * WK_STEP) % 1440;
+  if (!S.rel) { return hhmm(t); }
+  return Math.abs(t - S.td) < WK_STEP ? 'au retour' : (t === 0 ? 'au départ' : 'départ + ' + durTxt(t));
+}
 function weekPanel(S, d, on, compact, G, Wn, r) {
   var last = S.which === 'last';
   var h = '<div class="wk">';
@@ -3445,9 +3426,9 @@ function weekPanel(S, d, on, compact, G, Wn, r) {
   h += weekChart(S, 682, compact ? 230 : 268, G, Wn);
   h += '<div class="wkk">';
   h += '<div><b>' + fmt(S.weekKm, 0) + ' km</b><span>parcourus dans la semaine</span></div>';
-  h += '<div><b>' + fmt(S.weekKWh, 0) + ' kWh</b><span>consommés' + (last ? ' (+' + fmt((S.BS.mult - 1) * 100, 1) + ' % vieillissement)' : '') + '</span></div>';
-  h += '<div><b>' + durTxt(S.depMinAvg) + '</b><span>de recharge au dépôt par jour' + (G ? (Math.abs(S.depMinAvg - G.depMinAvg) < 2.5 ? ' (comme en semaine 1)' : ' (' + (S.depMinAvg >= G.depMinAvg ? '+' : '−') + durTxt(Math.abs(S.depMinAvg - G.depMinAvg)) + ' vs semaine 1)') : '') + '</span></div>';
-  h += '<div class="' + (S.deficit ? 'bad' : '') + '"><b>' + fmt(S.minSoc, 0) + ' % · ' + fmt(Math.max(0, S.minKm), 0) + ' km</b><span>niveau le plus bas (' + WK_DAYS[Math.floor(S.minI / 288)].toLowerCase() + ' ' + hhmm(S.minI * WK_STEP) + ')' + (G ? ', semaine 1 : ' + fmt(G.minSoc, 0) + ' %' : '') + '</span></div>';
+  h += '<div><b>' + fmt(S.weekKWh, 0) + ' kWh</b><span>consommés</span></div>';
+  h += '<div><b>' + durTxt(S.depMinAvg) + '</b><span>' + (S.depEven ? 'de recharge au dépôt par jour' : 'de recharge au dépôt en moyenne par recharge (week-end compris)') + (G ? (Math.abs(S.depMinAvg - G.depMinAvg) < 2.5 ? ' (comme en semaine 1)' : ' (' + (S.depMinAvg >= G.depMinAvg ? '+' : '−') + durTxt(Math.abs(S.depMinAvg - G.depMinAvg)) + ' vs semaine 1)') : '') + '</span></div>';
+  h += '<div class="' + (S.deficit ? 'bad' : '') + '"><b>' + fmt(S.minSoc, 0) + ' % · ' + fmt(Math.max(0, S.minKm), 0) + ' km</b><span>niveau le plus bas (' + WK_DAYS[Math.floor(S.minI / 288)].toLowerCase() + ' ' + lowWhen(S, S.minI) + ')' + (G ? ', semaine 1 : ' + fmt(G.minSoc, 0) + ' %' : '') + '</span></div>';
   if (Wn) { h += '<div class="' + (Wn.deficit ? 'bad' : '') + '"><b>' + fmt(Wn.minSoc, 0) + ' %</b><span>au plus bas en hiver (+' + fmt(d.hivPct, 0) + ' % de conso)</span></div>'; }
   else if (S.pubE > 0) { h += '<div class="pub"><b>' + fmt(S.pubE, 0) + ' kWh</b><span>en borne publique (' + durTxt(S.pubMin) + ')</span></div>'; }
   else if (S.pauseE > 0) { h += '<div class="pub"><b>' + fmt(S.pauseE / Math.max(1, S.nDays), 0) + ' kWh</b><span>rechargés à chaque pause de 45 min</span></div>'; }
@@ -3465,7 +3446,10 @@ function pageWeek(r, d, on, which) {
   var two = sims.length > 1;
   var h = '<div class="page">' + headHtml(d);
   h += '<div class="st">' + (last ? 'Dernière semaine de l’année ' + r.n + ' : la batterie vieillie, heure par heure' : 'Une semaine avec ' + (two ? 'vos tracteurs électriques' : esc(sims[0].name)) + ' : la batterie heure par heure') + '</div>';
-  h += '<div class="basis" style="margin-top:0">Simulation du lundi 00:00 au dimanche 23:59, en régime établi : départ à ' + hhmm(sims[0].dep) + ', ' + durTxt(sims[0].td) + ' de tournée' + (sims[0].pauseOn ? ' dont une pause rechargée de 45 min' : '') + ', recharge au dépôt ' + (sims[0].plan && sims[0].plan.pilot ? hcPlanTxt(sims[0].plan) : (d.win.hor ? winTxt(d.win) + ' (horaires saisis)' : 'dès le retour')) + ' jusqu’à ' + fmt(sims[0].fullPct, 0) + ' %, ralentie en fin de charge. ' + (last ? 'Batterie et consommation de la fin de l’année ' + r.n + ' ; en pointillés, la semaine 1' + (winters[0] ? ' et, en tirets, la même semaine en hiver' : '') + '.' : 'Batterie neuve, consommation réelle moyenne de l’étude.') + '</div>';
+  var S0w = sims[0];
+  h += '<div class="basis" style="margin-top:0">' + (S0w.rel
+    ? 'Simulation d’une semaine en régime établi, graduée depuis le départ de chaque journée (sans heures creuses, aucune heure d’horloge n’est nécessaire) : ' + durTxt(S0w.td) + ' de tournée (' + (S0w.rule ? 'au plus, règle des ' + REPOS_MIN + ' h de repos journalier d’un chauffeur seul' : 'temps de travail du chauffeur') + '), puis ' + durTxt(1440 - S0w.td) + ' à l’arrêt au dépôt, recharge dès le retour'
+    : 'Simulation du lundi 00:00 au dimanche 23:59, en régime établi : départ à ' + hhmm(S0w.dep) + ', ' + durTxt(S0w.td) + ' de tournée, retour au dépôt à ' + hhmm(S0w.dep + S0w.td) + ', recharge ' + (S0w.plan && S0w.plan.pilot ? hcPlanTxt(S0w.plan) : 'dès le retour')) + ' jusqu’à ' + fmt(S0w.fullPct, 0) + ' %, ralentie en fin de charge. ' + (last ? 'Batterie et consommation de la fin de l’année ' + r.n + ' ; en pointillés, la semaine 1' + (winters[0] ? ' et, en tirets, la même semaine en hiver' : '') + '.' : 'Batterie neuve, consommation réelle moyenne de l’étude.') + '</div>';
   var i;
   for (i = 0; i < sims.length; i++) { h += weekPanel(sims[i], d, on, two, ghosts[i], winters[i], r); }
   var S = sims[0];
@@ -3473,18 +3457,31 @@ function pageWeek(r, d, on, which) {
     var du1 = durability(r, d, on, S.X);
     if (du1) { h += durBox(du1, r.V[S.X], d, on); }
   } else if (!two) {
-    var g, k, items = [];
+    var g, k, items = [], tA = 0, segD = [];
     for (k = 0; k < S.segs.length; k++) {
       g = S.segs[k];
       if (g.a >= 288) { break; }
       if (g.b - g.a < 1) { continue; }
+      segD.push(g);
+    }
+    var endName = function (ph) { return ph === 1 ? 'retour' : (ph === 2 ? 'recharge terminée' : (ph === 3 ? 'reprise de la tournée' : 'départ')); };
+    for (k = 0; k < segD.length; k++) {
+      g = segD[k];
+      var lastSeg = k === segD.length - 1 || segD[k + 1].a >= 288;
+      var tB = lastSeg ? 1440 : (g.ph === 2 || g.ph === 3 ? Math.min(1440, tA + g.min) : Math.min(288, g.b) * WK_STEP);
       var lbl = g.ph === 1 ? 'Tournée' : (g.ph === 2 ? 'Recharge au dépôt' : (g.ph === 3 ? 'Recharge en borne publique' : (g.ph === 4 ? 'Pause rechargée' : 'À l’arrêt')));
       var col = g.ph === 1 ? '#00529b' : (g.ph === 2 ? '#1a9b6c' : (g.ph >= 3 ? '#e0a82a' : '#b9c4d0'));
-      var det = g.ph === 1 ? fmt(S.soc[g.a > 0 ? g.a - 1 : 0], 0) + ' % → ' + fmt(S.soc[Math.min(287, g.b - 1)], 0) + ' %'
-        : (g.ph >= 2 ? '+' + fmt(g.kwh, 0) + ' kWh, ' + fmt(S.soc[Math.min(287, g.b - 1)], 0) + ' % atteints' : 'batterie à ' + fmt(S.soc[g.a], 0) + ' %');
-      items.push('<div class="dli"><i style="background:' + col + '"></i><b>' + hhmm(g.a * WK_STEP) + ' – ' + (g.b >= 288 ? '24:00' : hhmm(g.b * WK_STEP)) + '</b><span>' + lbl + ' · ' + det + '</span></div>');
+      var det = g.ph === 1 ? fmt(S.soc[g.a > 0 ? g.a - 1 : S.N - 1], 0) + ' % → ' + fmt(S.soc[Math.min(287, g.b - 1)], 0) + ' %'
+        : (g.ph >= 2 ? (g.b > 288 ? '+' + fmt((S.soc[287] - (g.a > 0 ? S.soc[g.a - 1] : S.soc[S.N - 1])) * S.cap / 100, 0) + ' kWh, ' + fmt(S.soc[287], 0) + ' % à minuit (suite le lendemain)' : '+' + fmt(g.kwh, 0) + ' kWh, ' + fmt(S.soc[g.b - 1], 0) + ' % atteints') : 'batterie à ' + fmt(S.soc[g.a], 0) + ' %');
+      if (S.rel) {
+        var fromN = k === 0 ? 'départ' : endName(segD[k - 1].ph), toN = lastSeg ? 'départ suivant' : endName(g.ph);
+        items.push('<div class="dli"><i style="background:' + col + '"></i><b>' + durTxt(tB - tA) + '</b><span>' + lbl + ' (' + fromN + ' → ' + toN + ') · ' + det + '</span></div>');
+      } else {
+        items.push('<div class="dli"><i style="background:' + col + '"></i><b>' + hhmm(tA) + ' – ' + (tB >= 1440 ? '24:00' : hhmm(tB)) + '</b><span>' + lbl + ' · ' + det + '</span></div>');
+      }
+      tA = tB;
     }
-    h += '<div class="dial"><div>' + dayDial(S, 214) + '</div><div class="dtx"><div class="dtt">Le lundi, heure par heure' + (last ? ' (année ' + r.n + ')' : '') + '</div>' + items.join('') + '<div class="dlg">Anneau extérieur : activité · anneau intérieur : niveau de charge (plus il est épais, plus la batterie est pleine).</div></div></div>';
+    h += '<div class="dial"><div>' + dayDial(S, 214) + '</div><div class="dtx"><div class="dtt">' + (S.rel ? 'Le lundi, du départ au départ suivant' : 'Le lundi, heure par heure') + (last ? ' (année ' + r.n + ')' : '') + '</div>' + items.join('') + '<div class="dlg">Anneau extérieur : activité · anneau intérieur : niveau de charge (plus il est épais, plus la batterie est pleine).</div></div></div>';
   }
   var bad = false, msgs = sims.map(function (T, ix) {
     var who = two ? '<b>' + esc(T.name) + ' :</b> ' : '';
@@ -3492,7 +3489,7 @@ function pageWeek(r, d, on, which) {
     if (T.empty) { bad = true; return who + '<b>autonomie insuffisante</b> : la batterie se vide avant la fin de la tournée. Active la recharge en borne publique ou ajuste la tournée.'; }
     if (T.deficit) { bad = true; return who + '<b>point de vigilance</b> : le niveau descend à ' + fmt(T.minSoc, 0) + ' %, sous la marge de sécurité de ' + fmt(T.margePct, 0) + ' %, pendant la tournée.' + (T.pubOn ? '' : ' La recharge en borne publique est désactivée.'); }
     if (T.notFull) { bad = true; return who + '<b>point de vigilance</b> : le temps disponible au dépôt ne permet pas toujours de remonter à ' + fmt(T.fullPct, 0) + ' % avant le départ.'; }
-    var m = who + 'la batterie repart chaque matin à ' + fmt(T.depSoc, 0) + ' % et ne descend jamais sous ' + fmt(T.minSoc, 0) + ' % (≈ ' + fmt(Math.max(0, T.minKm), 0) + ' km d’autonomie restante)';
+    var m = who + 'la batterie repart à chaque départ à ' + fmt(T.depSoc, 0) + ' % et ne descend jamais sous ' + fmt(T.minSoc, 0) + ' % (≈ ' + fmt(Math.max(0, T.minKm), 0) + ' km d’autonomie restante)';
     if (Gt) { m += ', contre ' + fmt(Gt.minSoc, 0) + ' % en semaine 1'; }
     m += '. ';
     if (Wt) {
@@ -3626,7 +3623,7 @@ function pilePanel(r, d, on, X, which, S, K) {
   if (last) { h += '<div class="plbl">Net en année ' + r.n + ' : ' + fmt(BS.cap, 0) + ' kWh</div><div class="plbar"><i style="width:' + (BS.cap / sp.brut * 100).toFixed(1) + '%;background:linear-gradient(90deg,#16a37a,#4ef0b5)"></i></div>'; }
   h += '<div class="plnote">' + (last ? 'Le vieillissement retire ' + fmt(lost, 0) + ' kWh à la capacité nette ; les ' + fmt(sp.brut - sp.net, 0) + ' kWh de réserve restent intouchés.' : 'Les ' + fmt(sp.brut - sp.net, 0) + ' kWh d’écart ne sont jamais utilisés : ils allongent la durée de vie des cellules LFP.') + '</div></div>';
   var pUse = Math.min(d.bornePuis, sp.dc > 0 ? sp.dc : d.bornePuis), p100 = vehAccept(sp, 100);
-  h += '<div class="plspec"><h5>Motorisation et recharge</h5>';
+  h += '<div class="plspec"><h5>Recharge</h5>';
   if (sp.motKw > 0) { h += '<div class="plrow"><span>Moteur électrique</span><b>' + fmt(sp.motKw, 0) + ' kW · ' + chTxt(sp.motKw) + '</b></div>'; }
   if (sp.dc > 0) { h += '<div class="plrow"><span>Recharge maximale acceptée (DC)</span><b>' + fmt(sp.dc, 0) + ' kW</b></div>'; }
   if (sp.ac > 0) { h += '<div class="plrow"><span>Recharge maximale acceptée (AC)</span><b>' + fmt(sp.ac, 0) + ' kW</b></div>'; }
@@ -3654,10 +3651,9 @@ function pilePanel(r, d, on, X, which, S, K) {
 function kmBox(K, d, title, compact) {
   var h = '<div class="kmb"><div class="kmt">' + title + '</div><div class="kmg">';
   h += '<div' + (K.limit === 'batterie' ? ' class="win"' : '') + '><i>Batterie</i><b>' + fmt(K.kmBat, 0) + ' km</b><span>de ' + fmt(K.start, 0) + ' % au départ à ' + fmt(K.marge, 0) + ' % au retour, à ' + fmt(K.consKm * 100, 1) + ' kWh/100 km</span></div>';
-  if (K.pauseOn) { h += '<div><i>Pause rechargée</i><b>+' + fmt(K.pauseKm, 0) + ' km</b><span>' + fmt(K.pauseE, 0) + ' kWh en 45 min sur ' + fmt(d.pausePuis, 0) + ' kW, après 4 h 30 de conduite</span></div>'; }
-  if (K.kmLegal !== null) { h += '<div' + (K.limit === 'conduite' ? ' class="win"' : '') + '><i>Temps de conduite</i><b>' + fmt(K.kmLegal, 0) + ' km</b><span>' + fmt(K.legalH, 0) + ' h de conduite au plus × ' + fmt(K.v, 0) + ' km/h de moyenne</span></div>'; }
-  else { h += '<div class="dim"><i>Temps de conduite</i><b>–</b><span>vitesse moyenne à renseigner</span></div>'; }
-  h += '<div class="' + (K.kmMax >= K.tour ? '' : 'dim') + '"><i>Tournée prévue</i><b>' + fmt(K.tour, 0) + ' km</b><span>' + (K.driveH !== null ? '≈ ' + hTxt(K.driveH) + ' de conduite' : 'par jour de tournée') + '</span></div>';
+  var Wd = d.win || depotWin(d);
+  h += '<div class="' + (K.kmMax >= K.tour ? '' : 'dim') + '"><i>Tournée prévue</i><b>' + fmt(K.tour, 0) + ' km</b><span>en ' + durTxt(Wd.D * 60) + ' de journée' + (Wd.rule ? ' au plus (règle des ' + REPOS_MIN + ' h de repos)' : '') + '</span></div>';
+  h += '<div class="' + (K.kmMax >= K.tour ? '' : 'dim') + '"><i>Réserve</i><b>' + (K.kmMax >= K.tour ? '+' : '−') + fmt(Math.abs(K.kmMax - K.tour), 0) + ' km</b><span>' + (K.kmMax >= K.tour ? 'possibles en plus avant la marge de ' + fmt(K.marge, 0) + ' %' : 'manquent : recharge en route à prévoir') + '</span></div>';
   h += '</div>';
   /* Jauge */
   if (compact) {
@@ -3716,24 +3712,25 @@ function durBox(du, ev, d, on, small) {
   if (du.failAvg === null && du.failWin === null) { msg = '<b class="ok">La tournée de ' + fmt(du.tour, 0) + ' km reste faisable jusqu’à la fin de l’année ' + (n - 1) + '</b>, en gardant la marge de ' + fmt(du.marge, 0) + ' %' + (du.winterOn ? ', hiver compris' : '') + '.'; }
   else if (du.failAvg === null) { msg = 'En moyenne, la tournée de ' + fmt(du.tour, 0) + ' km passe toute l’étude ; <b class="ko">en hiver, la marge de ' + fmt(du.marge, 0) + ' % n’est plus tenue ' + yTxt(du.failWin) + '</b> : ' + fix + '.'; }
   else { var yt = yTxt(du.failAvg); msg = '<b class="ko">' + yt.charAt(0).toUpperCase() + yt.slice(1) + ', la tournée de ' + fmt(du.tour, 0) + ' km ne tient plus avec la marge de ' + fmt(du.marge, 0) + ' %</b>' + (du.failWin !== null && du.failWin < du.failAvg ? ' (' + yTxt(du.failWin) + ' en hiver)' : '') + ' : ' + (pub ? 'la recharge publique prévue prend le relais.' : 'recharge en route ou tournée raccourcie à prévoir.'); }
-  h += '<div class="kmm">' + msg + ' Départ à ' + fmt(startPct(d), 0) + ' % du net de l’année, consommation majorée par le vieillissement' + (d.pauseCharge === 'oui' ? ', recharge à la pause comprise' : '') + ', sans recharge publique.</div></div>';
+  h += '<div class="kmm">' + msg + ' Départ à ' + fmt(startPct(d), 0) + ' % du net de l’année (capacité réduite par le vieillissement), sans recharge publique.</div></div>';
   return h;
 }
 
 function pagePile(r, d, on, X, which) {
   var ev = r.V[X];
-  var S = weekSim(d, on, r, X, { which: which });
-  if (!S) { return ''; }
-  var K = S.K;
-  if (!K) { return ''; }
+  var BS = batState(r, d, on, X, which);
+  if (!BS || !BS.K) { return ''; }
+  var K = BS.K;
+  var S0 = weekSim(d, on, r, X, { which: which });
+  var S = S0 || { BS: BS, depSoc: K.start, cap: BS.cap, consKm: K.consKm };
   var last = which === 'last';
   var h = '<div class="page">' + headHtml(d);
   h += '<div class="st">' + (last ? 'La batterie en fin d’étude : dernière semaine de l’année ' + r.n : 'La batterie : capacité brute, capacité nette et recharge') + (cmpOf(d) === 'ee' ? ' · ' + esc(ev.name) : '') + '</div>';
-  h += '<div class="basis" style="margin-top:0">' + (last ? 'Même tournée qu’en semaine 1, batterie vieillie : santé ' + fmt(S.BS.soh, 0) + ' %, ' + fmt(S.cap, 0) + ' kWh nets, consommation +' + fmt((S.BS.mult - 1) * 100, 1) + ' %.' : 'Capacité nette = brute × part utilisable (' + fmt(ev.bat.spec.dod, 0) + ' %). Tournée de ' + fmt(K.tour, 0) + ' km à la consommation réelle de l’étude ; recharge à la puissance la plus basse entre borne et véhicule, ralentie en fin de charge.') + '</div>';
+  h += '<div class="basis" style="margin-top:0">' + (last ? 'Même tournée qu’en semaine 1, batterie vieillie : santé ' + fmt(S.BS.soh, 0) + ' %, ' + fmt(S.cap, 0) + ' kWh nets, même consommation.' : 'Capacité nette = brute × part utilisable (' + fmt(ev.bat.spec.dod, 0) + ' %). Tournée de ' + fmt(K.tour, 0) + ' km à la consommation réelle de l’étude ; recharge à la puissance la plus basse entre borne et véhicule, ralentie en fin de charge, retour visé avec ' + fmt(marginPct(d), 0) + ' % de marge.') + '</div>';
   h += pilePanel(r, d, on, X, which, S, K);
   var ee = cmpOf(d) === 'ee';
-  h += kmBox(K, d, last ? 'Combien de kilomètres par jour en année ' + r.n + ' ?' : 'Combien de kilomètres par jour ?', last && ee);
-  if (last && ee) {
+  h += kmBox(K, d, last ? 'Combien de kilomètres par jour en année ' + r.n + ' ?' : 'Combien de kilomètres par jour ?', last && (ee || !S0));
+  if (last && (ee || !S0)) {
     var du = durability(r, d, on, X);
     if (du) { h += durBox(du, ev, d, on, true); }
   } else if (!last) {
@@ -3796,15 +3793,14 @@ function pageSynth(r, d, on) {
   Xs.forEach(function (X) {
     var ev = r.V[X], bat = ev.bat;
     var S1 = weekSim(d, on, r, X, { which: 'first' }), SL = weekSim(d, on, r, X, { which: 'last' });
-    if (!S1 || !SL) { return; }
     var K1 = bat.K[0], KL = bat.K[r.n], du = durability(r, d, on, X);
     if (!K1 || !KL) { return; }
-    var okAll = du && du.failAvg === null && du.failWin === null && !S1.notFull && !SL.notFull;
+    var okAll = du && du.failAvg === null && du.failWin === null && !(S1 && S1.notFull) && !(SL && SL.notFull);
     h += '<div class="st">Autonomie et recharge' + (Xs.length > 1 || cmpOf(d) === 'ee' ? ' · ' + esc(ev.name) : '') + '</div>';
     h += '<div class="syk">';
     h += '<div class="' + (KL.kmMax >= KL.tour ? 'ok' : 'ko') + '"><i>Km possibles par jour</i><b>' + fmt(K1.kmMax, 0) + ' → ' + fmt(KL.kmMax, 0) + ' km</b><span>neuve → année ' + r.n + ', marge de ' + fmt(K1.marge, 0) + ' % gardée</span></div>';
     h += '<div class="' + (okAll ? 'ok' : 'ko') + '"><i>Tournée de ' + fmt(K1.tour, 0) + ' km</i><b>' + (okAll ? 'Faisable' : (du && du.failAvg !== null ? (du.failAvg === 0 ? 'Trop longue' : 'Limite an ' + du.failAvg) : (du && du.failWin !== null ? (du.failWin === 0 ? 'Hiver limite' : 'Hiver : an ' + du.failWin) : 'À surveiller'))) + '</b><span>' + (okAll ? 'jusqu’à la fin de l’année ' + r.n + (du && du.winterOn ? ', hiver compris' : '') : 'recharge d’appoint à prévoir') + '</span></div>';
-    h += '<div class="' + (bat.okWindow ? '' : 'ko') + '"><i>Recharge au dépôt</i><b>' + hTxt(K1.rechH) + '</b><span>par jour à ' + fmt(K1.depP, 0) + ' kW (' + hTxt(KL.rechH) + ' en année ' + r.n + '), pour ' + fmt(d.fenetre, 0) + ' h disponibles</span></div>';
+    h += '<div class="' + (bat.okWindow ? '' : 'ko') + '"><i>Recharge au dépôt</i><b>' + hTxt(K1.rechH) + '</b><span>par jour à ' + fmt(K1.depP, 0) + ' kW (' + hTxt(KL.rechH) + ' en année ' + r.n + '), pour ' + durTxt(d.fenetre * 60) + ' d’arrêt' + (d.win.rule ? ' au moins' : '') + '</span></div>';
     h += '<div><i>Batterie en fin d’étude</i><b>' + fmt(bat.sohPre[r.n], 0) + ' %</b><span>' + fmt(KL.cap, 0) + ' kWh nets sur ' + fmt(bat.spec.net, 0) + ' (' + fmt(bat.spec.brut, 0) + ' bruts)</span></div>';
     h += '</div>';
   });
@@ -3831,7 +3827,7 @@ function batteryPages(r, d, on) {
 }
 function buildPages(r, d, on) {
   var pages;
-  CUR_RP = on.scen ? compute(prudentData(d), on) : null;
+  CUR_RP = null;
   CUR_SENS = (on.sens && r.valid) ? sensitivity(d, on, isComplet(), r) : null;
   if (isComplet()) {
     pages = [];
@@ -3841,7 +3837,7 @@ function buildPages(r, d, on) {
     pages.push(pageComplet4(r, d, on));
     if (on.batterie && r.V.E.bat && r.V.D.bat) { pages.push('<div class="page">' + headHtml(d) + batteryBlock(r, d, on, 'E', true) + batteryBlock(r, d, on, 'D', true) + footHtml(d, '') + '</div>'); }
     if (on.batterie) { pages = pages.concat(batteryPages(r, d, on)); }
-    if (on.co2) { pages.push('<div class="page">' + headHtml(d) + co2Block(r, d) + footHtml(d, '') + '</div>'); }
+    if (on.co2 && d.chargeT > 0) { pages.push('<div class="page">' + headHtml(d) + co2Block(r, d) + footHtml(d, '') + '</div>'); }
   } else {
     pages = [pageConso1(r, d, on), pageConso2(r, d, on)];
     if (CUR_SENS) { pages.push(pageSens(r, d, on, CUR_SENS)); }
@@ -3879,6 +3875,14 @@ function migrateValues(v) {
     var oldP = num(m.scBatDeg) - (typeof m.batDeg === 'string' && m.batDegU !== 'cycle' ? num(m.batDeg) : 1.5);
     m.scBatDegP = String(Math.max(0, Math.round(oldP * 100) / 100)).replace('.', ',');
   }
+  if (m.rechMode === 'pct') { m.rechMode = 'auto'; }
+  /* Plage de conduite : listes d'heures entières (anciennes saisies arrondies à l'heure) */
+  /* Ancienne plage début / fin : devient le temps de travail du chauffeur ; l'heure de retour sert aux heures creuses */
+  if (typeof m.tJour !== 'string' && typeof m.hDep === 'string' && typeof m.hRet === 'string' && m.hDep.replace(/\s/g, '') !== '' && m.hRet.replace(/\s/g, '') !== '' && num(m.hRet) > num(m.hDep)) {
+    m.tJour = String(Math.round((num(m.hRet) - num(m.hDep)) * 100) / 100).replace('.', ',');
+  }
+  if (typeof m.hRet === 'string' && m.hRet.replace(/\s/g, '') !== '') { m.hRet = String(Math.round(num(m.hRet)) % 24); }
+  if (typeof m.hcDeb1 === 'string' && m.hcDeb1 !== '' && typeof m.hcOn !== 'string') { m.hcOn = 'oui'; }
   if (typeof m.chargeStart === 'string' && typeof m.rechPlage !== 'string') {
     if (m.chargeStart === '22') { m.rechPlage = 'horaire'; m.hRechDeb = '22'; m.hRechFin = typeof m.hDep === 'string' ? m.hDep : '6'; }
     else { m.rechPlage = 'libre'; }
@@ -3897,6 +3901,8 @@ function applyStored(o) {
     for (k in ons) {
       if (Object.prototype.hasOwnProperty.call(o.on, k)) { ons[k] = !!o.on[k]; }
     }
+    if (Object.prototype.hasOwnProperty.call(o.on, 'remb') && typeof v.rembOn !== 'string') { state.rembOn = o.on.remb ? 'oui' : 'non'; }
+    if (o.on.fisc && !o.on.regl) { ons.regl = true; }
   }
 }
 function loadState() {
@@ -4104,7 +4110,7 @@ function updateInfos(r) {
   });
   setInfo('kmJour', kmTxt.join(' · ') + (kmTxt.length ? '.' : ''), false);
   var W = depotWin(state);
-  setInfo('rechWin', eo.batterie ? (W.missing ? 'Horaires non renseignés : la recharge est calculée sur toute la plage où le camion est au dépôt, ' + winTxt(W) + ', soit <b>' + fmt(W.hours, 1) + ' h par jour</b>.' : 'Recharge possible ' + winTxt(W) + (W.hor ? ' (horaires saisis, camion présent au dépôt)' : ' (du retour au départ suivant)') + ', soit <b>' + fmt(W.hours, 1) + ' h par jour</b>.') : '', W.missing);
+  setInfo('rechWin', anyElec(state) ? (W.rule ? 'Temps de travail non renseigné : règle du repos journalier d’un chauffeur seul (au moins ' + REPOS_MIN + ' h, règlement européen 561/2006), soit une journée de <b>13 h au plus</b> et <b>au moins ' + REPOS_MIN + ' h à l’arrêt au dépôt</b> pour recharger.' : 'Journée de ' + durTxt(W.D * 60) + ' (départ → retour) · à l’arrêt au dépôt et en recharge <b>' + durTxt(W.hours * 60) + ' par jour</b>.' + (W.D > 24 - REPOS_MIN + 1e-9 ? ' Au-delà de 13 h, un chauffeur seul n’a plus ses ' + REPOS_MIN + ' h de repos journalier : double équipage ?' : '')) + (W.clock ? ' Avec les heures creuses : départ à ' + hTxtClock(W.depM) + ', retour à ' + hTxtClock(W.retM) + '.' : '') : '', false);
   if (state.kmUnit === 'an') { s = 'Kilométrage annuel d’étude : <b>' + fmt(r.kmAn, 0) + ' km par an</b>'; }
   else { s = fmt(num(state.kmPer), 0) + ' km × ' + fmt(num(state.kmNb), 0) + ' ' + (DYN[state.kmUnit] || '') + ' = <b>' + fmt(r.kmAn, 0) + ' km par an</b>'; }
   if (needD(state, eo)) { s += ' · ' + fmt(r.P.days, 0) + ' jours d’exploitation par an'; }
@@ -4112,10 +4118,12 @@ function updateInfos(r) {
   setInfo('contrat', (eo.contrat && anyElec(state)) ? 'Prix fixé par la carte « Contrat électrique du dépôt » : ' + fmt(r.V.E.type === 'elec' ? r.V.E.pDep : r.V.D.pDep, 4) + ' €/kWh HT + ' + eur(r.fixedContrat) + ' de part fixe par an.' : '', false);
   var hcTxt = '';
   if (eo.contrat && anyElec(state)) {
-    var R0 = hcRanges(state);
-    if (!R0) { hcTxt = 'Renseigne la plage d’heures creuses du contrat : sans elle, toute la recharge est comptée en heures pleines.'; }
+    var R0 = state.hcOn === 'oui' ? hcRanges(state) : null;
+    if (state.hcOn !== 'oui') { hcTxt = ''; }
+    else if (!R0) { hcTxt = 'Renseigne la plage d’heures creuses : sans elle, toute la recharge est comptée en heures pleines.'; }
+    else if (String(state.hRet || '') === '') { hcTxt = 'Renseigne l’heure de retour au dépôt : sans elle, la recharge ne peut pas être croisée avec les heures creuses et elle est comptée en heures pleines.'; }
     else {
-      hcTxt = ['E', 'D'].filter(function (X) { return r.V[X].type === 'elec'; }).map(function (X) { var ev = r.V[X]; return (cmpOf(state) === 'ee' ? esc(ev.name) + ' : ' : '') + (ev.plan && ev.plan.share !== null ? 'recharge ' + hcPlanTxt(ev.plan) + ' → <b>' + fmt(ev.hcShare * 100, 0) + ' % en heures creuses</b>, soit ' + fmt(ev.pDep, 4) + ' €/kWh HT' : 'part saisie utilisée'); }).join(' · ') + ' (heures creuses ' + rangesTxt(R0) + ', plage de recharge ' + winTxt(depotWin(state)) + ').';
+      hcTxt = ['E', 'D'].filter(function (X) { return r.V[X].type === 'elec'; }).map(function (X) { var ev = r.V[X]; return (cmpOf(state) === 'ee' ? esc(ev.name) + ' : ' : '') + (ev.plan && ev.plan.share !== null ? 'recharge ' + hcPlanTxt(ev.plan) + ' → <b>' + fmt(ev.hcShare * 100, 0) + ' % en heures creuses</b>, soit ' + fmt(ev.pDep, 4) + ' €/kWh HT' : 'part saisie utilisée'); }).join(' · ') + ' (heures creuses ' + rangesTxt(R0) + ', camion au dépôt ' + winTxt(depotWin(state, true)) + ').';
     }
   }
   setInfo('hcPlan', hcTxt, false);
@@ -4217,7 +4225,6 @@ function modelWarnings(d, on, r) {
   if (isComplet()) {
     if (!on.entretien) { w.push('Entretien désactivé : ce poste est exclu du coût total.'); }
     if (anyTherm(d) && !on.adblue) { w.push('AdBlue désactivé : ce poste est exclu du coût total des thermiques.'); }
-    if (anyElec(d) && !on.chauf && on.recharge) { w.push('Coût du temps de chauffeur désactivé : les heures de recharge publique ne sont pas valorisées.'); }
     if (anyElec(d) && !on.batterie) { w.push('Carte Batterie désactivée : aucune dégradation ni remplacement n’est intégré, et les pages batterie (pile, semaine type, km par jour, fin d’étude) n’apparaissent pas dans le rapport. Active-la sur la page Données.'); }
     if (!on.assur) { w.push('Assurance désactivée : ce poste est exclu du coût total.'); }
     if (anyElec(d) && !on.borne) { w.push('Investissement et abonnement de recharge au dépôt désactivés : vérifier qu’ils sont déjà pris en charge ailleurs.'); }
@@ -4229,6 +4236,8 @@ function modelWarnings(d, on, r) {
     if (on.revente) { w.push('La valeur de revente est une estimation forfaitaire saisie par l’utilisateur ; elle n’est pas prédite à partir du kilométrage, de l’âge ou de l’état de santé de la batterie.'); }
   }
   ['E', 'D'].forEach(function (X) { if (r.A[X].aideBlocked) { w.push('Aide au tracteur ' + r.V[X].name + ' non prise en compte : elle n’est acquise que si le client garde le véhicule au moins ' + AIDE_MIN_ANS + ' ans, or l’étude porte sur ' + ans(r.n) + '.'); } });
+  if (anyElec(d) && d.win.hcWait && on.contrat && hcRanges(state)) { w.push('Heures creuses activées sans heure de retour au dépôt : la recharge est comptée au prix des heures pleines.'); }
+  if (anyElec(d) && on.batterie && d.win.given && d.win.D > 24 - REPOS_MIN + 1e-9) { w.push('Journée de travail de plus de 13 h : un chauffeur seul n’a plus ses ' + REPOS_MIN + ' h de repos journalier (double équipage ?).'); }
   if (on.recharge) { w.push('La recharge publique est un modèle simplifié : pertes de charge, courbe de puissance, disponibilité des bornes, files d’attente et détours ne sont pas simulés.'); }
   if (on.co2 && bats.some(function (b) { return b.replYears.length > 0; })) { w.push('Les émissions de CO₂ à l’usage intègrent la consommation électrique liée au vieillissement de la batterie, mais pas les émissions de fabrication/remplacement de la batterie.'); }
   return w;
