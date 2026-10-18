@@ -18,6 +18,8 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.page,.page *{-webkit-text-size-adjust:none;text-size-adjust:none}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.4}
 #app{max-width:760px;margin:0 auto;padding-bottom:40px}
 .top{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 0}
@@ -435,6 +437,9 @@ var GROUPS = [
     { k: 'tvaDiesel', l: 'TVA sur le gazole', u: '%', vis: function (s) { return s.pDieselBase === 'ttc'; } },
     { k: 'ticpe', l: 'TICPE comprise dans le prix', u: '€/L HT', hint: 'information : n’influe pas sur les économies' }
   ]},
+  { id: 'remb', on: 'remb', req: 'energie', title: 'Remboursement partiel de TICPE', note: 'Déduit du coût HT du gazole.', fields: [
+    { k: 'rembTicpe', l: 'Remboursement', u: '€/L HT', hint: '0,1556 €/L en 2026 pour un poids lourd de 7,5 t et plus, hors Corse' }
+  ]},
   { id: 'contrat', on: 'contrat', req: 'energie', title: 'Contrat électrique du dépôt', note: 'Remplace le prix unique du kWh : prix en heures creuses et pleines, plus la part fixe liée à la puissance souscrite.', fields: [
     { k: 'pHC', l: 'Prix du kWh en heures creuses', u: '€/kWh HT', pos: true },
     { k: 'pHP', l: 'Prix du kWh en heures pleines', u: '€/kWh HT', pos: true },
@@ -448,9 +453,6 @@ var GROUPS = [
     { k: 'hivMois', l: 'Nombre de mois d’hiver', u: 'mois', max: 12 },
     { k: 'chargePct', l: 'Ajustement lié à la charge transportée', u: '%', hint: 'positif si le camion roule plus chargé qu’à l’essai' },
     { info: 'saison' }
-  ]},
-  { id: 'remb', on: 'remb', req: 'energie', title: 'Remboursement partiel de TICPE', note: 'Déduit du coût HT du gazole.', fields: [
-    { k: 'rembTicpe', l: 'Remboursement', u: '€/L HT' }
   ]},
   { id: 'recharge', on: 'recharge', req: 'energie', title: 'Recharge en borne publique', note: 'Une partie de l’énergie est rechargée hors dépôt, à un prix plus élevé.', fields: [
     { k: 'rechMode', l: 'Mode de calcul', select: [['pct', 'Part de l’énergie (%)'], ['kwh', 'Énergie par recharge (kWh)'], ['dur', 'Durée et puissance'], ['auto', 'Automatique : autonomie et temps au dépôt']] },
@@ -1319,9 +1321,17 @@ function lineChart(w, h, n, A, B, o) {
       pb = up ? yv(B[i]) + 17 : yv(B[i]) - 9;
       tx = (i === n) ? xv(i) - 6 : xv(i);
       anc = (i === n) ? 'end' : 'middle';
-      if (i === 0) { tx = xv(i) + 4; anc = 'start'; }
-      s += '<text x="' + tx + '" y="' + pa + '" font-size="10" font-weight="700" fill="' + o.ca + '" text-anchor="' + anc + '">' + eur(A[i]) + '</text>';
-      s += '<text x="' + tx + '" y="' + pb + '" font-size="10" font-weight="700" fill="' + o.cb + '" text-anchor="' + anc + '">' + eur(B[i]) + '</text>';
+      var showA = true, showB = true;
+      if (i === 0) {
+        /* Départ : on n'affiche pas un 0 € évident ; les libellés restants sont placés au-dessus des points */
+        tx = xv(i) + 2; anc = 'start';
+        showA = Math.round(A[i]) !== 0; showB = Math.round(B[i]) !== 0;
+        var top0 = Math.min(yv(A[i]), yv(B[i]));
+        if (showA && showB) { pa = A[i] >= B[i] ? top0 - 22 : top0 - 9; pb = A[i] >= B[i] ? top0 - 9 : top0 - 22; }
+        else { pa = yv(A[i]) - (A[i] >= 0 ? 15 : -17); pb = yv(B[i]) - (B[i] >= 0 ? 15 : -17); }
+      }
+      if (showA) { s += '<text x="' + tx + '" y="' + pa + '" font-size="10" font-weight="700" fill="' + o.ca + '" text-anchor="' + anc + '">' + eur(A[i]) + '</text>'; }
+      if (showB) { s += '<text x="' + tx + '" y="' + pb + '" font-size="10" font-weight="700" fill="' + o.cb + '" text-anchor="' + anc + '">' + eur(B[i]) + '</text>'; }
     }
   }
   s += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + yv(0) + '" y2="' + yv(0) + '" stroke="#9aa5b1" stroke-width="1.2"/>';
@@ -1460,6 +1470,7 @@ function missReason(k) {
     } else if (av > num(state.prixE)) { return 'ne peut pas dépasser le prix d’achat'; }
     else if (aideLeaseFin(state, 'E') > 0 && creditLeaseFirst(state, 'E') + av + creditLeaseResidual(state, 'E') >= num(state.prixE)) { return 'aide + premier loyer + valeur résiduelle doivent rester inférieurs au prix'; }
   }
+  if (k === 'rembTicpe' && num(state.ticpe) > 0 && parseFloat(s) >= num(state.ticpe)) { return 'égal ou supérieur à toute la TICPE : vérifie le taux'; }
   if (k === 'aideBorne') {
     if (parseFloat(s) < 0) { return 'ne peut pas être négative'; }
     if (effOn().borne && parseFloat(s) > num(state.borneInv)) { return 'ne peut pas dépasser le prix de la borne'; }
@@ -1795,7 +1806,7 @@ function pageSens(r, d, on, S) {
   var what = complet ? 'l’économie sur ' + ans(r.n) + ' (coût total)' : 'l’économie d’énergie sur ' + ans(r.n);
   var h = '<div class="page">' + headHtml(d);
   h += '<div class="st">Seuils de rentabilité</div>';
-  h += '<div class="basis" style="margin-top:0">Valeur de chaque donnée pour laquelle ' + what + ' devient nulle, toutes les autres données restant inchangées. Base actuelle : <b>' + eur(S.base) + '</b>.</div>';
+  h += '<div class="basis" style="margin-top:0">Valeur de chaque donnée pour laquelle ' + what + ' devient nulle, toutes les autres données restant inchangées. Base actuelle : <b>' + eur(S.base) + '</b>. La marge indique de combien la donnée peut se dégrader avant que l’électrique perde son avantage.</div>';
   var nCards = S.thr.length + (complet && on.achat ? 1 : 0);
   h += '<div class="thr' + (nCards > 6 ? ' c4' : '') + '">';
   var i;
@@ -1809,6 +1820,12 @@ function pageSens(r, d, on, S) {
   if (S.vars.length > 0) {
     h += '<div class="st">Sensibilité : effet d’une variation de ± ' + fmt(S.amp * 100, 0) + ' % sur ' + what + '</div>';
     h += tornadoChart(706, S.vars, S.base, S.amp);
+    var tv = S.vars[0];
+    var pc = fmt(S.amp * 100, 0) + ' %';
+    h += '<div class="callout" style="font-size:11px;margin:4px 0 6px;padding:6px 10px"><b>Comment lire ce graphique :</b> chaque ligne fait varier <b>une seule donnée</b> de ' + pc + ' à la baisse (barre claire) ou à la hausse (barre foncée), toutes les autres restant identiques, et indique ' + what + ' obtenue. ';
+    h += 'Plus la ligne est longue, plus le résultat dépend de cette donnée : ce sont les hypothèses à vérifier en priorité avec le client. ';
+    h += 'Exemple : ' + esc(tv.label.toLowerCase()) + ' à −' + pc + ' donne ' + eur(tv.low) + ', à +' + pc + ' ' + eur(tv.high) + ' (contre ' + eur(S.base) + ' aujourd’hui). ';
+    h += 'La ligne pointillée « équilibre » correspond à une économie nulle : une barre qui la franchit signifie que le diesel deviendrait plus avantageux dans ce cas.</div>';
   }
 
   var k, j, maxAbs = 0;
@@ -1820,7 +1837,7 @@ function pageSens(r, d, on, S) {
   for (k = 0; k < S.steps.length; k++) {
     h += '<tr><th class="rh">' + fmt(r.kmAn * Math.max(0.01, S.steps[k]), 0) + '</th>';
     for (j = 0; j < S.steps.length; j++) {
-      h += '<td' + (k === 2 && j === 2 ? ' class="cur"' : '') + ' style="background:' + heatColor(S.grid[k][j], maxAbs) + '">' + fmt(S.grid[k][j] / 1000, 0) + ' k€</td>';
+      h += '<td' + (k === 2 && j === 2 ? ' class="cur"' : '') + ' style="background:' + heatColor(S.grid[k][j], maxAbs) + '">' + fmt(Math.round(S.grid[k][j] / 1000) || 0, 0) + ' k€</td>';
     }
     h += '</tr>';
   }
@@ -1924,6 +1941,13 @@ function reportRow(f, d) {
     v = base === 'ht' ? d[f.k] : d[f.k] / (1 + tva / 100);
     val = fmt(v, f.k === 'pDiesel' ? 3 : 4) + (f.k === 'pDiesel' ? ' €/L HT' : ' €/kWh HT');
     label = label + ' (HT)';
+  } else if ((f.k === 'loyE' || f.k === 'loyD') && d['mode' + f.k.slice(-1)] === 'cbail') {
+    val = fmt(d[f.k], 0) + ' € HT/mois (calculé)';
+  } else if ((f.k === 'cbPremierE' || f.k === 'cbPremierD') && d['mode' + f.k.slice(-1)] === 'cbail') {
+    var X = f.k.slice(-1);
+    var fc = d['first' + X] || 0, fa = X === 'E' ? (d.aideFinE || 0) : 0;
+    if (fc + fa <= 0) { val = 'Non'; }
+    else { val = eur(fc + fa) + (fa > 0 ? (fc > 0 ? ' (dont aide ' + eur(fa) + ')' : ' (payé par l’aide)') : ''); }
   } else {
     val = valueText(f);
   }
@@ -2444,16 +2468,41 @@ function renderReport() {
   host.innerHTML = h;
   btn.textContent = 'Télécharger le rapport en PDF (' + pages.length + ' pages)';
   fitPages();
-  var pageEls = host.getElementsByClassName('page');
-  var overflowPages = [];
-  for (var pi = 0; pi < pageEls.length; pi++) {
-    if (pageEls[pi].scrollHeight > pageEls[pi].clientHeight + 2) { overflowPages.push(pi + 1); }
-  }
+  var overflowPages = fitPageContent(host);
   if (overflowPages.length > 0) {
-    warn.innerHTML += '<div class="warn red"><b>Rapport dense :</b> le contenu dépasse la hauteur prévue sur la/les page(s) ' + overflowPages.join(', ') + '. Réduis les options facultatives avant l’export pour éviter une page tronquée.</div>';
+    warn.innerHTML += '<div class="warn red"><b>Rapport dense :</b> le contenu de la/les page(s) ' + overflowPages.join(', ') + ' a dû être nettement réduit pour tenir sur une page. Désactive des options facultatives pour un rendu plus lisible.</div>';
   }
 }
 
+/* Si le contenu d'une page dépasse la hauteur A4 (polices plus grandes selon l'appareil), il est réduit pour tenir */
+var PAGE_AVAIL = 1122 - 34 - 52;
+function fitPageContent(root) {
+  var pages = root.getElementsByClassName('page');
+  var tooDense = [];
+  var i, j, pg, pc, kids, hgt, k;
+  for (i = 0; i < pages.length; i++) {
+    pg = pages[i];
+    pc = pg.querySelector(':scope > .pgc');
+    if (!pc) {
+      pc = document.createElement('div');
+      pc.className = 'pgc';
+      kids = [];
+      for (j = 0; j < pg.childNodes.length; j++) { if (!(pg.childNodes[j].classList && pg.childNodes[j].classList.contains('foot'))) { kids.push(pg.childNodes[j]); } }
+      for (j = 0; j < kids.length; j++) { pc.appendChild(kids[j]); }
+      pg.insertBefore(pc, pg.firstChild);
+    }
+    pc.style.transform = ''; pc.style.width = '';
+    hgt = pc.offsetHeight;
+    if (hgt > PAGE_AVAIL) {
+      k = PAGE_AVAIL / hgt;
+      pc.style.transformOrigin = 'top left';
+      pc.style.transform = 'scale(' + k.toFixed(4) + ')';
+      pc.style.width = (100 / k).toFixed(3) + '%';
+      if (k < 0.86) { tooDense.push(i + 1); }
+    }
+  }
+  return tooDense;
+}
 function fitPages() {
   var host = document.getElementById('pagesHost');
   var w = host.clientWidth;
@@ -2539,6 +2588,7 @@ function startPdf() {
   btn.textContent = 'Génération du PDF…';
   var stage = document.getElementById('stage');
   stage.innerHTML = pages.join('');
+  fitPageContent(stage);
   var els = stage.getElementsByClassName('page');
   var pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
   var idx = 0;
