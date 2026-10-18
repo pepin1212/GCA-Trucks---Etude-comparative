@@ -401,7 +401,7 @@ var DEFAULTS = {
   coutChauf: '35',
   modeE: 'achat', prixE: '290000', loyE: '5200', durLocE: '5', durLocUE: 'ans', optE: '2900', cbTauxE: '5', cbPremierE: 'non', cbPremierMontantE: '10', cbPremierUE: 'pct', cbResE: '10', cbResUE: 'pct',
   modeD: 'achat', prixD: '115000', loyD: '2100', durLocD: '5', durLocUD: 'ans', optD: '1150', cbTauxD: '5', cbPremierD: 'non', cbPremierMontantD: '10', cbPremierUD: 'pct', cbResD: '10', cbResUD: 'pct',
-  aideAchat: '0', aideCbBenef: 'fin', aideAchat2: '0', aideCbBenef2: 'fin', aideBorne: '0',
+  aideAchat: '0', aideCbBenef: 'fin', aideAchat2: '0', aideCbBenef2: 'fin', tvaLoyer: '20', aideBorne: '0',
   finPartE: '80', finTauxE: '5', finDureeE: '5', finUE: 'ans',
   finPartD: '80', finTauxD: '5', finDureeD: '5', finUD: 'ans',
   resE: '30', resD: '35', resU: 'pct',
@@ -553,13 +553,14 @@ var GROUPS = [
     { k: 'cbResD', slot: 'D', l: 'Valeur résiduelle du crédit-bail', unitKey: 'cbResUD', units: U_RES, max: function (s) { return s.cbResUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD === 'cbail'; } },
     { info: 'acqD' }
   ]},
-  { id: 'aides', on: 'aides', cx: true, need: 'elec', title: 'Aides', note: 'Les aides (véhicule et borne) sont versées le 6e mois : elles ne comptent qu’à partir de ce moment-là. L’aide à un tracteur électrique n’est acquise que si le client le garde au moins 5 ans. Elle s’applique quel que soit le mode d’acquisition ; en crédit-bail, versée au financeur, elle paie le premier loyer majoré, avancé par le client jusqu’au versement.', fields: [
+  { id: 'aides', on: 'aides', cx: true, need: 'elec', title: 'Aides', note: 'Les aides (véhicule et borne) sont versées le 6e mois : elles ne comptent qu’à partir de ce moment-là. L’aide à un tracteur électrique n’est acquise que si le client le garde au moins 5 ans. Elle s’applique quel que soit le mode d’acquisition. En crédit-bail, elle peut payer un loyer majoré : le 1er (le client avance l’aide jusqu’au 6e mois) ou le 6e, pour un montant égal à l’aide − TVA (aucune avance) ou à l’aide en HT (le client avance seulement la TVA, loyers plus bas). Elle peut aussi être versée directement au client.', fields: [
     { k: 'aideAchat', slot: 'E', l: function (s) { return 'Aide au tracteur ' + V1(s); }, u: '€', vis: function (s, o) { return !!o.achat && isElec(s, 'E'); } },
-    { k: 'aideCbBenef', slot: 'E', l: 'Aide versée au', select: [['fin', 'Financeur (premier loyer majoré)'], ['client', 'Client (au démarrage)']], vis: function (s, o) { return !!o.achat && isElec(s, 'E') && s.modeE === 'cbail'; } },
+    { k: 'aideCbBenef', slot: 'E', l: 'Versement de l’aide en crédit-bail', select: [['fin', '1er loyer majoré (avance)'], ['fin6', '6e loyer majoré = aide − TVA'], ['fin6ht', '6e loyer majoré = aide HT'], ['client', 'Aide versée au client']], vis: function (s, o) { return !!o.achat && isElec(s, 'E') && s.modeE === 'cbail'; } },
     { info: 'aideT' },
     { k: 'aideAchat2', slot: 'D', l: function (s) { return 'Aide au tracteur ' + V2(s); }, u: '€', vis: function (s, o) { return !!o.achat && isElec(s, 'D'); } },
-    { k: 'aideCbBenef2', slot: 'D', l: 'Aide versée au', select: [['fin', 'Financeur (premier loyer majoré)'], ['client', 'Client (au démarrage)']], vis: function (s, o) { return !!o.achat && isElec(s, 'D') && s.modeD === 'cbail'; } },
+    { k: 'aideCbBenef2', slot: 'D', l: 'Versement de l’aide en crédit-bail', select: [['fin', '1er loyer majoré (avance)'], ['fin6', '6e loyer majoré = aide − TVA'], ['fin6ht', '6e loyer majoré = aide HT'], ['client', 'Aide versée au client']], vis: function (s, o) { return !!o.achat && isElec(s, 'D') && s.modeD === 'cbail'; } },
     { info: 'aideT2' },
+    { k: 'tvaLoyer', l: 'TVA sur les loyers', u: '%', hint: 'sert à calculer « aide − TVA »', vis: function (s, o) { return !!o.achat && (((isElec(s, 'E') && s.modeE === 'cbail' && s.aideCbBenef === 'fin6')) || (isElec(s, 'D') && s.modeD === 'cbail' && s.aideCbBenef2 === 'fin6')); } },
     { k: 'aideBorne', l: 'Aide à l’installation de la borne', u: '€', hint: 'versée le 6e mois, déduite du prix de la borne', vis: function (s, o) { return !!o.borne; } }
   ]},
   { id: 'fin', on: 'fin', cx: true, req: 'achat', title: 'Financement par crédit', note: 'Intérêts d’un crédit amortissable mensuellement, pour les tracteurs achetés.', fields: [
@@ -709,6 +710,8 @@ function readData(s) {
   d.firstE = creditLeaseFirst(s, 'E');
   d.aideFinE = aideLeaseFin(s, 'E');
   d.aideFinD = aideLeaseFin(s, 'D');
+  d.aideMaj6E = aideLease6(s, 'E');
+  d.aideMaj6D = aideLease6(s, 'D');
   d.firstD = creditLeaseFirst(s, 'D');
   if (s.modeE === 'cbail') { d.loyE = creditLeaseMonthly(s, 'E'); d.optE = creditLeaseResidual(s, 'E'); }
   if (s.modeD === 'cbail') { d.loyD = creditLeaseMonthly(s, 'D'); d.optD = creditLeaseResidual(s, 'D'); }
@@ -776,10 +779,20 @@ function studyYears(s) { return Math.min(15, Math.max(1, Math.round(posNum(s.ann
 function aideOkDuree(s) { return studyYears(s) >= AIDE_MIN_ANS; }
 function aideLeaseFin(s, X) {
   if (!aideOkDuree(s)) { return 0; }
-  if (!isElec(s, X) || s['mode' + X] !== 'cbail' || s[eKey(X, 'aideCbBenef')] === 'client') { return 0; }
+  if (!isElec(s, X) || s['mode' + X] !== 'cbail' || s[eKey(X, 'aideCbBenef')] !== 'fin') { return 0; }
   var o = effOn();
   if (!o.aides || !o.achat) { return 0; }
   return Math.max(0, num(s[eKey(X, 'aideAchat')]));
+}
+/* 6e loyer majoré payé par l'aide (options « aide − TVA » ou « aide en HT ») : montant HT du loyer majoré */
+function aideLease6(s, X) {
+  if (!aideOkDuree(s) || !isElec(s, X) || s['mode' + X] !== 'cbail') { return 0; }
+  var b = s[eKey(X, 'aideCbBenef')];
+  if (b !== 'fin6' && b !== 'fin6ht') { return 0; }
+  var o = effOn();
+  if (!o.aides || !o.achat) { return 0; }
+  var aid = Math.max(0, num(s[eKey(X, 'aideAchat')]));
+  return b === 'fin6' ? aid / (1 + Math.max(0, num(s.tvaLoyer)) / 100) : aid;
 }
 function creditLeaseMonthly(s, X) {
   var price = Math.max(0, num(s['prix' + X]));
@@ -787,6 +800,23 @@ function creditLeaseMonthly(s, X) {
   var rate = Math.max(0, num(s['cbTaux' + X])) / 100 / 12;
   var first = creditLeaseFirst(s, X) + aideLeaseFin(s, X);
   var residual = creditLeaseResidual(s, X);
+  var maj6 = months >= 6 ? aideLease6(s, X) : 0;
+  if (maj6 > 0) {
+    /* Échéancier identique au cas sans 6e loyer majoré (loyer k payé au temps k, ou k − 1 s'il y a un premier loyer majoré),
+       le 6e loyer étant remplacé par le loyer majoré */
+    if (months <= 0 || price <= 0) { return 0; }
+    var hasFirst = first > 0, k, t, v, pvMaj = 0, pvReg = 0;
+    for (k = 1; k <= months; k++) {
+      t = hasFirst ? k - 1 : k;
+      v = Math.pow(1 + rate, -t);
+      if (k === 1 && hasFirst) { pvMaj += first * v; }
+      else if (k === 6) { pvMaj += maj6 * v; }
+      else { pvReg += v; }
+    }
+    var rest = price - pvMaj - residual * Math.pow(1 + rate, -months);
+    if (rest <= 0 || pvReg <= 0) { return 0; }
+    return rest / pvReg;
+  }
   var payments = months - (first > 0 ? 1 : 0);
   if (months <= 0 || price <= 0 || first >= price || residual >= price || first + residual >= price || payments <= 0) { return 0; }
   if (rate === 0) { return Math.max(0, (price - first - residual) / payments); }
@@ -812,7 +842,7 @@ function loanInterestByYear(P, ratePct, term, termUnit, n) {
   }
   return arr;
 }
-function rentInYear(mode, rent, months, opt, y, first) {
+function rentInYear(mode, rent, months, opt, y, first, maj6) {
   if (mode === 'achat' || months <= 0) { return 0; }
   var from = 12 * (y - 1) + 1;
   var to = 12 * y;
@@ -823,6 +853,7 @@ function rentInYear(mode, rent, months, opt, y, first) {
   var cnt = Math.max(0, Math.min(to, months) - from + 1);
   var c = rent * cnt;
   if (mode === 'cbail' && y === 1 && first > 0) { c += Math.max(0, first) - rent; }
+  if (mode === 'cbail' && maj6 > 0 && months >= 6 && from <= 6 && 6 <= to) { c += maj6 - rent; }
   if (mode === 'cbail' && months >= from && months <= to) { c += opt; }
   return c;
 }
@@ -1023,7 +1054,7 @@ function acqVeh(d, on, X, ctx) {
   a.aideBlocked = a.aideAsked > 0 && n < AIDE_MIN_ANS;
   a.aideT = a.aideBlocked ? 0 : a.aideAsked;
   if (mode !== 'location') { a.aideT = Math.min(a.aideT, Math.max(0, d['prix' + X])); }
-  a.aideFin = (acqOn && mode === 'cbail' && d[eKey(X, 'aideCbBenef')] !== 'client') ? a.aideT : 0;
+  a.aideFin = (acqOn && mode === 'cbail' && d[eKey(X, 'aideCbBenef')] === 'fin') ? a.aideT : 0;
   a.aideY0 = a.aideT - a.aideFin;
   a.aideA = mode === 'achat' ? a.aideT : 0;
   a.net = a.cap - a.aideA;
@@ -1035,6 +1066,9 @@ function acqVeh(d, on, X, ctx) {
   a.int = loanInterestByYear(a.loanP, d['finTaux' + X], d['finDuree' + X], d['finU' + X], n);
   a.leaseShort = acqOn && mode === 'location' && a.lm < 12 * n;
   a.first = mode === 'cbail' ? (d['first' + X] || 0) + (d['aideFin' + X] || 0) : 0;
+  a.maj6 = (mode === 'cbail' && a.aideT > 0) ? (d['aideMaj6' + X] || 0) : 0;
+  a.benef = (mode === 'cbail' && a.aideT > 0) ? d[eKey(X, 'aideCbBenef')] : '';
+  a.tvaMaj = a.benef === 'fin' ? a.first * Math.max(0, d.tvaLoyer) / 100 : (a.maj6 > 0 ? a.maj6 * Math.max(0, d.tvaLoyer) / 100 : 0);
   return a;
 }
 
@@ -1097,7 +1131,7 @@ function compute(d, on) {
     for (y = 1; y <= n; y++) {
       fA = on.evol ? Math.pow(1 + d.evAutres / 100, y - 1) : 1;
       it.achat.push(0);
-      it.loyer.push(on.achat ? rentInYear(d['mode' + X], d['loy' + X], ac.lm, d['opt' + X], y, ac.first) : 0);
+      it.loyer.push(on.achat ? rentInYear(d['mode' + X], d['loy' + X], ac.lm, d['opt' + X], y, ac.first, ac.maj6) : 0);
       it.borne.push(el ? oc.borneAbo * fA : 0);
       it.ene.push(ev.yr.ene[y]);
       it.ent.push(oc['ent' + X] * fA);
@@ -1235,7 +1269,7 @@ function monthlyCash(d, on, r) {
       } else if (mode === 'location') {
         for (m = 1; m <= M; m++) { acq[m] -= d['loy' + X]; }
       } else {
-        for (m = 1; m <= Math.min(M, ac.lm); m++) { acq[m] -= (m === 1 && ac.first > 0) ? ac.first : d['loy' + X]; }
+        for (m = 1; m <= Math.min(M, ac.lm); m++) { acq[m] -= (m === 1 && ac.first > 0) ? ac.first : ((m === 6 && ac.maj6 > 0) ? ac.maj6 : d['loy' + X]); }
         if (ac.lm >= 1 && ac.lm <= M) { acq[ac.lm] -= d['opt' + X]; }
       }
     }
@@ -1731,6 +1765,7 @@ function missReason(k) {
       if (totL > 0 && av > totL) { return 'ne peut pas dépasser le total des loyers'; }
     } else if (av > num(state['prix' + AX])) { return 'ne peut pas dépasser le prix d’achat'; }
     else if (aideLeaseFin(state, AX) > 0 && creditLeaseFirst(state, AX) + av + creditLeaseResidual(state, AX) >= num(state['prix' + AX])) { return 'aide + premier loyer + valeur résiduelle doivent rester inférieurs au prix'; }
+    else if (aideLease6(state, AX) > 0 && creditLeaseMonthly(state, AX) <= 0) { return 'aide trop élevée pour ce crédit-bail'; }
   }
   if (k === 'rembTicpe' && num(state.ticpe) > 0 && parseFloat(s) >= num(state.ticpe)) { return 'égal ou supérieur à toute la TICPE : vérifie le taux'; }
   if (k === 'aideBorne') {
@@ -2203,7 +2238,7 @@ function pageComplet4(r, d, on) {
   var aTxt = [];
   ['E', 'D'].forEach(function (X) {
     var ac = r.A[X];
-    if (ac.aideT > 0) { aTxt.push('<b>' + eur(ac.aideT) + '</b> pour ' + esc(r.V[X].name) + ' (' + (ac.aideFin > 0 ? 'versée au financeur comme premier loyer majoré, ce qui baisse les loyers et les intérêts ; premier loyer avancé par le client jusqu’au versement' : 'encaissée par le client') + ')'); }
+    if (ac.aideT > 0) { aTxt.push('<b>' + eur(ac.aideT) + '</b> pour ' + esc(r.V[X].name) + ' (' + aideCbText(ac, d) + ')'); }
     if (ac.aideBlocked) { aTxt.push('aide de ' + eur(ac.aideAsked) + ' pour ' + esc(r.V[X].name) + ' <b>non retenue</b> : durée de détention inférieure à ' + AIDE_MIN_ANS + ' ans'); }
   });
   if (r.aideB > 0) { aTxt.push('<b>' + eur(r.aideB) + '</b> pour la borne (déduite de son prix' + (r.oc.nb > 1 ? ', soit ' + eur(r.aideBShare) + ' par camion' : '') + ')'); }
@@ -2315,9 +2350,11 @@ function acqText(d, X, r) {
   var m = X === 'E' ? r.lmE : r.lmD;
   var fa = mode === 'cbail' ? (r.A[X].aideFin || 0) : 0;
   var first = r.A[X].first;
-  var cnt = Math.min(m, 12 * r.n) - (first > 0 ? 1 : 0);
+  var maj6 = r.A[X].maj6 || 0;
+  var cnt = Math.min(m, 12 * r.n) - (first > 0 ? 1 : 0) - (maj6 > 0 && m >= 6 ? 1 : 0);
   var ft = '';
-  if (first > 0) { ft = 'premier loyer majoré ' + eur(first) + (fa > 0 ? ' (dont aide ' + eur(fa) + ' versée au financeur)' : '') + ' + '; }
+  if (maj6 > 0) { ft = '6e loyer majoré ' + eur(maj6) + ' (payé par l’aide) + '; }
+  if (first > 0) { ft += 'premier loyer majoré ' + eur(first) + (fa > 0 ? ' (dont aide ' + eur(fa) + ' versée au financeur)' : '') + ' + '; }
   return ACQ_NAME[mode] + ' ' + ft + eur(d['loy' + X]) + ' × ' + fmt(cnt, 0) + ' mois' + (mode === 'cbail' && m <= 12 * r.n ? ' + option ' + eur(d['opt' + X]) : '');
 }
 function pair(d, a, b) { return esc(N1(d)) + ' ' + a + ' · ' + esc(N2(d)) + ' ' + b; }
@@ -2382,9 +2419,8 @@ function annex2(r, d, on) {
         var ac = r.A[X];
         if (ac.aideT <= 0) { return; }
         var mode = d['mode' + X];
-        add('Aide au tracteur' + nm(X), (mode === 'achat' ? 'Achat : prix payé en entier, aide encaissée'
-          : (ac.aideFin > 0 ? 'Crédit-bail, aide versée au financeur : elle paie le premier loyer majoré (avancé par le client), réduit le montant financé, les intérêts et les loyers ; encaissée'
-          : (mode === 'cbail' ? 'Crédit-bail, aide versée au client : loyers inchangés ; encaissée' : 'Location : loyers inchangés ; encaissée'))) + ' le ' + AIDE_MOIS + 'e mois (année 1), acquise car le véhicule est gardé au moins ' + AIDE_MIN_ANS + ' ans', '– ' + eur(ac.aideT));
+        add('Aide au tracteur' + nm(X), (mode === 'achat' ? 'Achat : prix payé en entier, aide encaissée le ' + AIDE_MOIS + 'e mois'
+          : (mode === 'cbail' ? 'Crédit-bail : aide ' + aideCbText(ac, d) : 'Location : loyers inchangés, aide encaissée le ' + AIDE_MOIS + 'e mois')) + ' (année 1) ; acquise car le véhicule est gardé au moins ' + AIDE_MIN_ANS + ' ans', '– ' + eur(ac.aideT));
       });
     }
     if (on.borne) { add('Borne imputée à chaque camion électrique', '(' + eur(d.borneInv) + (r.aideB > 0 ? ' − aide ' + eur(r.aideB) + ' versée le ' + AIDE_MOIS + 'e mois' + (r.aideB < num(state.aideBorne) ? ' (plafonnée au prix)' : '') : '') + ') ÷ ' + fmt(r.oc.nb, 0) + ' ; abonnement ' + eur(r.oc.borneAboTot) + ' ÷ ' + fmt(r.oc.nb, 0), 'Invest. ' + eur(r.borneNet) + ' · ' + eur(r.oc.borneAbo) + '/an'); }
@@ -2563,6 +2599,10 @@ function annex5(r, d, on) {
         h += '<div>1er mois : <b>' + eur(t.net[1]) + '</b></div>';
         h += '<div>Plus forte sortie : <b>' + eur(t.minNet) + '</b> (' + (t.minM ? 'M' + t.minM : '–') + ')</div>';
         h += '<div>Sortie mensuelle habituelle (an ' + t.usualYear + ') : <b>' + eur(t.usual) + '</b></div>';
+        var ac5 = r.A[X];
+        if (ac5.benef === 'fin') { h += '<div>TVA du 1er loyer majoré à avancer : <b>' + eur(ac5.tvaMaj) + '</b> (M1, récupérable)</div>'; }
+        else if (ac5.benef === 'fin6ht') { h += '<div>TVA du 6e loyer majoré à avancer : <b>' + eur(ac5.tvaMaj) + '</b> (M6, récupérable)</div>'; }
+        else if (ac5.benef === 'fin6') { h += '<div>6e loyer majoré : ' + eur(ac5.maj6) + ' HT, soit ' + eur(ac5.maj6 + ac5.tvaMaj) + ' TTC payés par l’aide : aucune avance. En HT, le M6 affiche +' + eur(ac5.tvaMaj) + ' : c’est la TVA de ce loyer, payée avec l’aide puis récupérée.</div>'; }
         h += '<div>Total sur ' + ans(n) + ' : <b>' + eur(t.cum[T.M]) + '</b></div></div>';
       });
       h += '<div class="tbox vx"><div class="tn">Écart de trésorerie</div>';
@@ -2594,6 +2634,16 @@ function annex5(r, d, on) {
     pages.push(h);
   }
   return pages;
+}
+
+/* Description du versement de l'aide en crédit-bail */
+function aideCbText(ac, d) {
+  var tv = fmt(Math.max(0, d.tvaLoyer), 0) + ' %';
+  if (ac.benef === 'fin') { return 'versée au financeur comme 1er loyer majoré de ' + eur(ac.first) + ' HT, avancé par le client jusqu’au versement de l’aide le ' + AIDE_MOIS + 'e mois ; baisse les loyers et les intérêts'; }
+  if (ac.benef === 'fin6') { return 'versée au financeur pour payer le 6e loyer majoré de ' + eur(ac.maj6) + ' HT (aide − TVA ' + tv + ', soit ' + eur(ac.maj6 + ac.tvaMaj) + ' TTC) : aucune avance de trésorerie ; baisse les loyers et les intérêts'; }
+  if (ac.benef === 'fin6ht') { return 'versée au financeur pour payer le 6e loyer majoré de ' + eur(ac.maj6) + ' HT : le client avance la TVA de ' + eur(ac.tvaMaj) + ' (récupérable) ; loyers encore plus bas'; }
+  if (ac.benef === 'client') { return 'encaissée par le client le ' + AIDE_MOIS + 'e mois, loyers inchangés'; }
+  return 'encaissée par le client le ' + AIDE_MOIS + 'e mois';
 }
 
 function buildPages(r, d, on) {
@@ -2823,7 +2873,7 @@ function updateInfos(r) {
       else if (state['mode' + X] === 'achat') { at = 'Achat : le prix est payé en entier à la livraison (crédit éventuel calculé sur le prix complet) ; l’aide est encaissée le ' + AIDE_MOIS + 'e mois.'; }
       else if (state['mode' + X] === 'location') { at = 'Location : les loyers sont inchangés, l’aide est encaissée le ' + AIDE_MOIS + 'e mois.'; }
       else if (state[eKey(X, 'aideCbBenef')] === 'client') { at = 'Crédit-bail, aide au client : les loyers sont inchangés, l’aide est encaissée le ' + AIDE_MOIS + 'e mois.'; }
-      else { at = 'Crédit-bail, aide au financeur : elle paie le premier loyer majoré, ce qui réduit le montant financé, les intérêts et les loyers (loyer recalculé : <b>' + eur(r.d['loy' + X]) + '</b>/mois). Le client avance ce premier loyer jusqu’au versement de l’aide le ' + AIDE_MOIS + 'e mois.'; }
+      else { at = 'Crédit-bail : aide ' + aideCbText(ac, r.d) + '. Loyer recalculé : <b>' + eur(r.d['loy' + X]) + '</b>/mois.'; }
     }
     setInfo(X === 'E' ? 'aideT' : 'aideT2', at, alertA);
   });
@@ -2841,7 +2891,7 @@ function updateInfos(r) {
   } else { setInfo('rech', '', false); }
   ['E', 'D'].forEach(function (X) {
     var ac = r.A[X], first = ac.first, fa = ac.aideFin;
-    setInfo('acq' + X, (state['mode' + X] === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du premier loyer éventuel et de la valeur résiduelle. ' + (first > 0 ? 'Premier loyer majoré : <b>' + eur(first) + '</b>' + (fa > 0 ? ' (dont aide ' + eur(fa) + ')' : '') + ', puis ' + fmt(ac.lm - 1, 0) + ' loyers de <b>' + eur(r.d['loy' + X]) + '</b>. ' : '') + 'Valeur résiduelle due en fin de contrat : <b>' + eur(r.d['opt' + X]) + '</b>. ' : '') + ((eo.achat && ac.leaseShort) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state['mode' + X] === 'cbail' || (eo.achat && ac.leaseShort));
+    setInfo('acq' + X, (state['mode' + X] === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du premier loyer éventuel et de la valeur résiduelle. ' + (first > 0 ? 'Premier loyer majoré : <b>' + eur(first) + '</b>' + (fa > 0 ? ' (dont aide ' + eur(fa) + ')' : '') + ', puis ' + fmt(ac.lm - 1 - (ac.maj6 > 0 ? 1 : 0), 0) + ' loyers de <b>' + eur(r.d['loy' + X]) + '</b>. ' : '') + (ac.maj6 > 0 ? '6e loyer majoré payé par l’aide : <b>' + eur(ac.maj6) + '</b> HT. ' : '') + 'Valeur résiduelle due en fin de contrat : <b>' + eur(r.d['opt' + X]) + '</b>. ' : '') + ((eo.achat && ac.leaseShort) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state['mode' + X] === 'cbail' || (eo.achat && ac.leaseShort));
   });
 }
 
