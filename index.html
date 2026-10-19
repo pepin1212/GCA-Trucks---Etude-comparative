@@ -364,7 +364,7 @@ table.a4 tr.cum td{font-weight:700;color:#00529b}
 <body>
 <div id="app">
   <header class="top">
-    <div class="brand"><div class="wm"><span class="a">Master</span><span class="b">TCO</span></div><span class="tag">Coût total de possession<br>électrique et diesel<br><span style="opacity:.7;font-size:10px">version 8 du 18/10/2026</span></span></div>
+    <div class="brand"><div class="wm"><span class="a">Master</span><span class="b">TCO</span></div><span class="tag">Coût total de possession<br>électrique et diesel<br><span style="opacity:.7;font-size:10px">version 9 du 19/10/2026</span></span></div>
     <div class="tabs">
       <button class="tab on" type="button" data-action="tab" data-tab="saisie" id="tab-saisie">Données</button>
       <button class="tab" type="button" data-action="tab" data-tab="rapport" id="tab-rapport">Rapport</button>
@@ -802,6 +802,7 @@ function num(v) {
 }
 function fmt(n, d) {
   if (!isFinite(n)) { return '0'; }
+  if (Math.abs(n) < 0.5 * Math.pow(10, -(d || 0))) { n = 0; }
   return n.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
 }
 function fmtT(v) { return fmt(v, Math.abs(v) < 10 ? 1 : 0); }
@@ -1027,6 +1028,19 @@ function creditLeaseMonthly(s, X) {
   return Math.max(0, financed * rate / (1 - Math.pow(1 + rate, -payments)));
 }
 
+/* Capital remboursé chaque année (mensualités de l'étude) ; le capital restant dû est soldé la dernière année, comme dans la trésorerie */
+function loanPrincipalByYear(P, ratePct, term, termUnit, n) {
+  var arr = [], y, m, months, i, mens, bal, it, pr, M = n * 12;
+  for (y = 0; y <= n; y++) { arr.push(0); }
+  if (!(P > 0)) { return arr; }
+  months = Math.max(1, Math.round(termUnit === 'mois' ? term : term * 12));
+  i = Math.max(0, ratePct) / 100 / 12;
+  mens = i > 0 ? P * i / (1 - Math.pow(1 + i, -months)) : P / months;
+  bal = P;
+  for (m = 1; m <= Math.min(M, months); m++) { it = bal * i; pr = mens - it; bal -= pr; arr[Math.ceil(m / 12)] += pr; }
+  if (bal > 0.005) { arr[n] += bal; }
+  return arr;
+}
 function loanInterestByYear(P, ratePct, term, termUnit, n) {
   var arr = [];
   var y, m, it, yr, bal, pay, i, months;
@@ -1384,6 +1398,7 @@ function acqVeh(d, on, X, ctx) {
   var finOn = !!(on.fin && acqOn);
   a.loanP = (finOn && mode === 'achat') ? a.cap * d['finPart' + X] / 100 : 0;
   a.int = loanInterestByYear(a.loanP, d['finTaux' + X], d['finDuree' + X], d['finU' + X], n);
+  a.princ = loanPrincipalByYear(a.loanP, d['finTaux' + X], d['finDuree' + X], d['finU' + X], n);
   a.leaseShort = acqOn && mode === 'location' && a.lm < 12 * n;
   var tvl = Math.max(0, d.tvaLoyer) / 100;
   a.bFin = mode === 'cbail' ? (d['borneFin' + X] || 0) : 0;
@@ -1452,6 +1467,7 @@ function compute(d, on) {
   var borneGross = on.borne ? d.borneInv / nb : 0;
   var borneLoan = (on.borne && d.borneFin === 'credit' && d.borneDuree > 0) ? borneGross : 0;
   var borneInt = loanInterestByYear(borneLoan, d.borneTaux, d.borneDuree, 'ans', n);
+  var bornePrinc = loanPrincipalByYear(borneLoan, d.borneTaux, d.borneDuree, 'ans', n);
   var aideBShare = on.borne ? aideB / nb : 0;
 
   /* Postes année par année, pour chaque véhicule (indice 0 = départ) */
@@ -1462,14 +1478,17 @@ function compute(d, on) {
     ev = V[X]; ac = A[X]; el = ev.type === 'elec';
     it = {};
     for (k = 0; k < ITEM_KEYS.length; k++) { it[ITEM_KEYS[k]] = [0]; }
-    it.achat[0] = ac.cap;
-    it.borne[0] = el ? borneGross : 0;
+    /* Départ : ce qui est payé comptant ; la part financée par crédit est remboursée année par année (capital dans le poste, intérêts dans « fin ») */
+    it.achat[0] = ac.cap - ac.loanP;
+    it.borne[0] = el ? borneGross - borneLoan : 0;
+    it.borneAbo = [0];
     it.aides[0] = 0;
     for (y = 1; y <= n; y++) {
       fA = on.evol ? Math.pow(1 + d.evAutres / 100, y - 1) : 1;
-      it.achat.push(0);
+      it.achat.push(ac.princ[y]);
       it.loyer.push(on.achat ? rentInYear(d['mode' + X], d['loy' + X], ac.lm, d['opt' + X], y, ac.first, ac.maj6) : 0);
-      it.borne.push(el ? oc.borneAbo * fA : 0);
+      it.borneAbo.push(el ? oc.borneAbo * fA : 0);
+      it.borne.push(el ? oc.borneAbo * fA + bornePrinc[y] : 0);
       it.ene.push(ev.yr.ene[y]);
       it.ent.push(oc['ent' + X] * fA * entMult(d, on, X, y));
       it.adb.push(el ? 0 : ev.adbCost * fA);
@@ -1534,29 +1553,17 @@ function compute(d, on) {
 
   function op1(X) {
     var it = IT[X];
-    return it.ene[1] + it.ent[1] + it.ass[1] + it.adb[1] + it.borne[1] + it.chauf[1] + it.taxes[1] - V[X].yr.certif[1];
+    return it.ene[1] + it.ent[1] + it.ass[1] + it.adb[1] + it.borneAbo[1] + it.chauf[1] + it.taxes[1] - V[X].yr.certif[1];
   }
   var opE1 = op1('E'), opD1 = op1('D');
 
-  var be = null;
-  var be0 = (cumD[0] - cumE[0]) >= 0;
-  var s0, s1;
-  if (be0) { be = 0; }
-  else {
-    for (y = 1; y <= n; y++) {
-      s0 = cumD[y - 1] - cumE[y - 1];
-      s1 = cumD[y] - cumE[y];
-      if (s1 >= 0) { be = (y - 1) + (-s0) / (s1 - s0); break; }
-    }
-  }
+  var be = null, be0 = false, beRes = null;
   var resOn = !!(on.revente && on.achat);
-  var beRes = be;
-  if (beRes === null && resOn && (cumDn[n] - cumEn[n]) >= 0) { beRes = n; }
 
   var co2Year = (V.D.kg1 - V.E.kg1) / 1000;
   var co2Total = (V.D.kgTotal - V.E.kgTotal) / 1000;
 
-  return {
+  var out = {
     n: n, kmAn: kmAn, P: P, adj: adj, hivF: hivF, chgF: chgF, cmp: cmpOf(d),
     pSimpleHT: pSimpleHT, pDepHT: pDepHT, pPubHT: pPubHT, pDieHT: pDieHT, pDieHTnet: pDieHTnet, rembU: rembU,
     fixedContrat: fixedContrat, V: V, A: A, IT: IT, an: an, ref: ref, oc: oc,
@@ -1571,6 +1578,24 @@ function compute(d, on) {
     co2Year: co2Year, co2Total: co2Total,
     valid: kmAn > 0 && (d.kmUnit === 'an' || d.kmNb > 0) && (!on.energie || (V.E.valid && V.D.valid))
   };
+  breakEven(d, on, out);
+  return out;
+}
+/* Temps d'équilibre : moment après lequel la trésorerie cumulée du véhicule 1 reste meilleure que celle du véhicule 2,
+   d'après la trésorerie mois par mois, hors valeur de revente (même calcul que l'annexe trésorerie) */
+function breakEven(d, on, out) {
+  var T, M, m, g = [0], last = -1, tol = 0.005;
+  try { T = monthlyCash(d, on, out); } catch (e) { T = null; }
+  if (!T) { return; }
+  M = T.M;
+  for (m = 1; m <= M; m++) { g.push(T.E.cum[m] - T.D.cum[m] - (m === M ? out.A.E.res - out.A.D.res : 0)); }
+  for (m = 1; m <= M; m++) { if (g[m] < -tol) { last = m; } }
+  if (last < 0) { out.be0 = true; out.be = 0; }
+  else if (last < M) { out.be = (last + (-g[last]) / (g[last + 1] - g[last])) / 12; }
+  else { out.be = null; }
+  out.beRes = out.be;
+  var resOn = !!(on.revente && on.achat);
+  if (out.beRes === null && resOn && (out.cumDn[out.n] - out.cumEn[out.n]) >= 0) { out.beRes = out.n; }
 }
 
 /* ===================== TRÉSORERIE MOIS PAR MOIS ===================== */
@@ -1585,7 +1610,7 @@ function loanSchedule(P, ratePct, term, termUnit, M) {
   for (k = 1; k <= Math.min(M, months); k++) {
     it = bal * i; princ = mens - it; bal -= princ; pay[k] = mens;
   }
-  return { pay: pay, rest: Math.max(0, bal) };
+  return { pay: pay, rest: bal > 0.005 ? bal : 0 };
 }
 function monthlyCash(d, on, r) {
   var n = r.n, M = n * 12, res = {};
@@ -1620,7 +1645,7 @@ function monthlyCash(d, on, r) {
     /* Usage, réparti uniformément sur les 12 mois de chaque année */
     for (m = 1; m <= M; m++) {
       y = Math.ceil(m / 12);
-      use[m] -= (it.ene[y] + it.ent[y] + it.ass[y] + it.adb[y] + it.borne[y] + it.chauf[y] + it.taxes[y]) / 12;
+      use[m] -= (it.ene[y] + it.ent[y] + it.ass[y] + it.adb[y] + it.borneAbo[y] + it.chauf[y] + it.taxes[y]) / 12;
       use[m] += ev.yr.certif[y] / 12;
       if (m % 12 === 0) { use[m] -= it.batt[y]; }
     }
@@ -1724,7 +1749,7 @@ function sensitivity(d, on, complet, r) {
   }
   if (complet && on.achat && on.aides && isElec(d, 'E')) {
     var capA = d.modeE === 'location' ? Math.max(0, d.loyE) * leaseMonths(d, 'E') : Math.max(0, d.prixE) * 0.95;
-    var aApply = function (dc, a) { dc.aideAchat = a; if (dc.modeE === 'cbail') { dc.aideFinE = aideLeaseFin(dc, 'E'); dc.loyE = creditLeaseMonthly(dc, 'E'); } };
+    var aApply = function (dc, a) { dc.aideAchat = a; if (dc.modeE === 'cbail') { dc.aideFinE = aideLeaseFin(dc, 'E'); dc.aideMaj6E = aideLease6(dc, 'E'); dc.loyE = creditLeaseMonthly(dc, 'E'); dc.optE = creditLeaseResidual(dc, 'E'); } };
     var mA = function (a) { var dc = copyObj(d); aApply(dc, a); return metricOf(compute(dc, on), complet); };
     var aSeuil = null, lo = 0, hi = capA, k;
     if (mA(0) >= 0) { aSeuil = 0; }
@@ -2258,7 +2283,7 @@ function energyBlock(r, d, on) {
   h += '</div><div class="fx2"><table class="t sm">' + th2(d, 'Écart') + '';
   h += '<tr><td>Par an</td><td>' + eur(r.an.e1) + '</td><td>' + eur(r.an.e2) + '</td><td>' + eur(r.an.ecoHT) + '</td></tr>';
   h += '<tr><td>Au km</td><td>' + eur(r.V.E.perKm, 3) + '</td><td>' + eur(r.V.D.perKm, 3) + '</td><td>' + eur(r.V.D.perKm - r.V.E.perKm, 3) + '</td></tr>';
-  h += '<tr><td>Aux 100 km</td><td>' + eur(r.V.E.perKm * 100, 2) + '</td><td>' + eur(r.V.D.perKm * 100, 2) + '</td><td>' + eur((r.V.D.perKm - r.V.E.perKm) * 100, 2) + '</td></tr>';
+  h += '<tr><td>Aux 100 km' + (r.adj !== 1 ? ' (conditions réelles)' : '') + '</td><td>' + eur(r.V.E.perKm * 100, 2) + '</td><td>' + eur(r.V.D.perKm * 100, 2) + '</td><td>' + eur((r.V.D.perKm - r.V.E.perKm) * 100, 2) + '</td></tr>';
   h += '</table>';
   if (on.contrat && anyElec(d)) { h += '<div class="basis">Contrat du dépôt : ' + ['E', 'D'].filter(function (X) { return r.V[X].type === 'elec'; }).map(function (X) { var ev = r.V[X], sh = ev.hcShare || 0; return (cmpOf(d) === 'ee' ? esc(ev.name) + ' ' : '') + fmt(sh * 100, 0) + ' % en heures creuses' + (ev.plan && ev.plan.share !== null ? ' (recharge ' + hcPlanTxt(ev.plan) + ')' : ''); }).join(', ') + ', part fixe de ' + eur(r.fixedContrat) + ' par an imputée à chaque camion électrique.</div>'; }
   h += '</div></div>';
@@ -2268,8 +2293,9 @@ function energyBlock(r, d, on) {
   h += '<tr><td>Énergie consommée</td><td>' + fmt(r.ref.E.qty, 1) + ' ' + r.V.E.unit + '</td><td>' + fmt(r.ref.D.qty, 1) + ' ' + r.V.D.unit + '</td><td></td></tr>';
   h += '<tr><td>Consommation aux 100 km</td><td>' + fmt(r.V.E.c100, 1) + ' ' + r.V.E.unit + '</td><td>' + fmt(r.V.D.c100, 1) + ' ' + r.V.D.unit + '</td><td></td></tr>';
   h += '<tr><td>Coût de l’énergie</td><td>' + eur(r.ref.E.cost, 2) + '</td><td>' + eur(r.ref.D.cost, 2) + '</td><td>' + eur(r.ref.ecoHT, 2) + '</td></tr>';
-  h += '<tr class="hl"><td>Économie aux 100 km</td><td colspan="3">' + eur(r.ref.km > 0 ? r.ref.ecoHT / r.ref.km * 100 : 0, 2) + '</td></tr>';
+  h += '<tr class="hl"><td>Économie aux 100 km' + (r.adj !== 1 ? ' (consommations de l’essai)' : '') + '</td><td colspan="3">' + eur(r.ref.km > 0 ? r.ref.ecoHT / r.ref.km * 100 : 0, 2) + '</td></tr>';
   h += '</table>';
+  if (r.adj !== 1 && r.ref.test) { h += '<div class="basis">Consommations mesurées pendant l’essai, sans la correction hiver et charge ; en conditions réelles, l’écart est de ' + eur((r.V.D.perKm - r.V.E.perKm) * 100, 2) + ' aux 100 km (tableau du haut).</div>'; }
 
   h += '<div class="st">Consommations annuelles (année 1)</div>';
   h += '<table class="t">' + th2(d, '');
@@ -2533,7 +2559,7 @@ function pageSens(r, d, on, S) {
   var i;
   for (i = 0; i < S.thr.length; i++) { h += thrCard(S.thr[i], S); }
   if (complet && on.achat) {
-    h += '<div class="tc"><div class="l">Temps d’équilibre économique</div><div class="q">Durée pour rattraper le surcoût</div><div class="v">' + beMain(r) + '</div><div class="c">Hors valeur de revente</div>';
+    h += '<div class="tc"><div class="l">Temps d’équilibre économique</div><div class="q">Durée pour rattraper le surcoût (trésorerie)</div><div class="v">' + beMain(r) + '</div><div class="c">Hors valeur de revente</div>';
     h += '<span class="m ' + (r.be !== null ? 'ok' : 'na') + '">' + (r.be !== null ? 'Avant la fin de l’étude' : 'Avec revente : ' + beWithRes(r)) + '</span></div>';
   }
   h += '</div>';
@@ -2838,7 +2864,7 @@ function annex2(r, d, on) {
       });
     }
     if (on.borne) { add('Borne imputée à chaque camion électrique', '(' + eur(d.borneInv) + (r.aideB > 0 ? ' − aide ' + eur(r.aideB) + ' versée le ' + AIDE_MOIS + 'e mois' + (r.aideB < num(state.aideBorne) ? ' (plafonnée au prix)' : '') : '') + ') ÷ ' + fmt(r.oc.nb, 0) + (r.aideB > 0 ? ' ; aide ' + borneAideText(borneLeaseOk(state) ? state.aideBorneMode : 'client', r.aideBShare, d) : '') + ' ; abonnement ' + eur(r.oc.borneAboTot) + ' ÷ ' + fmt(r.oc.nb, 0), 'Invest. ' + eur(r.borneNet) + ' · ' + eur(r.oc.borneAbo) + '/an'); }
-    if (on.borne && r.borneLoan > 0) { add('Crédit de la borne', fmt(r.borneLoan, 0) + ' € par camion sur ' + fmt(d.borneDuree, 1) + ' an(s) à ' + fmt(d.borneTaux, 2) + ' %', eur(r.borneInt.reduce(function (a0, v0) { return a0 + v0; }, 0)) + ' d’intérêts sur ' + ans(n)); }
+    if (on.borne && r.borneLoan > 0) { add('Crédit de la borne', fmt(r.borneLoan, 0) + ' € par camion sur ' + fmt(d.borneDuree, 1) + ' an(s) à ' + fmt(d.borneTaux, 2) + ' %', eur(r.borneInt.reduce(function (a0, v0) { return a0 + v0; }, 0)) + ' d’intérêts au total'); }
     if (on.fin) {
       var fT = function (X) { return d['mode' + X] === 'achat' ? fmt(d['finPart' + X], 0) + ' % à ' + fmt(d['finTaux' + X], 2) + ' % sur ' + fmt(d['finDuree' + X], 0) + ' ' + d['finU' + X] : 'sans crédit'; };
       add('Intérêts des crédits', esc(N1(d)) + ' : ' + fT('E') + ' ; ' + esc(N2(d)) + ' : ' + fT('D'), pair(d, eur(r.cE.fin), eur(r.cD.fin)));
@@ -2862,7 +2888,7 @@ function annex2(r, d, on) {
     add('Coût total par camion', 'Somme des postes − aides − recettes − revente', pair(d, eur(r.tcoE), eur(r.tcoD)));
     add('Économie sur ' + ans(n), 'Coût total ' + esc(N2(d)) + ' − coût total ' + esc(N1(d)), eur(r.tcoSav));
     add('Économie annuelle d’exploitation', 'Année 1 : coûts d’usage ' + esc(N2(d)) + ' − ' + esc(N1(d)) + ' (hors acquisition et intérêts)', eur(r.opSav));
-    add('Temps d’équilibre économique', 'Année où le cumul des coûts de ' + esc(N2(d)) + ' rattrape celui de ' + esc(N1(d)) + ' (hors revente)' + (on.revente ? ' ; avec revente : ' + beWithRes(r) : ''), beMain(r));
+    add('Temps d’équilibre économique', 'Moment à partir duquel la trésorerie cumulée de ' + esc(N1(d)) + ' reste meilleure que celle de ' + esc(N2(d)) + ', mois par mois (annexe trésorerie), hors revente' + (on.revente ? ' ; avec revente : ' + beWithRes(r) : ''), beMain(r));
   }
   if (on.co2) {
     if (!isComplet()) { sec('Environnement'); }
@@ -2960,7 +2986,7 @@ function annex4Rows(r, d, on, X) {
   }
   if (!complet) { return rows; }
   var list = [
-    ['Prix d’achat', it.achat], ['Loyers', it.loyer], ['Borne (investissement et abonnement)', it.borne],
+    [r.A[X].loanP > 0 ? 'Prix d’achat (apport, puis capital du crédit)' : 'Prix d’achat', it.achat], ['Loyers', it.loyer], [r.borneLoan > 0 ? 'Borne (capital du crédit et abonnement)' : 'Borne (investissement et abonnement)', it.borne],
     ['Entretien', it.ent], ['AdBlue', it.adb], ['Assurance et taxes', it.ass], ['Intérêts du crédit', it.fin],
     ['Remplacement de la batterie', it.batt], ['Temps chauffeur en recharge', it.chauf], ['Taxes à venir', it.taxes]
   ];
@@ -3014,7 +3040,7 @@ function annex4(r, d, on) {
     last = ci === chunks.length - 1;
     h = '<div class="page annex">' + headHtml(d);
     h += '<div class="st">Annexe 3 · Calculs année par année' + (chunks.length > 1 ? ' (' + (ci + 1) + '/' + chunks.length + ')' : '') + ' · montants HT en €</div>';
-    if (ci === 0) { h += '<div class="basis" style="margin-top:0">Toutes les valeurs utilisées dans les calculs, année par année. Le départ (année 0) regroupe l’achat comptant et l’investissement de borne. Les aides, versées le ' + AIDE_MOIS + 'e mois, comptent en année 1. Les valeurs déduites sont en négatif.</div>'; }
+    if (ci === 0) { h += '<div class="basis" style="margin-top:0">Toutes les valeurs utilisées dans les calculs, année par année. Le départ (année 0) regroupe ce qui est payé comptant (achat, apport, borne) ; un crédit est remboursé année par année : capital dans le poste concerné, intérêts sur la ligne « Intérêts du crédit ». Les aides, versées le ' + AIDE_MOIS + 'e mois, comptent en année 1. Les valeurs déduites sont en négatif.</div>'; }
     h += annex4Table(r, d, rowsE, chunks[ci], last, esc(N1(d)), 'v1');
     h += annex4Table(r, d, rowsD, chunks[ci], last, esc(N2(d)), 'v2');
     h += annex4Table(r, d, rowsX, chunks[ci], last, 'Écart entre les deux véhicules', 'vx');
@@ -3755,7 +3781,7 @@ function pageSynth(r, d, on) {
   /* Indicateurs */
   var aid = r.A.E.aideT + r.A.D.aideT + (r.V.E.type === 'elec' ? r.aideBShare : 0) + (r.V.D.type === 'elec' ? r.aideBShare : 0);
   h += '<div class="syk">';
-  h += '<div><i>Équilibre économique</i><b>' + beMain(r) + '</b><span>' + (resOn && beWithRes(r) !== beMain(r) ? 'avec revente : ' + beWithRes(r) : 'surcoût de départ rattrapé') + '</span></div>';
+  h += '<div><i>Équilibre économique</i><b>' + beMain(r) + '</b><span>' + (resOn && beWithRes(r) !== beMain(r) ? 'avec revente : ' + beWithRes(r) : (r.be0 ? 'moins de trésorerie dès le 1er mois' : (r.be === null ? 'surcoût non rattrapé' : 'surcoût de départ rattrapé'))) + '</span></div>';
   h += '<div' + (r.opSav >= 0 ? ' class="ok"' : ' class="ko"') + '><i>Exploitation</i><b>' + eur(Math.abs(r.opSav)) + '</b><span>' + (r.opSav >= 0 ? 'de moins' : 'de plus') + ' par an à l’usage (hors acquisition)</span></div>';
   h += '<div><i>Aides</i><b>' + (aid > 0 ? eur(aid) : '–') + '</b><span>' + (aid > 0 ? 'versées le ' + AIDE_MOIS + 'e mois, déduites' : 'aucune aide retenue') + '</span></div>';
   h += '<div' + (on.co2 && r.co2Year > 0 ? ' class="ok"' : '') + '><i>CO₂ évité sur ' + ans(r.n) + '</i><b>' + (on.co2 ? fmtT(r.co2Total) + ' t' : '–') + '</b><span>' + (on.co2 ? fmtT(r.co2Year) + ' t par an' : 'poste non pris en compte') + '</span></div>';
