@@ -513,8 +513,8 @@ var DEFAULTS = {
   rechFreq: '1', rechFreqU: 'jour', pPublic: '0,55', pPublicBase: 'ttc',
   appNb: '1', appMode: 'dur', appDur: '45', appDurU: 'min', appKwh: '80',
   coutChauf: '35',
-  modeE: 'achat', prixE: '290000', loyE: '5200', durLocE: '5', durLocUE: 'ans', optE: '2900', cbTauxE: '5', cbPremierE: 'non', cbPremierMontantE: '10', cbPremierUE: 'pct', cbResE: '10', cbResUE: 'pct',
-  modeD: 'achat', prixD: '115000', loyD: '2100', durLocD: '5', durLocUD: 'ans', optD: '1150', cbTauxD: '5', cbPremierD: 'non', cbPremierMontantD: '10', cbPremierUD: 'pct', cbResD: '10', cbResUD: 'pct',
+  modeE: 'achat', prixE: '290000', loyE: '5200', durLocE: '5', durLocUE: 'ans', optE: '2900', cbTauxE: '5', cbPremierE: 'non', cbPremierMontantE: '10', cbPremierUE: 'pct', cbMajE: 'non', cbMajMontantE: '', cbResE: '10', cbResUE: 'pct',
+  modeD: 'achat', prixD: '115000', loyD: '2100', durLocD: '5', durLocUD: 'ans', optD: '1150', cbTauxD: '5', cbPremierD: 'non', cbPremierMontantD: '10', cbPremierUD: 'pct', cbMajD: 'non', cbMajMontantD: '', cbResD: '10', cbResUD: 'pct',
   aideAchat: '0', aideCbBenef: 'fin', aideAchat2: '0', aideCbBenef2: 'fin', tvaLoyer: '20', aideBorne: '0', aideBorneMode: 'client',
   finPartE: '80', finTauxE: '5', finDureeE: '5', finUE: 'ans',
   finPartD: '80', finTauxD: '5', finDureeD: '5', finUD: 'ans',
@@ -709,15 +709,17 @@ var GROUPS = [
     { k: 'appKwh', l: 'Énergie de chaque recharge d’appoint', u: 'kWh', pos: true, vis: function (s) { return s.appMode === 'kwh'; } },
     { info: 'appoint' }
   ]},
-  { id: 'achat', on: 'achat', cx: true, title: 'Acquisition · véhicule 1', note: 'Achat, location ou crédit-bail pour chaque tracteur. Désactive pour comparer uniquement les coûts d’usage. Montants HT.', fields: [
+  { id: 'achat', on: 'achat', cx: true, title: 'Acquisition · véhicule 1', note: 'Achat, location ou crédit-bail pour chaque tracteur. Désactive pour comparer uniquement les coûts d’usage. Montants HT. Un loyer majoré (1er ou 6e mois) sert aux montages non linéaires : il remplace le loyer de ce mois ; en crédit-bail, les autres loyers sont recalculés.', fields: [
     { sep: V1 },
     { k: 'modeE', slot: 'E', l: 'Mode d’acquisition', select: U_ACQ },
     { k: 'prixE', slot: 'E', l: 'Prix d’achat', u: '€ HT', pos: true, vis: function (s, o) { return priceUsed(s, o, 'E'); } },
     { k: 'loyE', slot: 'E', l: 'Loyer mensuel', u: '€ HT/mois', pos: true, vis: function (s) { return s.modeE !== 'achat'; }, readonly: function (s) { return s.modeE === 'cbail'; } },
     { k: 'durLocE', slot: 'E', l: 'Durée du contrat', unitKey: 'durLocUE', units: U_DUREE, pos: true, vis: function (s) { return s.modeE !== 'achat'; } },
     { k: 'cbTauxE', slot: 'E', l: 'Taux annuel du crédit-bail', u: '%/an', vis: function (s) { return s.modeE === 'cbail'; } },
-    { k: 'cbPremierE', slot: 'E', l: 'Premier loyer majoré', select: [['non', 'Non'], ['oui', 'Oui']], vis: function (s) { return s.modeE === 'cbail'; } },
-    { k: 'cbPremierMontantE', slot: 'E', l: 'Montant du premier loyer majoré', unitKey: 'cbPremierUE', units: U_RES, pos: true, max: function (s) { return s.cbPremierUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE === 'cbail' && s.cbPremierE === 'oui'; } },
+    { k: 'cbMajE', slot: 'E', l: 'Loyer majoré HT', select: [['non', 'Non'], ['m1', '1er mois'], ['m6', '6e mois']], hint: 'montage non linéaire : un seul mois au choix', vis: function (s) { return s.modeE !== 'achat'; } },
+    { k: 'cbMajMontantE', slot: 'E', l: 'Montant du loyer majoré', u: '€ HT', pos: true, vis: function (s) { return s.modeE !== 'achat' && (s.cbMajE === 'm1' || s.cbMajE === 'm6'); } },
+    { k: 'cbPremierE', slot: 'E', l: 'Premier loyer majoré', select: [['non', 'Non'], ['oui', 'Oui']], vis: function (s) { return s.modeE === 'cbail' && s.cbMajE !== 'm1' && s.cbMajE !== 'm6'; } },
+    { k: 'cbPremierMontantE', slot: 'E', l: 'Montant du premier loyer majoré', unitKey: 'cbPremierUE', units: U_RES, pos: true, max: function (s) { return s.cbPremierUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE === 'cbail' && s.cbPremierE === 'oui' && s.cbMajE !== 'm1' && s.cbMajE !== 'm6'; } },
     { k: 'cbResE', slot: 'E', l: 'Valeur résiduelle du crédit-bail', unitKey: 'cbResUE', units: U_RES, max: function (s) { return s.cbResUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE === 'cbail'; } },
     { info: 'acqE' }
   ]},
@@ -728,8 +730,10 @@ var GROUPS = [
     { k: 'loyD', slot: 'D', l: 'Loyer mensuel', u: '€ HT/mois', pos: true, vis: function (s) { return s.modeD !== 'achat'; }, readonly: function (s) { return s.modeD === 'cbail'; } },
     { k: 'durLocD', slot: 'D', l: 'Durée du contrat', unitKey: 'durLocUD', units: U_DUREE, pos: true, vis: function (s) { return s.modeD !== 'achat'; } },
     { k: 'cbTauxD', slot: 'D', l: 'Taux annuel du crédit-bail', u: '%/an', vis: function (s) { return s.modeD === 'cbail'; } },
-    { k: 'cbPremierD', slot: 'D', l: 'Premier loyer majoré', select: [['non', 'Non'], ['oui', 'Oui']], vis: function (s) { return s.modeD === 'cbail'; } },
-    { k: 'cbPremierMontantD', slot: 'D', l: 'Montant du premier loyer majoré', unitKey: 'cbPremierUD', units: U_RES, pos: true, max: function (s) { return s.cbPremierUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD === 'cbail' && s.cbPremierD === 'oui'; } },
+    { k: 'cbMajD', slot: 'D', l: 'Loyer majoré HT', select: [['non', 'Non'], ['m1', '1er mois'], ['m6', '6e mois']], hint: 'montage non linéaire : un seul mois au choix', vis: function (s) { return s.modeD !== 'achat'; } },
+    { k: 'cbMajMontantD', slot: 'D', l: 'Montant du loyer majoré', u: '€ HT', pos: true, vis: function (s) { return s.modeD !== 'achat' && (s.cbMajD === 'm1' || s.cbMajD === 'm6'); } },
+    { k: 'cbPremierD', slot: 'D', l: 'Premier loyer majoré', select: [['non', 'Non'], ['oui', 'Oui']], vis: function (s) { return s.modeD === 'cbail' && s.cbMajD !== 'm1' && s.cbMajD !== 'm6'; } },
+    { k: 'cbPremierMontantD', slot: 'D', l: 'Montant du premier loyer majoré', unitKey: 'cbPremierUD', units: U_RES, pos: true, max: function (s) { return s.cbPremierUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD === 'cbail' && s.cbPremierD === 'oui' && s.cbMajD !== 'm1' && s.cbMajD !== 'm6'; } },
     { k: 'cbResD', slot: 'D', l: 'Valeur résiduelle du crédit-bail', unitKey: 'cbResUD', units: U_RES, max: function (s) { return s.cbResUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD === 'cbail'; } },
     { info: 'acqD' }
   ]},
@@ -994,12 +998,35 @@ function creditLeaseResidual(s, X) {
   var value = Math.max(0, num(s['cbRes' + X]));
   return s['cbResU' + X] === 'eur' ? value : price * value / 100;
 }
-/* Premier loyer majoré du crédit-bail, en € HT (saisi en € ou en % du prix neuf) */
-function creditLeaseFirst(s, X) {
-  if (s['mode' + X] !== 'cbail' || s['cbPremier' + X] !== 'oui') { return 0; }
+function leaseMajMois(s, X) {
+  var v = s['cbMaj' + X];
+  return (v === 'm1' || v === 'm6') ? v : '';
+}
+function leaseMajHT(s, X) {
+  if (s['mode' + X] === 'achat' || !leaseMajMois(s, X)) { return 0; }
+  return Math.max(0, num(s['cbMajMontant' + X]));
+}
+/* Ancien premier loyer majoré du crédit-bail, en € HT (saisi en € ou en % du prix neuf) */
+function creditLeaseFirstLegacy(s, X) {
+  if (s['mode' + X] !== 'cbail' || s['cbPremier' + X] !== 'oui' || leaseMajMois(s, X)) { return 0; }
   var price = Math.max(0, num(s['prix' + X]));
   var value = Math.max(0, num(s['cbPremierMontant' + X]));
   return s['cbPremierU' + X] === 'pct' ? price * value / 100 : value;
+}
+function creditLeaseFirst(s, X) {
+  if (s['mode' + X] !== 'cbail') { return 0; }
+  if (leaseMajMois(s, X) === 'm1') { return leaseMajHT(s, X); }
+  return creditLeaseFirstLegacy(s, X);
+}
+function contractFirst(s, X) {
+  if (leaseMajMois(s, X) === 'm1') { return leaseMajHT(s, X); }
+  return creditLeaseFirstLegacy(s, X) + aideLeaseFin(s, X) + borneLeaseFin(s, X);
+}
+function contractMaj6(s, X) {
+  var months = s['mode' + X] === 'achat' ? 0 : leaseMonths(s, X);
+  if (months < 6) { return 0; }
+  if (leaseMajMois(s, X) === 'm6') { return leaseMajHT(s, X); }
+  return aideLease6(s, X) + borneLease6(s, X);
 }
 /* Aide au tracteur électrique versée au financeur en crédit-bail : elle paie (une partie du) premier loyer majoré */
 /* L'aide au véhicule électrique n'est acquise que si le client garde le véhicule au moins 5 ans */
@@ -1046,9 +1073,9 @@ function creditLeaseMonthly(s, X) {
   var price = Math.max(0, num(s['prix' + X]));
   var months = leaseMonths(s, X);
   var rate = Math.max(0, num(s['cbTaux' + X])) / 100 / 12;
-  var first = creditLeaseFirst(s, X) + aideLeaseFin(s, X) + borneLeaseFin(s, X);
+  var first = contractFirst(s, X);
   var residual = creditLeaseResidual(s, X);
-  var maj6 = months >= 6 ? aideLease6(s, X) + borneLease6(s, X) : 0;
+  var maj6 = contractMaj6(s, X);
   if (months <= 0 || price <= 0) { return 0; }
   /* Même calendrier que la trésorerie mois par mois : le flux k est payé en fin de mois k
      (1er loyer majoré au mois 1, 6e loyer majoré au mois 6, valeur résiduelle avec le dernier loyer). */
@@ -1506,6 +1533,8 @@ function acqVeh(d, on, X, ctx) {
     else if (a.benef === 'fin6') { a.t6 = tvl > 0 ? a.aideT / (1 + tvl) : a.aideT; a.maj6 = a.t6; }
     else if (a.benef === 'fin6ht') { a.t6 = a.aideT; a.maj6 = a.t6; }
   }
+  if ((mode === 'location' || mode === 'cbail') && d['cbMaj' + X] === 'm1' && d['cbMajMontant' + X] > 0) { a.first = d['cbMajMontant' + X]; }
+  if ((mode === 'location' || mode === 'cbail') && d['cbMaj' + X] === 'm6' && d['cbMajMontant' + X] > 0) { a.maj6 = d['cbMajMontant' + X]; }
   a.bMode = (a.bFin > 0 || a.b6 > 0) ? d.aideBorneMode : '';
   /* TVA à avancer par le client sur les loyers majorés payés par les aides */
   a.tvaM1 = ((d['aideFin' + X] || 0) + a.bFin) * tvl;
@@ -2255,9 +2284,11 @@ function missReason(k) {
   if (needPos && parseFloat(s) <= 0) { return 'doit être supérieur à 0'; }
   var mx = typeof f.max === 'function' ? f.max(state) : f.max;
   if (mx !== undefined && mx !== null && parseFloat(s) > mx) { return 'maximum ' + fmt(mx, 0); }
-  if (k === 'cbPremierMontantE' || k === 'cbPremierMontantD') {
+  if (k === 'cbPremierMontantE' || k === 'cbPremierMontantD' || k === 'cbMajMontantE' || k === 'cbMajMontantD') {
     var X = k.slice(-1);
-    if (creditLeaseFirst(state, X) + aideLeaseFin(state, X) + creditLeaseResidual(state, X) >= Math.max(0, num(state['prix' + X]))) { return aideLeaseFin(state, X) > 0 ? 'premier loyer + aide + valeur résiduelle doivent rester inférieurs au prix' : 'premier loyer + valeur résiduelle doivent rester inférieurs au prix'; }
+    if ((k === 'cbMajMontantE' || k === 'cbMajMontantD') && state['cbMaj' + X] === 'm6' && leaseMonthsS(state, X) < 6) { return 'le contrat dure moins de 6 mois'; }
+    if (state['mode' + X] === 'cbail' && contractFirst(state, X) + contractMaj6(state, X) + creditLeaseResidual(state, X) >= Math.max(0, num(state['prix' + X])) && creditLeaseMonthly(state, X) <= 0) { return 'loyers majorés + valeur résiduelle trop élevés pour ce crédit-bail'; }
+    if (k.indexOf('cbPremier') === 0 && creditLeaseFirst(state, X) + aideLeaseFin(state, X) + creditLeaseResidual(state, X) >= Math.max(0, num(state['prix' + X]))) { return aideLeaseFin(state, X) > 0 ? 'premier loyer + aide + valeur résiduelle doivent rester inférieurs au prix' : 'premier loyer + valeur résiduelle doivent rester inférieurs au prix'; }
   }
   if (k === 'aideAchat' || k === 'aideAchat2') {
     var AX = k === 'aideAchat' ? 'E' : 'D';
@@ -2880,6 +2911,9 @@ function reportRow(f, d) {
     var fc = d['first' + X] || 0, fa = (d['aideFin' + X] || 0) + (d['borneFin' + X] || 0);
     if (fc + fa <= 0) { val = 'Non'; }
     else { val = eur(fc + fa) + (fa > 0 ? (fc > 0 ? ' (dont aide ' + eur(fa) + ')' : ' (payé par l’aide)') : ''); }
+  } else if (f.k === 'cbMajE' || f.k === 'cbMajD') {
+    var MX = f.k.slice(-1), mm = d['cbMaj' + MX];
+    val = mm === 'm1' ? '1er mois · ' + eur(d['cbMajMontant' + MX]) + ' HT' : (mm === 'm6' ? '6e mois · ' + eur(d['cbMajMontant' + MX]) + ' HT' : 'Non');
   } else {
     val = valueText(f);
   }
@@ -4131,6 +4165,18 @@ function migrateValues(v) {
   if (m.rechMode === 'pct') { m.rechMode = 'auto'; }
   if (typeof m.chargeDeltaT !== 'string') { m.chargeDeltaT = '0'; }
   if (typeof m.borneLoy !== 'string') { m.borneLoy = ''; }
+  ['E', 'D'].forEach(function (X) {
+    if (typeof m['cbMaj' + X] !== 'string') {
+      if (m['cbPremier' + X] === 'oui') {
+        m['cbMaj' + X] = 'm1';
+        if (typeof m['cbMajMontant' + X] !== 'string') {
+          var p0 = Math.max(0, num(m['prix' + X])), pv0 = num(m['cbPremierMontant' + X]);
+          m['cbMajMontant' + X] = String(m['cbPremierU' + X] === 'pct' ? Math.round(p0 * pv0 / 100) : pv0).replace('.', ',');
+        }
+      } else { m['cbMaj' + X] = 'non'; }
+    }
+    if (typeof m['cbMajMontant' + X] !== 'string') { m['cbMajMontant' + X] = ''; }
+  });
   if (!String(m.nom1 || '').replace(/^\s+|\s+$/g, '')) { m.nom1 = DEF_NAMES[cmpOf(m)].E; }
   if (!String(m.nom2 || '').replace(/^\s+|\s+$/g, '')) { m.nom2 = DEF_NAMES[cmpOf(m)].D; }
   /* Plage de conduite : listes d'heures entières (anciennes saisies arrondies à l'heure) */
@@ -4424,7 +4470,11 @@ function updateInfos(r) {
   } else { setInfo('appoint', '', false); }
   ['E', 'D'].forEach(function (X) {
     var ac = r.A[X], first = ac.first, fa = ac.aideFin + ac.bFin;
-    setInfo('acq' + X, (state['mode' + X] === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du premier loyer éventuel et de la valeur résiduelle. ' + (first > 0 ? 'Premier loyer majoré : <b>' + eur(first) + '</b>' + (fa > 0 ? ' (dont aide ' + eur(fa) + ')' : '') + ', puis ' + fmt(ac.lm - 1 - (ac.maj6 > 0 ? 1 : 0), 0) + ' loyers de <b>' + eur(r.d['loy' + X]) + '</b>. ' : '') + (ac.maj6 > 0 ? '6e loyer majoré payé par ' + (ac.t6 > 0 && ac.b6 > 0 ? 'les aides' : (ac.b6 > 0 ? 'l’aide à la borne' : 'l’aide')) + ' : <b>' + eur(ac.maj6) + '</b> HT. ' : '') + 'Valeur résiduelle due en fin de contrat : <b>' + eur(r.d['opt' + X]) + '</b>. ' : '') + ((eo.achat && ac.leaseShort) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state['mode' + X] === 'cbail' || (eo.achat && ac.leaseShort));
+    var majTxt = '', userMaj = state['cbMaj' + X];
+    if (state['mode' + X] !== 'achat' && (userMaj === 'm1' || userMaj === 'm6')) {
+      majTxt = 'Loyer majoré saisi au ' + (userMaj === 'm1' ? '1er' : '6e') + ' mois : <b>' + eur(ac[userMaj === 'm1' ? 'first' : 'maj6']) + ' HT</b> (à la place du loyer de ce mois). ';
+    }
+    setInfo('acq' + X, (state['mode' + X] === 'cbail' ? 'Loyer calculé automatiquement à partir du prix neuf, du taux annuel, de la durée, du loyer majoré éventuel et de la valeur résiduelle. ' + (first > 0 ? 'Premier loyer majoré : <b>' + eur(first) + '</b>' + (fa > 0 && userMaj !== 'm1' ? ' (dont aide ' + eur(fa) + ')' : '') + ', puis ' + fmt(ac.lm - 1 - (ac.maj6 > 0 ? 1 : 0), 0) + ' loyers de <b>' + eur(r.d['loy' + X]) + '</b>. ' : '') + (ac.maj6 > 0 ? (userMaj === 'm6' ? '6e loyer majoré saisi : <b>' + eur(ac.maj6) + '</b> HT. ' : '6e loyer majoré payé par ' + (ac.t6 > 0 && ac.b6 > 0 ? 'les aides' : (ac.b6 > 0 ? 'l’aide à la borne' : 'l’aide')) + ' : <b>' + eur(ac.maj6) + '</b> HT. ') : '') + 'Valeur résiduelle due en fin de contrat : <b>' + eur(r.d['opt' + X]) + '</b>. ' : majTxt) + ((eo.achat && ac.leaseShort) ? 'Le loyer est prolongé au même tarif après l’échéance initiale pour couvrir toute l’étude ; confirmer le renouvellement.' : ''), state['mode' + X] === 'cbail' || (eo.achat && ac.leaseShort) || majTxt !== '');
   });
 }
 
