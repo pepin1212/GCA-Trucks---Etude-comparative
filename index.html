@@ -69,6 +69,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 .inp:focus-within{border-color:var(--brand)}
 .inp input,.inp select.full{flex:1;min-width:0;border:0;outline:0;font-size:16px;padding:11px 12px;background:transparent;color:var(--text);font-family:inherit}
 .inp input:disabled,.inp select:disabled{color:var(--muted)}
+.inp input[readonly]{background:#f4f8fc;color:var(--brand);font-weight:700;cursor:default}
 .inp .unit{padding:0 12px;font-size:13px;color:var(--muted);white-space:nowrap;background:#f6f8fa;align-self:stretch;display:flex;align-items:center;border-left:1px solid var(--line)}
 .inp select.usel{flex:none;max-width:52%;border:0;border-left:1px solid var(--line);outline:0;background:#f6f8fa;color:var(--brand);font-size:14px;font-weight:600;padding:0 8px;align-self:stretch;font-family:inherit}
 .calc{margin-top:8px;font-size:13px;color:var(--brand);background:#eaf2fb;border-radius:8px;padding:6px 10px}
@@ -506,7 +507,7 @@ var DEFAULTS = {
   pElec: '0,20', pElecBase: 'ttc', tvaElec: '20',
   cDiesel: '25', pDiesel: '2,50', pDieselBase: 'ttc', tvaDiesel: '20', ticpe: '0,594',
   pHC: '0,15', pHP: '0,19', hcDeb1: '', hcFin1: '', hcDeb2: '', hcFin2: '', pilotHC: 'hc', kva: '170', prixKva: '25', contratNb: '1',
-  hivPct: '15', hivMois: '4', chargePct: '0',
+  hivPct: '15', hivMois: '4', chargePct: '0', chargeDeltaT: '0',
   rembTicpe: '0',
   rechMode: 'auto', partPublic: '20', rechKwh: '200', rechDur: '45', rechDurU: 'min', rechPow: '150',
   rechFreq: '1', rechFreqU: 'jour', pPublic: '0,55', pPublicBase: 'ttc',
@@ -530,7 +531,7 @@ var DEFAULTS = {
   carbP: '0,12', carbYear: '2', pegD: '0', pegE: '0',
   fiscGain: '0', certif: '0',
   evElec: '0', evDiesel: '0', evAutres: '0',
-  scDiesel: '-10', scElec: '10', scKm: '-10', scBatDegP: '0,5', scRes: '-20', chargeT: '', rembOn: 'non', hcOn: 'non', borneFin: 'comptant', borneTaux: '', borneDuree: '', entHC: 'non', entDurE: '', entMajE: '', entDurD: '', entMajD: '',
+  scDiesel: '-10', scElec: '10', scKm: '-10', scBatDegP: '0,5', scRes: '-20', chargeT: '', rembOn: 'non', hcOn: 'non', borneFin: 'comptant', borneTaux: '', borneDuree: '', borneLoy: '', entHC: 'non', entDurE: '', entMajE: '', entDurD: '', entMajD: '',
   sensAmp: '10',
   co2D: '2,65', co2E: '0,06'
 };
@@ -567,6 +568,7 @@ function showJoursAn(s, o) {
 function showJoursSem(s, o) {
   o = o || {};
   if (anyElec(s)) { return true; }
+  if (s.kmUnit !== 'an') { return true; }
   if (s.kmUnit === 'sem' || s.kmUnit === 'mois') { return needD(s, o); }
   return needW(s, o) || needM(s, o);
 }
@@ -603,11 +605,11 @@ var GROUPS = [
     { k: 'client', l: 'Client / référence', text: true },
     { k: 'auteur', l: 'Établi par', text: true }
   ]},
-  { id: 'proj', title: 'Usage et chargement', note: 'Kilométrage, durée de l’étude et journée de travail : tous les calculs en dépendent. Le reste de la journée, le camion est à l’arrêt au dépôt et se recharge dès son retour.', fields: [
+  { id: 'proj', title: 'Usage et chargement', note: 'Kilométrage, durée de l’étude et journée de travail : tous les calculs en dépendent. Les jours par semaine et la durée d’usage dans l’année sont liés : jours/an = jours/semaine × semaines travaillées. Le graphe de semaine suit les jours hebdomadaires (lundi → …).', fields: [
     { k: 'kmPer', l: 'Kilométrage', unitKey: 'kmUnit', units: U_KM, pos: true, hint: 'changer l’unité conserve le total annuel' },
-    { k: 'kmNb', l: 'Durée d’usage dans l’année', dynUnit: true, pos: true, vis: function (s) { return s.kmUnit !== 'an'; } },
-    { k: 'joursAn', l: 'Jours d’exploitation par an', u: 'jours', pos: true, max: 366, vis: function (s, o) { return showJoursAn(s, o); } },
-    { k: 'joursSem', l: 'Jours d’exploitation par semaine', u: 'jours', pos: true, max: 7, hint: 'conversions jours, semaines, mois', vis: function (s, o) { return showJoursSem(s, o); } },
+    { k: 'kmNb', l: 'Durée d’usage dans l’année', dynUnit: true, pos: true, vis: function (s) { return s.kmUnit !== 'an'; }, hint: 'liée aux jours d’exploitation par semaine' },
+    { k: 'joursAn', l: 'Jours d’exploitation par an', u: 'jours', pos: true, max: 366, vis: function (s, o) { return showJoursAn(s, o); }, hint: 'jours/semaine × semaines travaillées' },
+    { k: 'joursSem', l: 'Jours d’exploitation par semaine', u: 'jours', pos: true, max: 7, hint: 'du lundi au dimanche : 5 = lun–ven. Recalcule les jours/an (semaines travaillées conservées) et le schéma de semaine', vis: function (s, o) { return showJoursSem(s, o); } },
     { info: 'km' },
     { k: 'annees', l: 'Durée de la comparaison', u: 'ans', pos: true, max: 15, hint: '1 à 15 ans' },
     { k: 'chargeT', l: 'Charge transportée en moyenne', u: 't', optional: true, hint: 'facultatif : CO₂ par tonne transportée' },
@@ -639,10 +641,10 @@ var GROUPS = [
     { k: 'rembOn', l: 'Remboursement partiel de TICPE', select: [['oui', 'Oui'], ['non', 'Non']], vis: function (s) { return anyTherm(s); } },
     { k: 'rembTicpe', l: 'Montant remboursé', u: '€/L HT', hint: '0,1556 €/L en 2026 pour un poids lourd de 7,5 t et plus, hors Corse', vis: function (s) { return anyTherm(s) && s.rembOn === 'oui'; } }
   ]},
-  { id: 'saison', on: 'saison', need: 'elec', title: 'Consommation réelle en électrique', note: 'Corrige la consommation de l’essai : surconsommation en hiver et écart dû à la charge. La consommation thermique saisie est considérée comme une moyenne réelle.', fields: [
+  { id: 'saison', on: 'saison', need: 'elec', title: 'Consommation réelle en électrique', note: 'Corrige la consommation de l’essai : surconsommation en hiver et charge plus (ou moins) élevée qu’à l’essai. Chaque tonne d’écart ajoute 1 kWh/100 km (roulement et relances). La consommation thermique saisie est déjà une moyenne réelle.', fields: [
     { k: 'hivPct', l: 'Surconsommation en hiver', u: '%' },
     { k: 'hivMois', l: 'Nombre de mois d’hiver', u: 'mois', max: 12 },
-    { k: 'chargePct', l: 'Écart de consommation dû à la charge (par rapport à l’essai)', u: '%', hint: 'positif si le camion roule plus chargé qu’à l’essai' },
+    { k: 'chargeDeltaT', l: 'Écart de charge par rapport à l’essai', u: 't', hint: 'positif si plus chargé qu’à l’essai ; négatif si plus léger. +1 t → +1 kWh/100 km' },
     { info: 'saison' }
   ]},
   { id: 'batterie', on: 'batterie', fixed: true, need: 'elec', title: 'Batterie et recharge au dépôt', note: 'Capacité nette = brute × part utilisable. La recharge se fait à la puissance la plus basse entre la borne et le véhicule, ralentie en fin de charge, et vise un retour au dépôt avec 5 % de marge de sécurité.', fields: [
@@ -687,7 +689,9 @@ var GROUPS = [
     { k: 'borneAbo', l: 'Abonnement et maintenance (total)', unitKey: 'borneAboU', units: U_AN_MOIS },
     { k: 'borneFin', l: 'Financement de la borne', select: [['comptant', 'Comptant'], ['credit', 'Crédit']] },
     { k: 'borneTaux', l: 'Taux du crédit borne', u: '%/an', vis: function (s) { return s.borneFin === 'credit'; } },
-    { k: 'borneDuree', l: 'Durée du crédit borne', u: 'ans', pos: true, vis: function (s) { return s.borneFin === 'credit'; } }
+    { k: 'borneDuree', l: 'Durée du crédit borne', u: 'ans', pos: true, vis: function (s) { return s.borneFin === 'credit'; } },
+    { k: 'borneLoy', l: 'Mensualité du crédit', u: '€ HT/mois', hint: 'calculée automatiquement à partir du montant, du taux et de la durée', vis: function (s) { return s.borneFin === 'credit'; }, readonly: function () { return true; } },
+    { info: 'borneCredit' }
   ]},
   { id: 'recharge', on: 'recharge', req: 'energie', need: 'elec', title: 'Recharge en borne publique', note: 'Indépendante des recharges d’appoint au dépôt. Mode automatique : chaque jour, on recharge au dépôt tout ce que la fenêtre d’arrêt (et l’appoint activé) permet. Le reste du besoin journalier est chiffré en borne publique, au prix saisi. Ce n’est pas une simulation d’itinérance. Nécessite la carte Batterie. Les modes kWh ou durée servent si tu connais déjà le volume rechargé en public.', fields: [
     { k: 'rechMode', l: 'Mode de calcul', select: [['auto', 'Automatique : ce que le dépôt ne couvre pas'], ['kwh', 'Énergie par recharge (kWh)'], ['dur', 'Durée et puissance']] },
@@ -954,27 +958,31 @@ var MONTHS_PER_YEAR = 12;
 function annualKm(d) {
   return d.kmUnit === 'an' ? d.kmPer : d.kmPer * d.kmNb;
 }
+function workDaysPerWeek(d) {
+  var n = Math.round(d && d.joursSem);
+  return n > 0 && n <= 7 ? n : 5;
+}
 function periodsPerYear(d) {
-  var jS = d.joursSem;
+  var jS = workDaysPerWeek(d);
   var days, weeks, months;
   if (d.kmUnit === 'jour') {
     days = d.kmNb;
-    weeks = days / (jS > 0 ? jS : 5);
+    weeks = days / jS;
     months = weeks * MONTHS_PER_YEAR / WEEKS_PER_YEAR;
   } else if (d.kmUnit === 'sem') {
     weeks = d.kmNb;
-    days = weeks * (jS > 0 ? jS : 5);
+    days = weeks * jS;
     months = weeks * MONTHS_PER_YEAR / WEEKS_PER_YEAR;
   } else if (d.kmUnit === 'mois') {
     months = d.kmNb;
     weeks = months * WEEKS_PER_YEAR / MONTHS_PER_YEAR;
-    days = weeks * (jS > 0 ? jS : 5);
+    days = weeks * jS;
   } else {
-    days = d.joursAn > 0 ? d.joursAn : ((jS > 0 ? jS : 5) * WEEKS_PER_YEAR);
-    weeks = days / (jS > 0 ? jS : 5);
+    days = d.joursAn > 0 ? d.joursAn : (jS * WEEKS_PER_YEAR);
+    weeks = days / jS;
     months = weeks * MONTHS_PER_YEAR / WEEKS_PER_YEAR;
   }
-  if (!(days > 0) && d.kmPer > 0) { days = 220; weeks = jS > 0 ? days / jS : days / 5; months = weeks * MONTHS_PER_YEAR / WEEKS_PER_YEAR; }
+  if (!(days > 0) && d.kmPer > 0) { days = 220; weeks = days / jS; months = weeks * MONTHS_PER_YEAR / WEEKS_PER_YEAR; }
   return { days: days, weeks: weeks, months: months };
 }
 function leaseMonths(d, X) {
@@ -1057,13 +1065,23 @@ function creditLeaseMonthly(s, X) {
 }
 
 /* Capital remboursé chaque année (mensualités de l'étude) ; le capital restant dû est soldé la dernière année, comme dans la trésorerie */
+function loanMonthly(P, ratePct, term, termUnit) {
+  if (!(P > 0) || !(term > 0)) { return 0; }
+  var months = Math.max(1, Math.round(termUnit === 'mois' ? term : term * 12));
+  var i = Math.max(0, ratePct) / 100 / 12;
+  return i > 0 ? P * i / (1 - Math.pow(1 + i, -months)) : P / months;
+}
+function borneCreditMonthly(s) {
+  if (!s || s.borneFin !== 'credit') { return 0; }
+  return loanMonthly(Math.max(0, num(s.borneInv)), num(s.borneTaux), num(s.borneDuree), 'ans');
+}
 function loanPrincipalByYear(P, ratePct, term, termUnit, n) {
   var arr = [], y, m, months, i, mens, bal, it, pr, M = n * 12;
   for (y = 0; y <= n; y++) { arr.push(0); }
   if (!(P > 0)) { return arr; }
   months = Math.max(1, Math.round(termUnit === 'mois' ? term : term * 12));
   i = Math.max(0, ratePct) / 100 / 12;
-  mens = i > 0 ? P * i / (1 - Math.pow(1 + i, -months)) : P / months;
+  mens = loanMonthly(P, ratePct, term, termUnit);
   bal = P;
   for (m = 1; m <= Math.min(M, months); m++) { it = bal * i; pr = mens - it; bal -= pr; arr[Math.ceil(m / 12)] += pr; }
   if (bal > 0.005) { arr[n] += bal; }
@@ -1076,7 +1094,7 @@ function loanInterestByYear(P, ratePct, term, termUnit, n) {
   if (P <= 0 || ratePct <= 0) { return arr; }
   months = Math.max(1, Math.round(termUnit === 'mois' ? term : term * 12));
   i = ratePct / 100 / 12;
-  pay = P * i / (1 - Math.pow(1 + i, -months));
+  pay = loanMonthly(P, ratePct, term, termUnit);
   bal = P;
   for (m = 1; m <= months; m++) {
     it = bal * i;
@@ -1181,6 +1199,12 @@ function chargeIn(sp, capK, from, hrs, pB, maxPct) {
 /* Surconsommation liée au vieillissement pour un état de santé donné */
 function multAt(bat, soh) { return bat.seuil < 100 ? 1 + Math.max(0, bat.eff / 100 * (100 - soh) / (100 - bat.seuil)) : 1; }
 var MARGE_RET = 5, TAPER_SOC = 80, TAPER_PCT = 30, PACK_KWH = 105;
+/* kWh/100 km ajoutés par tonne d’écart de charge vs l’essai (roulement + relances, hors aéro) */
+var TONNE_KWH_100 = 1;
+function chargeExtra100(d, on) {
+  if (!(on && on.saison)) { return 0; }
+  return d.chargeDeltaT * TONNE_KWH_100;
+}
 function marginPct(d) { return MARGE_RET; }
 function startPct(d) { return Math.min(100, Math.max(1, d.socFin)); }
 /* Puissance de recharge réellement disponible au dépôt et en route (plus basse entre borne et véhicule) */
@@ -1302,7 +1326,7 @@ function batteryModel(d, on, X, cReal, c100, kwhAn0, ctx) {
     sohE = bat.sohPre[y];
     mE = multAt(bat, sohE);
     bat.K.push(kmCore(sp, d, on, cap * sohE / 100, cReal * mE / 100, bat.dailyKm));
-    bat.KW.push(bat.winterOn ? kmCore(sp, d, on, cap * sohE / 100, c100 * (1 + d.hivPct / 100) * ctx.chgF * mE / 100, bat.dailyKm) : null);
+    bat.KW.push(bat.winterOn ? kmCore(sp, d, on, cap * sohE / 100, Math.max(0, c100 + (ctx.extra100 || 0)) * (1 + d.hivPct / 100) * mE / 100, bat.dailyKm) : null);
   }
   bat.okRange = true; bat.okWindow = true;
   for (y = 0; y <= n; y++) {
@@ -1347,7 +1371,7 @@ function energyVeh(d, on, X, ctx) {
     ev.testKm = d[eKey(X, 'km')];
     ev.testKwh = d[eKey(X, 'kwh')];
     ev.c100 = ev.consMode === 'direct' ? d[eKey(X, 'consDirect')] : (ev.testKm > 0 ? ev.testKwh / ev.testKm * 100 : 0);
-    ev.cReal = ev.c100 * ctx.adj;
+    ev.cReal = Math.max(0, ev.c100 + (ctx.extra100 || 0)) * ctx.hivF;
     ev.qty0 = ev.cReal * kmAn / 100;
     ev.adbLitres = 0; ev.adbCost = 0;
     var bat = batteryModel(d, on, X, ev.cReal, ev.c100, ev.qty0, ctx);
@@ -1513,8 +1537,9 @@ function compute(d, on) {
   var P = periodsPerYear(d);
   var kmAn = annualKm(d);
   var hivF = on.saison ? 1 + d.hivPct / 100 * Math.min(12, Math.max(0, d.hivMois)) / 12 : 1;
-  var chgF = on.saison ? 1 + d.chargePct / 100 : 1;
-  var adj = hivF * chgF;
+  var extra100 = chargeExtra100(d, on);
+  var chgF = 1;
+  var adj = hivF;
   var tvaE = 1 + d.tvaElec / 100;
   var tvaD = 1 + d.tvaDiesel / 100;
   var pSimpleHT = d.pElecBase === 'ht' ? d.pElec : d.pElec / tvaE;
@@ -1525,8 +1550,10 @@ function compute(d, on) {
   var pDieHT = d.pDieselBase === 'ht' ? d.pDiesel : d.pDiesel / tvaD;
   var rembU = (on.remb && eOn) ? d.rembTicpe : 0;
   var pDieHTnet = pDieHT - rembU;
-  var ctx = { n: n, eOn: eOn, P: P, kmAn: kmAn, adj: adj, chgF: chgF, pDepHT: pDepHT, pPubHT: pPubHT, fixedContrat: fixedContrat, pDieHTnet: pDieHTnet, rembU: rembU };
+  var ctx = { n: n, eOn: eOn, P: P, kmAn: kmAn, adj: adj, hivF: hivF, extra100: extra100, chgF: chgF, pDepHT: pDepHT, pPubHT: pPubHT, fixedContrat: fixedContrat, pDieHTnet: pDieHTnet, rembU: rembU };
   var V = { E: energyVeh(d, on, 'E', ctx), D: energyVeh(d, on, 'D', ctx) };
+  if (V.E.type === 'elec' && V.E.c100 > 0) { adj = V.E.cReal / V.E.c100; }
+  else if (V.D.type === 'elec' && V.D.c100 > 0) { adj = V.D.cReal / V.D.c100; }
   var A = { E: acqVeh(d, on, 'E', ctx), D: acqVeh(d, on, 'D', ctx) };
 
   /* Autres coûts annuels HT par camion */
@@ -1548,6 +1575,8 @@ function compute(d, on) {
   var borneLoan = (on.borne && d.borneFin === 'credit' && d.borneDuree > 0) ? borneGross : 0;
   var borneInt = loanInterestByYear(borneLoan, d.borneTaux, d.borneDuree, 'ans', n);
   var bornePrinc = loanPrincipalByYear(borneLoan, d.borneTaux, d.borneDuree, 'ans', n);
+  var borneMens = loanMonthly(on.borne ? d.borneInv : 0, d.borneTaux, d.borneDuree, 'ans');
+  var borneMensShare = loanMonthly(borneLoan, d.borneTaux, d.borneDuree, 'ans');
   var aideBShare = on.borne ? aideB / nb : 0;
 
   /* Postes année par année, pour chaque véhicule (indice 0 = départ) */
@@ -1644,10 +1673,10 @@ function compute(d, on) {
   var co2Total = (V.D.kgTotal - V.E.kgTotal) / 1000;
 
   var out = {
-    n: n, kmAn: kmAn, P: P, adj: adj, hivF: hivF, chgF: chgF, cmp: cmpOf(d),
+    n: n, kmAn: kmAn, P: P, adj: adj, hivF: hivF, extra100: extra100, chgF: chgF, cmp: cmpOf(d),
     pSimpleHT: pSimpleHT, pDepHT: pDepHT, pPubHT: pPubHT, pDieHT: pDieHT, pDieHTnet: pDieHTnet, rembU: rembU,
     fixedContrat: fixedContrat, V: V, A: A, IT: IT, an: an, ref: ref, oc: oc,
-    aideB: aideB, aideBShare: aideBShare, borneGross: borneGross, borneLoan: borneLoan, borneInt: borneInt, borneNet: borneGross - aideBShare,
+    aideB: aideB, aideBShare: aideBShare, borneGross: borneGross, borneLoan: borneLoan, borneInt: borneInt, borneMens: borneMens, borneMensShare: borneMensShare, borneNet: borneGross - aideBShare,
     d: d, lmE: A.E.lm, lmD: A.D.lm, ownE: A.E.own, ownD: A.D.own, leaseShortE: A.E.leaseShort, leaseShortD: A.D.leaseShort,
     cE: cE, cD: cD, stackE: stackE, stackD: stackD,
     resE: resE, resD: resD, tcoE: tcoE, tcoD: tcoD, tcoSav: tcoD - tcoE,
@@ -1686,7 +1715,7 @@ function loanSchedule(P, ratePct, term, termUnit, M) {
   if (P <= 0) { return { pay: pay, rest: 0 }; }
   months = Math.max(1, Math.round(termUnit === 'mois' ? term : term * 12));
   i = ratePct / 100 / 12;
-  mens = i > 0 ? P * i / (1 - Math.pow(1 + i, -months)) : P / months;
+  mens = loanMonthly(P, ratePct, term, termUnit);
   for (k = 1; k <= Math.min(M, months); k++) {
     it = bal * i; princ = mens - it; bal -= princ; pay[k] = mens;
   }
@@ -2206,6 +2235,7 @@ function fieldActive(k) {
 function missReason(k) {
   var f = FIELD[k];
   if (!f || !fieldActive(k)) { return ''; }
+  if (f.readonly && f.readonly(state)) { return ''; }
   if (k === 'rechMode' && state.rechMode === 'auto' && !effOn().batterie) { return 'le mix dépôt / public nécessite la carte Batterie (étude complète)'; }
   if (k === 'hRet' && String(state.hRet === undefined || state.hRet === null ? '' : state.hRet) === '') { return 'à renseigner'; }
   if (f.select) { return ''; }
@@ -2546,9 +2576,10 @@ function pageComplet1(r, d, on) {
   ];
   h += stackedChart(706, 310, bars, COMPS);
   h += '<div class="st">Détail poste par poste</div>';
+  var optInLoy = on.achat && ((d.modeE === 'cbail' && r.lmE > 0 && r.lmE <= 12 * r.n) || (d.modeD === 'cbail' && r.lmD > 0 && r.lmD <= 12 * r.n));
   var rows = [
     ['Prix d’achat', r.cE.achat, r.cD.achat, on.achat && (r.cE.achat > 0 || r.cD.achat > 0)],
-    ['Loyers (location, crédit-bail)', r.cE.loyer, r.cD.loyer, on.achat && (r.cE.loyer > 0 || r.cD.loyer > 0)],
+    [optInLoy ? 'Loyers et option d’achat (crédit-bail)' : 'Loyers (location, crédit-bail)', r.cE.loyer, r.cD.loyer, on.achat && (r.cE.loyer > 0 || r.cD.loyer > 0)],
     ['Borne de recharge (part de ce camion)', r.cE.borne, r.cD.borne, on.borne && anyElec(d)],
     ['Énergie', r.cE.ene, r.cD.ene, on.energie],
     ['Entretien', r.cE.ent, r.cD.ent, on.entretien],
@@ -2577,6 +2608,10 @@ function pageComplet1(r, d, on) {
   }
   h += '<tr class="hl"><td>Coût total de possession</td><td>' + eur(r.tcoE) + '</td><td>' + eur(r.tcoD) + '</td><td>' + eur(r.tcoSav) + '</td></tr>';
   h += '</table>';
+  var recL = [on.achat ? loyerRecipe(d, r, 'E') : '', on.achat ? loyerRecipe(d, r, 'D') : ''].filter(function (s) { return !!s; });
+  if (recL.length) {
+    h += '<div class="basis" style="margin-top:6px"><b>Vérification du poste Loyers</b> (avant aides) : ce n’est pas « loyer × 12 × années ». En crédit-bail, l’option d’achat de fin de contrat est dans cette ligne ; la « valeur de revente » plus bas est le prix de cession du camion, un autre montant. Une aide qui paie un loyer majoré reste ici, puis est déduite à part. ' + recL.join(' · ') + '.</div>';
+  }
   h += '<div style="margin-top:8px">';
   var iP;
   for (iP = 0; iP < BLOCK_NAMES.length; iP++) {
@@ -2932,6 +2967,23 @@ function acqText(d, X, r) {
   if (first > 0) { ft += 'premier loyer majoré ' + eur(first) + (fa > 0 ? ' (dont aide ' + eur(fa) + ' versée au financeur)' : '') + ' + '; }
   return ACQ_NAME[mode] + ' ' + ft + eur(d['loy' + X]) + ' × ' + fmt(cnt, 0) + ' mois' + (m <= nM ? ' + option ' + eur(d['opt' + X]) : '');
 }
+function loyerRecipe(d, r, X) {
+  var mode = d['mode' + X], tot = X === 'E' ? r.cE.loyer : r.cD.loyer, ac = r.A[X], rent = d['loy' + X], nM = 12 * r.n, m = ac.lm, parts = [];
+  if (mode === 'achat' || !(tot > 0.5)) { return ''; }
+  if (mode === 'location') {
+    if (ac.first > 0) { parts.push('1er mois ' + eur(ac.first)); }
+    if (ac.maj6 > 0) { parts.push('6e mois ' + eur(ac.maj6)); }
+    parts.push(eur(rent, 2) + ' × ' + fmt(nM - (ac.first > 0 ? 1 : 0) - (ac.maj6 > 0 ? 1 : 0), 0) + ' mois');
+  } else {
+    var inS = Math.max(0, Math.min(nM, m));
+    var nReg = inS - (ac.first > 0 && inS >= 1 ? 1 : 0) - (ac.maj6 > 0 && m >= 6 && inS >= 6 ? 1 : 0);
+    if (ac.first > 0) { parts.push('1er loyer ' + eur(ac.first)); }
+    if (ac.maj6 > 0) { parts.push('6e loyer ' + eur(ac.maj6)); }
+    if (nReg > 0) { parts.push(eur(rent, 2) + ' × ' + fmt(nReg, 0) + ' mois'); }
+    if (m >= 1 && m <= nM) { parts.push('option d’achat ' + eur(d['opt' + X])); }
+  }
+  return esc(X === 'E' ? N1(d) : N2(d)) + ' : ' + parts.join(' + ') + ' = ' + eur(tot);
+}
 function pair(d, a, b) { return esc(N1(d)) + ' ' + a + ' · ' + esc(N2(d)) + ' ' + b; }
 function annex2(r, d, on) {
   var rows = [];
@@ -2944,12 +2996,13 @@ function annex2(r, d, on) {
   sec('Kilométrage et consommation');
   if (d.kmUnit === 'an') { add('Kilométrage annuel d’étude', 'Défini en Projection', fmt(r.kmAn, 0) + ' km/an'); }
   else { add('Kilométrage annuel d’étude', fmt(d.kmPer, 0) + ' ' + optLabel(U_KM, d.kmUnit) + ' × ' + fmt(d.kmNb, 0) + ' ' + DYN[d.kmUnit], fmt(r.kmAn, 0) + ' km/an'); }
+  add('Calendrier d’exploitation', fmt(workDaysPerWeek(d), 0) + ' j/sem × ' + fmt(r.P.weeks, 1) + ' semaines travaillées (schéma lun–' + ['', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim'][workDaysPerWeek(d)] + ')', fmt(r.P.days, 0) + ' j/an');
   Xs.forEach(function (X) {
     var ev = r.V[X];
     if (ev.type === 'elec') {
       if (ev.consMode === 'direct') { add('Consommation à l’essai' + nm(X), 'Saisie directe', fmt(ev.c100, 1) + ' kWh/100 km'); }
       else { add('Consommation à l’essai' + nm(X), fmt(ev.testKwh, 1) + ' kWh ÷ ' + fmt(ev.testKm, 1) + ' km × 100', fmt(ev.c100, 1) + ' kWh/100 km'); }
-      if (on.saison) { add('Consommation réelle' + nm(X), fmt(ev.c100, 1) + ' × (1 + ' + fmt(d.hivPct, 1) + ' % × ' + fmt(d.hivMois, 0) + '/12) × (1 + ' + fmt(d.chargePct, 1) + ' %)', fmt(ev.cReal, 1) + ' kWh/100 km'); }
+      if (on.saison) { add('Consommation réelle' + nm(X), fmt(ev.c100, 1) + ' kWh/100 km à l’essai' + (r.extra100 ? ' + ' + fmt(d.chargeDeltaT, 1) + ' t × ' + fmt(TONNE_KWH_100, 1) + ' kWh/100 km/t (' + (r.extra100 > 0 ? '+' : '') + fmt(r.extra100, 1) + ' kWh/100 km)' : '') + ' × (1 + ' + fmt(d.hivPct, 1) + ' % × ' + fmt(d.hivMois, 0) + '/12)', fmt(ev.cReal, 1) + ' kWh/100 km'); }
       add('Énergie électrique (année 1)' + nm(X), fmt(ev.cReal, 1) + ' × ' + fmt(r.kmAn, 0) + ' ÷ 100', fmt(ev.yr.qty[1], 0) + ' kWh');
     } else {
       add('Gazole annuel' + nm(X), fmt(ev.c100, 1) + ' L/100 km × ' + fmt(r.kmAn, 0) + ' ÷ 100', fmt(ev.qty0, 0) + ' L/an');
@@ -3004,7 +3057,7 @@ function annex2(r, d, on) {
       });
     }
     if (on.borne) { add('Borne imputée à chaque camion électrique', '(' + eur(d.borneInv) + (r.aideB > 0 ? ' − aide ' + eur(r.aideB) + ' versée le ' + AIDE_MOIS + 'e mois' + (r.aideB < num(state.aideBorne) ? ' (plafonnée au prix)' : '') : '') + ') ÷ ' + fmt(r.oc.nb, 0) + (r.aideB > 0 ? ' ; aide ' + borneAideText(borneLeaseOk(state) ? state.aideBorneMode : 'client', r.aideBShare, d) : '') + ' ; abonnement ' + eur(r.oc.borneAboTot) + ' ÷ ' + fmt(r.oc.nb, 0), 'Invest. ' + eur(r.borneNet) + ' · ' + eur(r.oc.borneAbo) + '/an'); }
-    if (on.borne && r.borneLoan > 0) { add('Crédit de la borne', fmt(r.borneLoan, 0) + ' € par camion sur ' + fmt(d.borneDuree, 1) + ' an(s) à ' + fmt(d.borneTaux, 2) + ' %', eur(r.borneInt.reduce(function (a0, v0) { return a0 + v0; }, 0)) + ' d’intérêts au total'); }
+    if (on.borne && r.borneLoan > 0) { add('Crédit de la borne', 'Mensualité ' + eur(r.borneMens, 2) + '/mois (total installation) · ' + eur(r.borneMensShare, 2) + '/mois par camion · ' + fmt(r.borneLoan, 0) + ' € par camion sur ' + fmt(d.borneDuree, 1) + ' an(s) à ' + fmt(d.borneTaux, 2) + ' %', eur(r.borneInt.reduce(function (a0, v0) { return a0 + v0; }, 0)) + ' d’intérêts au total'); }
     if (on.fin) {
       var fT = function (X) { return d['mode' + X] === 'achat' ? fmt(d['finPart' + X], 0) + ' % à ' + fmt(d['finTaux' + X], 2) + ' % sur ' + fmt(d['finDuree' + X], 0) + ' ' + d['finU' + X] : 'sans crédit'; };
       add('Intérêts des crédits', esc(N1(d)) + ' : ' + fT('E') + ' ; ' + esc(N2(d)) + ' : ' + fT('D'), pair(d, eur(r.cE.fin), eur(r.cD.fin)));
@@ -3329,7 +3382,7 @@ function weekSim(d, on, r, X, opt) {
   var dailyKm = bat.dailyKm || 0;
   var dayKWh = dailyKm * consKm;
   var DW = d.win || depotWin(d);
-  var nDays = Math.min(7, Math.max(1, Math.round(r.P.weeks > 0 ? r.P.days / r.P.weeks : r.P.days / WEEKS_PER_YEAR)));
+  var nDays = workDaysPerWeek(d);
   var dep = DW.depM, td = Math.max(30, Math.round(DW.D * 60));
   var appN = K.pauseOn ? appointCount(d) : 0;
   var pDep = Math.max(1, d.bornePuis), pPub = Math.max(1, d.rechPow), pPause = Math.max(1, depotPow(d, sp) || d.bornePuis);
@@ -4069,6 +4122,8 @@ function migrateValues(v) {
     m.scBatDegP = String(Math.max(0, Math.round(oldP * 100) / 100)).replace('.', ',');
   }
   if (m.rechMode === 'pct') { m.rechMode = 'auto'; }
+  if (typeof m.chargeDeltaT !== 'string') { m.chargeDeltaT = '0'; }
+  if (typeof m.borneLoy !== 'string') { m.borneLoy = ''; }
   if (!String(m.nom1 || '').replace(/^\s+|\s+$/g, '')) { m.nom1 = DEF_NAMES[cmpOf(m)].E; }
   if (!String(m.nom2 || '').replace(/^\s+|\s+$/g, '')) { m.nom2 = DEF_NAMES[cmpOf(m)].D; }
   /* Plage de conduite : listes d'heures entières (anciennes saisies arrondies à l'heure) */
@@ -4303,6 +4358,16 @@ function updateInfos(r) {
     }
   }
   setInfo('aideB', bInfo, bAlert);
+  var bc = '';
+  if (eo.borne && state.borneFin === 'credit') {
+    if (!(num(state.borneDuree) > 0) || !(num(state.borneInv) > 0)) { bc = 'Renseigne le montant et la durée pour obtenir la mensualité, comme le loyer du crédit-bail.'; }
+    else {
+      bc = 'Mensualité calculée : <b>' + eur(r.borneMens, 2) + ' HT/mois</b> sur le total de l’installation';
+      if (r.oc.nb > 1) { bc += ' · <b>' + eur(r.borneMensShare, 2) + ' HT/mois</b> par camion'; }
+      bc += ' (' + fmt(r.d.borneDuree, 1) + ' an' + (r.d.borneDuree > 1 ? 's' : '') + ' à ' + fmt(r.d.borneTaux, 2) + ' %). L’aide éventuelle est versée à part (6e mois), le crédit porte sur le prix brut.';
+    }
+  }
+  setInfo('borneCredit', bc, false);
   var kmTxt = [];
   ['E', 'D'].forEach(function (X) {
     var ev = r.V[X], bt = ev.bat, sp, K;
@@ -4317,7 +4382,9 @@ function updateInfos(r) {
   setInfo('rechWin', anyElec(state) ? (W.rule ? 'Temps de travail non renseigné : règle du repos journalier d’un chauffeur seul (au moins ' + REPOS_MIN + ' h, règlement européen 561/2006), soit une journée de <b>13 h au plus</b> et <b>au moins ' + REPOS_MIN + ' h à l’arrêt au dépôt</b> pour recharger.' : 'Journée de ' + durTxt(W.D * 60) + ' (départ → retour) · à l’arrêt au dépôt et en recharge <b>' + durTxt(W.hours * 60) + ' par jour</b>.' + (W.D > 24 - REPOS_MIN + 1e-9 ? ' Au-delà de 13 h, un chauffeur seul n’a plus ses ' + REPOS_MIN + ' h de repos journalier : double équipage ?' : '')) + (W.clock ? ' Avec les heures creuses : départ à ' + hTxtClock(W.depM) + ', retour à ' + hTxtClock(W.retM) + '.' : '') : '', false);
   if (state.kmUnit === 'an') { s = 'Kilométrage annuel d’étude : <b>' + fmt(r.kmAn, 0) + ' km par an</b>'; }
   else { s = fmt(num(state.kmPer), 0) + ' km × ' + fmt(num(state.kmNb), 0) + ' ' + (DYN[state.kmUnit] || '') + ' = <b>' + fmt(r.kmAn, 0) + ' km par an</b>'; }
-  if (needD(state, eo)) { s += ' · ' + fmt(r.P.days, 0) + ' jours d’exploitation par an'; }
+  if (needD(state, eo) || showJoursSem(state, eo) || showJoursAn(state, eo)) {
+    s += ' · <b>' + fmt(workDaysPerWeek(r.d), 0) + ' j/sem</b> × ' + fmt(r.P.weeks, 1) + ' sem = <b>' + fmt(r.P.days, 0) + ' j/an</b> (le schéma de semaine suit les jours hebdomadaires)';
+  }
   setInfo('km', s + '.', false);
   setInfo('contrat', (eo.contrat && anyElec(state)) ? 'Prix fixé par la carte « Contrat électrique du dépôt » : ' + fmt(r.V.E.type === 'elec' ? r.V.E.pDep : r.V.D.pDep, 4) + ' €/kWh HT + ' + eur(r.fixedContrat) + ' de part fixe par an.' : '', false);
   var hcTxt = '';
@@ -4333,7 +4400,7 @@ function updateInfos(r) {
   setInfo('hcPlan', hcTxt, false);
   var els = ['E', 'D'].filter(function (X) { return r.V[X].type === 'elec'; });
   var two = els.length > 1;
-  setInfo('saison', eo.saison && els.length ? 'Consommation réelle : ' + els.map(function (X) { return (two ? esc(r.V[X].name) + ' ' : '') + '<b>' + fmt(r.V[X].cReal, 1) + ' kWh/100 km</b> (essai : ' + fmt(r.V[X].c100, 1) + ')'; }).join(' · ') + '.' : '', false);
+  setInfo('saison', eo.saison && els.length ? 'Consommation réelle : ' + els.map(function (X) { return (two ? esc(r.V[X].name) + ' ' : '') + '<b>' + fmt(r.V[X].cReal, 1) + ' kWh/100 km</b> (essai : ' + fmt(r.V[X].c100, 1) + ')'; }).join(' · ') + (Math.abs(r.extra100) > 1e-9 ? ' · charge ' + (r.d.chargeDeltaT > 0 ? '+' : '') + fmt(r.d.chargeDeltaT, 1) + ' t → ' + (r.extra100 > 0 ? '+' : '') + fmt(r.extra100, 1) + ' kWh/100 km (' + fmt(TONNE_KWH_100, 1) + ' kWh/100 km par tonne)' : '') + '.' : '', false);
   if (eo.recharge && els.length) {
     if (state.rechMode === 'auto' && !eo.batterie) { setInfo('rech', 'Le mode auto (ce que le dépôt ne couvre pas) a besoin de la carte Batterie : active-la en étude complète.', true); }
     else if (state.rechMode === 'auto') { setInfo('rech', 'Année 1 : ' + els.map(function (X) { var ev = r.V[X]; return (two ? esc(ev.name) + ' ' : '') + '<b>' + fmt(ev.yr.pub[1], 0) + ' kWh</b> (' + fmt(ev.share1 * 100, 0) + ' %) que le dépôt ne couvre pas' + (eo.chauf ? ', ' + fmt(ev.yr.hours[1], 0) + ' h de chauffeur' : ''); }).join(' · ') + '. Mix dépôt / public, pas une simulation d’itinérance.', false); }
@@ -4405,11 +4472,18 @@ function updateLive() {
 }
 
 function refreshAll() {
-  var le, ld;
+  var le, ld, bl, bMens;
   if (state.modeE === 'cbail') { le = document.getElementById('f_loyE'); if (le) { le.value = fmt(creditLeaseMonthly(state, 'E'), 2).replace(/\u202f/g, ' '); le.readOnly = true; } }
   else { le = document.getElementById('f_loyE'); if (le) { le.readOnly = false; le.value = state.loyE; } }
   if (state.modeD === 'cbail') { ld = document.getElementById('f_loyD'); if (ld) { ld.value = fmt(creditLeaseMonthly(state, 'D'), 2).replace(/\u202f/g, ' '); ld.readOnly = true; } }
   else { ld = document.getElementById('f_loyD'); if (ld) { ld.readOnly = false; ld.value = state.loyD; } }
+  bl = document.getElementById('f_borneLoy');
+  if (bl) {
+    bMens = borneCreditMonthly(state);
+    bl.value = bMens > 0 ? fmt(bMens, 2).replace(/\u202f/g, ' ') : '';
+    bl.readOnly = true;
+    state.borneLoy = bl.value;
+  }
   applyModeUI();
   applyVisibility();
   refreshMissing();
@@ -4705,6 +4779,55 @@ function printFallback(pages) {
 
 /* ----- Événements ----- */
 var KM_DEFAULT_NB = { jour: '220', sem: '46', mois: '11' };
+function fmtNb(n, d) {
+  var x = Math.round(n * Math.pow(10, d || 0)) / Math.pow(10, d || 0);
+  return String(x).replace('.', ',');
+}
+function linkUsageCalendar(s, key, prev) {
+  var jS = Math.min(7, Math.max(1, Math.round(num(s.joursSem)) || 5));
+  var prevD = prev && prev.joursSem > 0 && prev.joursSem <= 7 ? prev.joursSem : jS;
+  var weeks, ja;
+  s.joursSem = String(jS);
+  if (key === 'joursSem') {
+    if (s.kmUnit === 'sem' && num(s.kmNb) > 0) { weeks = num(s.kmNb); }
+    else if (s.kmUnit === 'mois' && num(s.kmNb) > 0) { weeks = num(s.kmNb) * WEEKS_PER_YEAR / MONTHS_PER_YEAR; }
+    else if (s.kmUnit === 'jour' && num(prev && prev.kmNb) > 0) { weeks = num(prev.kmNb) / prevD; }
+    else if (prev && prev.joursAn > 0) { weeks = prev.joursAn / prevD; }
+    else { weeks = 44; }
+    if (!(weeks > 0)) { weeks = 44; }
+    ja = Math.max(1, Math.min(366, Math.round(jS * weeks)));
+    s.joursAn = String(ja);
+    if (s.kmUnit === 'jour') { s.kmNb = String(ja); }
+    else if (s.kmUnit === 'sem') { s.kmNb = fmtNb(weeks, 1); }
+  } else if (key === 'joursAn') {
+    ja = Math.max(1, Math.min(366, Math.round(num(s.joursAn))));
+    s.joursAn = String(ja);
+    if (s.kmUnit === 'jour') { s.kmNb = String(ja); }
+    else if (s.kmUnit === 'sem') { s.kmNb = fmtNb(ja / jS, 1); }
+    else if (s.kmUnit === 'mois') { s.kmNb = fmtNb(ja / jS * MONTHS_PER_YEAR / WEEKS_PER_YEAR, 1); }
+  } else if (key === 'kmNb') {
+    if (s.kmUnit === 'jour') {
+      ja = Math.max(1, Math.min(366, Math.round(num(s.kmNb))));
+      s.kmNb = String(ja);
+      s.joursAn = String(ja);
+    } else if (s.kmUnit === 'sem') {
+      weeks = num(s.kmNb);
+      s.joursAn = String(Math.max(1, Math.min(366, Math.round(weeks * jS))));
+    } else if (s.kmUnit === 'mois') {
+      weeks = num(s.kmNb) * WEEKS_PER_YEAR / MONTHS_PER_YEAR;
+      s.joursAn = String(Math.max(1, Math.min(366, Math.round(weeks * jS))));
+    }
+  } else if (key === 'kmUnit') {
+    if (s.kmUnit === 'jour') { s.kmNb = s.joursAn || KM_DEFAULT_NB.jour; }
+    else if (s.kmUnit === 'sem') {
+      weeks = num(s.joursAn) > 0 ? num(s.joursAn) / jS : 44;
+      s.kmNb = fmtNb(weeks, 1);
+    } else if (s.kmUnit === 'mois') {
+      weeks = num(s.joursAn) > 0 ? num(s.joursAn) / jS : 44;
+      s.kmNb = fmtNb(weeks * MONTHS_PER_YEAR / WEEKS_PER_YEAR, 1);
+    } else { s.kmNb = ''; }
+  }
+}
 function onFieldEvent(e) {
   var t = e.target;
   var key = t.getAttribute ? t.getAttribute('data-key') : null;
@@ -4726,9 +4849,12 @@ function onFieldEvent(e) {
   }
   if (e.type === 'change' && t.tagName === 'INPUT' && state[key] === t.value) { return; }
   var prevAnnual = (key === 'kmUnit') ? annualKm(readData(state)) : 0;
+  var prevCal = { joursSem: num(state.joursSem), joursAn: num(state.joursAn), kmNb: num(state.kmNb) };
   state[key] = t.value;
+  if (key === 'kmUnit' || key === 'joursSem' || key === 'joursAn' || key === 'kmNb') {
+    linkUsageCalendar(state, key, prevCal);
+  }
   if (key === 'kmUnit') {
-    state.kmNb = KM_DEFAULT_NB[t.value] || '';
     var nbP = t.value === 'an' ? 1 : num(state.kmNb);
     if (prevAnnual > 0 && nbP > 0) {
       state.kmPer = (t.value === 'an' ? String(Math.round(prevAnnual)) : String(Math.round(prevAnnual / nbP * 10) / 10)).replace('.', ',');
