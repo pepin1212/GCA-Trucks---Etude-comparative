@@ -745,14 +745,14 @@ var GROUPS = [
   ]},
   { id: 'aides', on: 'aides', cx: true, need: 'elec', title: 'Aides', note: 'Les aides (véhicule et borne) sont des montants TTC, versés le 6e mois : elles ne comptent qu’à partir de ce moment-là. L’aide à un tracteur électrique n’est acquise que si le client le garde au moins 5 ans. En location, le loyer saisi est déjà net d’aide et n’est jamais recalculé : tu choisis seulement le calendrier (aide au client en plus des loyers ; 1er mois = l’aide ; ou 6e mois = l’aide). En crédit-bail, l’aide peut aussi recalculer le loyer (1er loyer majoré, 6e loyer = aide − TVA, ou 6e loyer = aide HT).', fields: [
     { k: 'aideAchat', slot: 'E', l: 'Aide à l’acquisition du tracteur', u: '€ TTC', vis: function (s, o) { return !!o.achat && isElec(s, 'E'); } },
-    { k: 'aideCbBenef', slot: 'E', l: 'Versement de l’aide', select: [['client', 'Au client, en une fois le 6e mois'], ['fin', '1er loyer du financement (avance de l’aide et de la TVA)'], ['fin6', '6e loyer = aide − TVA (sans avance de TVA)'], ['fin6ht', '6e loyer = aide HT (avance de la TVA seulement)']], vis: function (s, o) { return !!o.achat && isElec(s, 'E') && leaseAidOk(s, 'E'); } },
+    { k: 'aideCbBenef', slot: 'E', l: 'Versement de l’aide', select: [['client', 'Au client, en une fois le 6e mois'], ['fin', '1er loyer du financement (avance de l’aide et de la TVA)'], ['fin6', '6e loyer = aide − TVA (sans avance de TVA)'], ['fin6ht', '6e loyer = aide HT (avance de la TVA seulement)']], hint: 'en achat, seul le versement au client s’applique ; en location ou crédit-bail, tu choisis le calendrier', vis: function (s, o) { return !!o.achat && isElec(s, 'E'); } },
     { info: 'aideT' },
     { k: 'aideAchat2', slot: 'D', l: 'Aide à l’acquisition du tracteur', u: '€ TTC', vis: function (s, o) { return !!o.achat && isElec(s, 'D'); } },
-    { k: 'aideCbBenef2', slot: 'D', l: 'Versement de l’aide', select: [['client', 'Au client, en une fois le 6e mois'], ['fin', '1er loyer du financement (avance de l’aide et de la TVA)'], ['fin6', '6e loyer = aide − TVA (sans avance de TVA)'], ['fin6ht', '6e loyer = aide HT (avance de la TVA seulement)']], vis: function (s, o) { return !!o.achat && isElec(s, 'D') && leaseAidOk(s, 'D'); } },
+    { k: 'aideCbBenef2', slot: 'D', l: 'Versement de l’aide', select: [['client', 'Au client, en une fois le 6e mois'], ['fin', '1er loyer du financement (avance de l’aide et de la TVA)'], ['fin6', '6e loyer = aide − TVA (sans avance de TVA)'], ['fin6ht', '6e loyer = aide HT (avance de la TVA seulement)']], hint: 'en achat, seul le versement au client s’applique ; en location ou crédit-bail, tu choisis le calendrier', vis: function (s, o) { return !!o.achat && isElec(s, 'D'); } },
     { info: 'aideT2' },
     { k: 'tvaLoyer', l: 'TVA sur les loyers', u: '%', hint: 'les aides sont TTC : sert à isoler la TVA avancée ou à calculer « aide − TVA »', vis: function (s, o) { return showTvaLoyer(s, o); } },
     { k: 'aideBorne', l: 'Aide à l’installation de la borne', u: '€ TTC', hint: 'versée le 6e mois, déduite du prix de la borne', vis: function (s, o) { return !!o.borne; } },
-    { k: 'aideBorneMode', l: 'Versement de l’aide à la borne', select: [['client', 'Au client, en une fois le 6e mois'], ['fin', '1er loyer du financement (avance de l’aide et de la TVA)'], ['fin6', '6e loyer = aide − TVA (sans avance de TVA)'], ['fin6ht', '6e loyer = aide HT (avance de la TVA seulement)']], vis: function (s, o) { return !!o.borne && posNum(s.aideBorne) > 0; } },
+    { k: 'aideBorneMode', l: 'Versement de l’aide à la borne', select: [['client', 'Au client, en une fois le 6e mois'], ['fin', '1er loyer du financement (avance de l’aide et de la TVA)'], ['fin6', '6e loyer = aide − TVA (sans avance de TVA)'], ['fin6ht', '6e loyer = aide HT (avance de la TVA seulement)']], vis: function (s, o) { return !!o.borne; } },
     { info: 'aideB' }
   ]},
   { id: 'revente', on: 'revente', cx: true, req: 'achat', title: 'Valeur de revente', note: 'Déduite du coût total en fin de période, pour les tracteurs dont le client est propriétaire à cette date.', fields: [
@@ -1517,6 +1517,9 @@ function acqVeh(d, on, X, ctx) {
     else if (a.benef === 'fin6ht') { a.tvaM6 = a.aideT * tvl; a.tvaMaj = a.tvaM6; }
     else if (a.benef === 'fin6') { a.tva6c = a.aideT - a.t6; a.tvaMaj = a.tva6c; }
   }
+  /* Trésorerie / TCO HT : en « aide − TVA », on ne crédite que le HT (le 6e loyer). La TVA de l’aide n’est pas de la trésorerie. */
+  a.aideDed = (a.benef === 'fin6') ? a.t6 : a.aideT;
+  a.borneDed = (a.bMode === 'fin6') ? a.b6 : 0;
   return a;
 }
 
@@ -1606,7 +1609,7 @@ function compute(d, on) {
       it.batt.push(ev.yr.batt[y]);
       it.chauf.push(ev.yr.chauf[y]);
       it.taxes.push(ev.yr.carb[y] + (on.regl ? d['peg' + X] * fA : 0));
-      it.aides.push(y === 1 ? ac.aideT + (el ? aideBShare : 0) : 0);
+      it.aides.push(y === 1 ? ac.aideDed + (el ? (ac.bMode === 'fin6' ? ac.borneDed : aideBShare) : 0) : 0);
       it.recettes.push(ev.yr.certif[y] + ((on.fisc && el && y === 1) ? d.fiscGain : 0));
       it.revente.push(y === n ? ac.res : 0);
     }
@@ -1762,7 +1765,11 @@ function monthlyCash(d, on, r) {
     }
     if (el && on.fisc) { use[Math.min(12, M)] += d.fiscGain; }
     /* Aides versées le 6e mois, revente le dernier mois */
-    if (M >= AIDE_MOIS) { aid[AIDE_MOIS] += ac.aideT + (el ? r.aideBShare : 0); }
+    if (M >= AIDE_MOIS) {
+      var vAid = ac.benef === 'fin6' ? ac.t6 : ac.aideT;
+      var bAid = el ? (ac.bMode === 'fin6' ? ac.b6 : r.aideBShare) : 0;
+      aid[AIDE_MOIS] += vAid + bAid;
+    }
     aid[M] += ac.res;
     var net = z(), cum = z();
     for (m = 1; m <= M; m++) { net[m] = acq[m] + use[m] + aid[m]; cum[m] = cum[m - 1] + net[m]; }
@@ -2598,7 +2605,7 @@ function pageComplet1(r, d, on) {
     }
   }
   var ded = function (v) { return v > 0 ? '– ' + eur(v) : eur(0); };
-  var aT1 = r.A.E.aideT, aT2 = r.A.D.aideT;
+  var aT1 = r.A.E.aideDed, aT2 = r.A.D.aideDed;
   var aB1 = r.V.E.type === 'elec' ? r.aideBShare : 0, aB2 = r.V.D.type === 'elec' ? r.aideBShare : 0;
   if (aT1 > 0 || aT2 > 0) { h += '<tr><td>Aide au tracteur (déduite)</td><td>' + ded(aT1) + '</td><td>' + ded(aT2) + '</td><td>' + eur(aT1 - aT2) + '</td></tr>'; }
   if (aB1 > 0 || aB2 > 0) { h += '<tr><td>Aide à la borne (déduite, part de ce camion)</td><td>' + ded(aB1) + '</td><td>' + ded(aB2) + '</td><td>' + eur(aB1 - aB2) + '</td></tr>'; }
@@ -3053,7 +3060,7 @@ function annex2(r, d, on) {
         if (ac.aideT <= 0) { return; }
         var mode = d['mode' + X];
         add('Aide au tracteur' + nm(X), (mode === 'achat' ? 'Achat : prix payé en entier, aide encaissée le ' + AIDE_MOIS + 'e mois'
-          : ((mode === 'cbail' ? 'Crédit-bail' : 'Location') + ' : aide ' + aideCbText(ac, d))) + ' (année 1) ; acquise car le véhicule est gardé au moins ' + AIDE_MIN_ANS + ' ans', '– ' + eur(ac.aideT));
+          : ((mode === 'cbail' ? 'Crédit-bail' : 'Location') + ' : aide ' + aideCbText(ac, d))) + ' (année 1) ; acquise car le véhicule est gardé au moins ' + AIDE_MIN_ANS + ' ans', '– ' + eur(ac.aideDed));
       });
     }
     if (on.borne) { add('Borne imputée à chaque camion électrique', '(' + eur(d.borneInv) + (r.aideB > 0 ? ' − aide ' + eur(r.aideB) + ' versée le ' + AIDE_MOIS + 'e mois' + (r.aideB < num(state.aideBorne) ? ' (plafonnée au prix)' : '') : '') + ') ÷ ' + fmt(r.oc.nb, 0) + (r.aideB > 0 ? ' ; aide ' + borneAideText(borneLeaseOk(state) ? state.aideBorneMode : 'client', r.aideBShare, d) : '') + ' ; abonnement ' + eur(r.oc.borneAboTot) + ' ÷ ' + fmt(r.oc.nb, 0), 'Invest. ' + eur(r.borneNet) + ' · ' + eur(r.oc.borneAbo) + '/an'); }
@@ -3265,7 +3272,7 @@ function annex5(r, d, on) {
         var ac5 = r.A[X];
         if (ac5.tvaM1 > 0) { h += '<div>TVA du 1er loyer majoré (aides) à avancer : <b>' + eur(ac5.tvaM1) + '</b> (M1, récupérable)</div>'; }
         if (ac5.tvaM6 > 0) { h += '<div>TVA du 6e loyer majoré à avancer : <b>' + eur(ac5.tvaM6) + '</b> (M6, récupérable)</div>'; }
-        if (ac5.tva6c > 0) { h += '<div>6e mois = aide − TVA : <b>' + eur(ac5.t6) + '</b> HT, payé TTC par l’aide de ' + eur(ac5.t6 + ac5.tva6c) + ' : <b>aucune avance de TVA</b>. L’écart HT de ' + eur(ac5.tva6c) + ' est la TVA incluse dans l’aide, récupérée par le client.</div>'; }
+        if (ac5.tva6c > 0) { h += '<div>6e mois = aide − TVA : loyer <b>' + eur(ac5.t6) + '</b> HT, soldé par l’aide TTC de ' + eur(ac5.t6 + ac5.tva6c) + '. Trésorerie HT : <b>neutre</b> (− loyer HT + aide HT). La TVA de l’aide n’entre pas dans la trésorerie (récupérable, hors chiffrage HT).</div>'; }
         h += '<div>Total sur ' + ans(n) + ' : <b>' + eur(t.cum[T.M]) + '</b></div></div>';
       });
       h += '<div class="tbox vx"><div class="tn">Écart de trésorerie</div>';
@@ -4335,7 +4342,10 @@ function updateInfos(r) {
     var alertA = false;
     if (eo.aides && eo.achat && isElec(state, X) && aid > 0) {
       if (ac.aideBlocked) { at = '<b>Aide non prise en compte</b> : elle n’est acquise que si le client garde le véhicule au moins ' + AIDE_MIN_ANS + ' ans. Porte la durée de la comparaison (carte « Projection ») à ' + AIDE_MIN_ANS + ' ans ou plus pour l’intégrer.'; alertA = true; }
-      else if (state['mode' + X] === 'achat') { at = 'Achat : le prix est payé en entier à la livraison (crédit éventuel calculé sur le prix complet) ; l’aide est encaissée le ' + AIDE_MOIS + 'e mois.'; }
+      else if (state['mode' + X] === 'achat') {
+        at = 'Achat : le prix est payé en entier à la livraison (crédit éventuel calculé sur le prix complet) ; l’aide est encaissée le ' + AIDE_MOIS + 'e mois.';
+        if (state[eKey(X, 'aideCbBenef')] !== 'client') { at += ' Les options « 1er loyer » et « 6e loyer » ne s’appliquent qu’en <b>location</b> ou <b>crédit-bail</b> : change le mode d’acquisition pour les activer.'; alertA = true; }
+      }
       else if (state['mode' + X] === 'location') {
         at = 'Location : le loyer saisi (<b>' + eur(r.d['loy' + X]) + '</b>/mois) tient déjà compte de l’aide, il n’est pas modifié. ';
         if (ac.locSkip1) { at += '1er mois = l’aide <b>' + eur(ac.first) + '</b> HT (TVA de <b>' + eur(ac.tvaM1) + '</b> à avancer, récupérable). Puis les loyers saisis. L’aide TTC est versée le ' + AIDE_MOIS + 'e mois.'; }
