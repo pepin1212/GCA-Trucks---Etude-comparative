@@ -1,4 +1,4 @@
-const CACHE = 'mastertco-v9-2026-10-19';
+const CACHE = 'mastertco-v9-2026-11-03-dod95';
 const PRECACHE = [
   './',
   './index.html',

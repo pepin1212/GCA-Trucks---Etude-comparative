@@ -51,11 +51,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 .card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .chead{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .card h2{margin:0;font-size:16px;color:var(--brand)}
+.cflip{flex:1;min-width:0;display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:4px 0;margin:0;cursor:pointer;text-align:left;font-family:inherit;color:inherit}
+.cflip:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:8px}
+.ctitle{font-size:16px;font-weight:700;color:var(--brand);line-height:1.25}
+.chev{width:7px;height:7px;flex:none;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin:0 2px 3px 1px;color:var(--brand)}
+.card.folded .chev{transform:rotate(-45deg);margin-bottom:0}
 .card .note{margin:4px 0 0;font-size:13px;color:var(--muted)}
 .card .note.blk{color:#a35a00;font-weight:600}
 .cbody{margin-top:4px;transition:opacity .15s}
 .card.off .cbody{opacity:.4}
-.card.off h2{color:var(--muted)}
+.card.off h2,.card.off .ctitle,.card.off .chev{color:var(--muted)}
+.card.folded .note,.card.folded .cbody{display:none}
+.chead .sw{flex:none}
 .sep{margin-top:14px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
 .field{margin-top:10px}
 .fhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
@@ -78,13 +85,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 .sw span{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .15s}
 .sw.on{background:var(--green)}
 .sw.on span{left:25px}
-.modebar{background:#fff;border-radius:14px;padding:10px 12px 12px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.modebar .mt{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
-.mslider{position:relative;display:flex;background:#e6edf5;border-radius:12px;padding:3px}
-.mthumb{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);background:var(--brand);border-radius:10px;transition:transform .22s}
-.mslider.right .mthumb{transform:translateX(100%)}
-.mopt{position:relative;flex:1;text-align:center;padding:11px 4px;font-weight:700;font-size:14px;color:var(--brand);transition:color .2s;border:0;background:transparent;font-family:inherit;cursor:pointer}
-.mopt.on{color:#fff}
 .live{background:linear-gradient(135deg,#0b3d91,#00529b);color:#fff}
 .live h2{color:#fff}
 .lgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
@@ -376,7 +376,7 @@ table.a4 tr.cum td{font-weight:700;color:#00529b}
 <body>
 <div id="app">
   <header class="top">
-    <div class="brand"><div class="wm"><span class="a">Master</span><span class="b">TCO</span></div><span class="tag">Coût total de possession<br>électrique et diesel<br><span style="opacity:.7;font-size:10px">version 9 du 19/10/2026</span></span></div>
+    <div class="brand"><div class="wm"><span class="a">Master</span><span class="b">TCO</span></div><span class="tag">Coût total de possession<br>électrique et diesel<br><span style="opacity:.7;font-size:10px">version 9 du 03/11/2026</span></span></div>
     <div class="tabs">
       <button class="tab on" type="button" data-action="tab" data-tab="saisie" id="tab-saisie">Données</button>
       <button class="tab" type="button" data-action="tab" data-tab="rapport" id="tab-rapport">Rapport</button>
@@ -388,13 +388,6 @@ table.a4 tr.cum td{font-weight:700;color:#00529b}
       <div class="di"><div class="dl">Étude</div><div class="dn" id="dosName">Étude non enregistrée</div><div class="ds" id="dosState"></div></div>
       <button class="btn sec" type="button" data-action="dos-save">Enregistrer</button>
       <button class="btn main" type="button" data-action="dos-panel">Dossiers</button>
-    </div>
-    <div class="modebar">
-      <div class="mt">Type de rapport</div>
-      <div class="mslider"><div class="mthumb"></div>
-        <button type="button" class="mopt" data-action="mode" data-mode="conso">Consommation</button>
-        <button type="button" class="mopt" data-action="mode" data-mode="complet">Étude complète</button>
-      </div>
     </div>
     <div id="missBanner"></div>
     <div id="formHost"></div>
@@ -413,13 +406,6 @@ table.a4 tr.cum td{font-weight:700;color:#00529b}
   </section>
 
   <section class="view" id="view-rapport" style="display:none">
-    <div class="modebar">
-      <div class="mt">Type de rapport</div>
-      <div class="mslider"><div class="mthumb"></div>
-        <button type="button" class="mopt" data-action="mode" data-mode="conso">Consommation</button>
-        <button type="button" class="mopt" data-action="mode" data-mode="complet">Étude complète</button>
-      </div>
-    </div>
     <div id="reportWarn"></div>
     <div class="toolbar">
       <button class="btn main" type="button" data-action="pdf" id="btnPdf">Télécharger le rapport en PDF</button>
@@ -493,6 +479,8 @@ table.a4 tr.cum td{font-weight:700;color:#00529b}
 <script>
 /* ===================== DONNÉES PAR DÉFAUT ===================== */
 var STORAGE_KEY = 'masterTCO_v5';
+var FOLD_KEY = 'masterTCO_fold_v1';
+var folded = {};
 var OLD_KEYS = ['masterTCO_v4', 'masterTCO_v3', 'ecoCamionData_v2'];
 
 var DEFAULTS = {
@@ -513,8 +501,8 @@ var DEFAULTS = {
   rechFreq: '1', rechFreqU: 'jour', pPublic: '0,55', pPublicBase: 'ttc',
   appNb: '1', appMode: 'dur', appDur: '45', appDurU: 'min', appKwh: '80',
   coutChauf: '35',
-  modeE: 'achat', prixE: '290000', loyE: '5200', durLocE: '5', durLocUE: 'ans', optE: '2900', cbTauxE: '5', cbPremierE: 'non', cbPremierMontantE: '10', cbPremierUE: 'pct', cbMajE: 'non', cbMajMontantE: '', cbResE: '10', cbResUE: 'pct',
-  modeD: 'achat', prixD: '115000', loyD: '2100', durLocD: '5', durLocUD: 'ans', optD: '1150', cbTauxD: '5', cbPremierD: 'non', cbPremierMontantD: '10', cbPremierUD: 'pct', cbMajD: 'non', cbMajMontantD: '', cbResD: '10', cbResUD: 'pct',
+  modeE: 'achat', prixE: '290000', loyE: '5200', durLocE: '5', durLocUE: 'ans', optE: '2900', cbTauxE: '5', cbPremierE: 'non', cbPremierMontantE: '10', cbPremierUE: 'pct', cbMajE: 'non', cbMajMontantE: '', cbMajUE: 'eur', cbResE: '10', cbResUE: 'pct',
+  modeD: 'achat', prixD: '115000', loyD: '2100', durLocD: '5', durLocUD: 'ans', optD: '1150', cbTauxD: '5', cbPremierD: 'non', cbPremierMontantD: '10', cbPremierUD: 'pct', cbMajD: 'non', cbMajMontantD: '', cbMajUD: 'eur', cbResD: '10', cbResUD: 'pct',
   aideAchat: '0', aideCbBenef: 'fin', aideAchat2: '0', aideCbBenef2: 'fin', tvaLoyer: '20', aideBorne: '0', aideBorneMode: 'client',
   finPartE: '80', finTauxE: '5', finDureeE: '5', finUE: 'ans',
   finPartD: '80', finTauxD: '5', finDureeD: '5', finUD: 'ans',
@@ -523,8 +511,8 @@ var DEFAULTS = {
   entE: '6000', entD: '11000', entU: 'an',
   adbL: '1,3', adbU: 'l100', adbP: '0,85',
   assE: '7500', assD: '7000', assU: 'an',
-  motNom: 'PACCAR EX-D1', motKw: '270', capBrut: '525', packs: '5', dod: '88', dcMax: '325', acMax: '22', taperSoc: '80', taperPct: '30',
-  motNom2: 'PACCAR EX-D1', motKw2: '270', capBrut2: '525', packs2: '5', dod2: '88', dcMax2: '325', acMax2: '22', taperSoc2: '80', taperPct2: '30',
+  motNom: 'PACCAR EX-D1', motKw: '270', capBrut: '525', packs: '5', dod: '95', dcMax: '325', acMax: '22', taperSoc: '80', taperPct: '30',
+  motNom2: 'PACCAR EX-D1', motKw2: '270', capBrut2: '525', packs2: '5', dod2: '95', dcMax2: '325', acMax2: '22', taperSoc2: '80', taperPct2: '30',
   batDeg: '1,5', batDegU: 'an',
   batDeg2: '1,5', batDegU2: 'an',
   bornePuis: '150', socFin: '100', tJour: '', hRet: '',
@@ -538,17 +526,16 @@ var DEFAULTS = {
 
 var DEFAULT_ON = {
   energie: true, contrat: false, saison: true, recharge: false, appoint: false, chauf: false, remb: false,
-  achat: true, aides: false, fin: false, revente: true, borne: true, entretien: true, adblue: true,
+  achat: true, aides: true, fin: false, revente: true, borne: true, entretien: true, adblue: true,
   assur: true, batterie: true, vieil: true, regl: false, fisc: false, evol: true, scen: false, sens: true, co2: true
 };
-var CONSO_OFF = ['achat', 'aides', 'fin', 'revente', 'borne', 'entretien', 'adblue', 'assur', 'chauf', 'regl', 'fisc'];
-
 var U_KM = [['an', 'km/an'], ['mois', 'km/mois'], ['sem', 'km/semaine'], ['jour', 'km/jour']];
 var U_BASE_KWH = [['ttc', '€/kWh TTC'], ['ht', '€/kWh HT']];
 var U_BASE_L = [['ttc', '€/L TTC'], ['ht', '€/L HT']];
 var U_AN_MOIS = [['an', '€ par an'], ['mois', '€ par mois']];
 var U_DUREE = [['ans', 'ans'], ['mois', 'mois']];
 var U_RES = [['pct', '% du prix'], ['eur', '€ HT']];
+var U_MAJ = [['eur', '€ HT'], ['pct', '% du montant financé']];
 var U_ACQ = [['achat', 'Achat (comptant ou crédit)'], ['location', 'Location (loyer)'], ['cbail', 'Crédit-bail']];
 
 /* Dépendances (tout le calendrier vient de la carte Projection) */
@@ -583,6 +570,7 @@ function ownsS(s, X) {
 }
 function priceUsed(s, o, X) {
   if (s['mode' + X] === 'achat' || s['mode' + X] === 'cbail') { return true; }
+  if (s['mode' + X] === 'location' && leaseMajMois(s, X) && s['cbMajU' + X] === 'pct') { return true; }
   return false;
 }
 function leaseAidOk(s, X) { return s['mode' + X] === 'cbail' || s['mode' + X] === 'location'; }
@@ -650,12 +638,12 @@ var GROUPS = [
   { id: 'batterie', on: 'batterie', fixed: true, need: 'elec', title: 'Batterie et recharge au dépôt', note: 'Capacité nette = brute × part utilisable. La recharge se fait à la puissance la plus basse entre la borne et le véhicule, ralentie en fin de charge, et vise un retour au dépôt avec 5 % de marge de sécurité.', fields: [
     { sep: V1 },
     { k: 'capBrut', slot: 'E', l: 'Capacité brute de la batterie', u: 'kWh', pos: true, hint: 'DAF XD : 210 à 525 kWh', vis: function (s) { return isElec(s, 'E'); } },
-    { k: 'dod', slot: 'E', l: 'Part utilisable (profondeur de décharge)', u: '%', pos: true, max: 100, hint: 'LFP DAF : 88 %', vis: function (s) { return isElec(s, 'E'); } },
+    { k: 'dod', slot: 'E', l: 'Part utilisable (profondeur de décharge)', u: '%', pos: true, max: 100, hint: 'LFP DAF : 95 % (525 kWh bruts → 499 kWh nets)', vis: function (s) { return isElec(s, 'E'); } },
     { info: 'batNet' },
     { k: 'dcMax', slot: 'E', l: 'Recharge maximale acceptée en DC', u: 'kW', pos: true, hint: 'DAF : 150 ou 325 kW', vis: function (s) { return isElec(s, 'E'); } },
     { sep: V2 },
     { k: 'capBrut2', slot: 'D', l: 'Capacité brute de la batterie', u: 'kWh', pos: true, hint: 'DAF XD : 210 à 525 kWh', vis: function (s) { return isElec(s, 'D'); } },
-    { k: 'dod2', slot: 'D', l: 'Part utilisable (profondeur de décharge)', u: '%', pos: true, max: 100, hint: 'LFP DAF : 88 %', vis: function (s) { return isElec(s, 'D'); } },
+    { k: 'dod2', slot: 'D', l: 'Part utilisable (profondeur de décharge)', u: '%', pos: true, max: 100, hint: 'LFP DAF : 95 % (525 kWh bruts → 499 kWh nets)', vis: function (s) { return isElec(s, 'D'); } },
     { info: 'batNet2' },
     { k: 'dcMax2', slot: 'D', l: 'Recharge maximale acceptée en DC', u: 'kW', pos: true, hint: 'DAF : 150 ou 325 kW', vis: function (s) { return isElec(s, 'D'); } },
     { sep: 'Recharge au dépôt' },
@@ -709,45 +697,31 @@ var GROUPS = [
     { k: 'appKwh', l: 'Énergie de chaque recharge d’appoint', u: 'kWh', pos: true, vis: function (s) { return s.appMode === 'kwh'; } },
     { info: 'appoint' }
   ]},
-  { id: 'achat', on: 'achat', cx: true, title: 'Acquisition · véhicule 1', note: 'Achat, location ou crédit-bail pour chaque tracteur. Désactive pour comparer uniquement les coûts d’usage. Montants HT. Un loyer majoré (1er ou 6e mois) sert aux montages non linéaires : il remplace le loyer de ce mois ; en crédit-bail, les autres loyers sont recalculés.', fields: [
+  { id: 'achat', on: 'achat', cx: true, title: 'Acquisition · véhicule 1', note: 'Achat, location ou crédit-bail pour chaque tracteur. Désactive pour comparer uniquement les coûts d’usage. Montants HT. Un loyer majoré (1er ou 6e mois) sert aux montages non linéaires : il remplace le loyer de ce mois, en € HT ou en % du montant financé ; en crédit-bail, les autres loyers sont recalculés.', fields: [
     { sep: V1 },
     { k: 'modeE', slot: 'E', l: 'Mode d’acquisition', select: U_ACQ },
-    { k: 'prixE', slot: 'E', l: 'Prix d’achat', u: '€ HT', pos: true, vis: function (s, o) { return priceUsed(s, o, 'E'); } },
+    { k: 'prixE', slot: 'E', l: function (s) { return s.modeE === 'location' ? 'Montant financé' : 'Prix d’achat'; }, u: '€ HT', pos: true, vis: function (s, o) { return priceUsed(s, o, 'E'); } },
     { k: 'loyE', slot: 'E', l: 'Loyer mensuel', u: '€ HT/mois', pos: true, vis: function (s) { return s.modeE !== 'achat'; }, readonly: function (s) { return s.modeE === 'cbail'; } },
     { k: 'durLocE', slot: 'E', l: 'Durée du contrat', unitKey: 'durLocUE', units: U_DUREE, pos: true, vis: function (s) { return s.modeE !== 'achat'; } },
     { k: 'cbTauxE', slot: 'E', l: 'Taux annuel du crédit-bail', u: '%/an', vis: function (s) { return s.modeE === 'cbail'; } },
-    { k: 'cbMajE', slot: 'E', l: 'Loyer majoré HT', select: [['non', 'Non'], ['m1', '1er mois'], ['m6', '6e mois']], hint: 'montage non linéaire : un seul mois au choix', vis: function (s) { return s.modeE !== 'achat'; } },
-    { k: 'cbMajMontantE', slot: 'E', l: 'Montant du loyer majoré', u: '€ HT', pos: true, vis: function (s) { return s.modeE !== 'achat' && (s.cbMajE === 'm1' || s.cbMajE === 'm6'); } },
-    { k: 'cbPremierE', slot: 'E', l: 'Premier loyer majoré', select: [['non', 'Non'], ['oui', 'Oui']], vis: function (s) { return s.modeE === 'cbail' && s.cbMajE !== 'm1' && s.cbMajE !== 'm6'; } },
-    { k: 'cbPremierMontantE', slot: 'E', l: 'Montant du premier loyer majoré', unitKey: 'cbPremierUE', units: U_RES, pos: true, max: function (s) { return s.cbPremierUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE === 'cbail' && s.cbPremierE === 'oui' && s.cbMajE !== 'm1' && s.cbMajE !== 'm6'; } },
+    { k: 'cbMajE', slot: 'E', l: 'Loyer majoré', select: [['non', 'Non'], ['m1', '1er mois'], ['m6', '6e mois']], hint: 'montage non linéaire : un seul mois au choix', vis: function (s) { return s.modeE !== 'achat'; } },
+    { k: 'cbMajMontantE', slot: 'E', l: 'Montant du loyer majoré', unitKey: 'cbMajUE', units: U_MAJ, pos: true, max: function (s) { return s.cbMajUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE !== 'achat' && (s.cbMajE === 'm1' || s.cbMajE === 'm6'); } },
     { k: 'cbResE', slot: 'E', l: 'Valeur résiduelle du crédit-bail', unitKey: 'cbResUE', units: U_RES, max: function (s) { return s.cbResUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE === 'cbail'; } },
     { info: 'acqE' }
   ]},
   { id: 'achat2', dep: 'achat', cx: true, title: 'Acquisition · véhicule 2', note: '', fields: [
     { sep: V2 },
     { k: 'modeD', slot: 'D', l: 'Mode d’acquisition', select: U_ACQ },
-    { k: 'prixD', slot: 'D', l: 'Prix d’achat', u: '€ HT', pos: true, vis: function (s, o) { return priceUsed(s, o, 'D'); } },
+    { k: 'prixD', slot: 'D', l: function (s) { return s.modeD === 'location' ? 'Montant financé' : 'Prix d’achat'; }, u: '€ HT', pos: true, vis: function (s, o) { return priceUsed(s, o, 'D'); } },
     { k: 'loyD', slot: 'D', l: 'Loyer mensuel', u: '€ HT/mois', pos: true, vis: function (s) { return s.modeD !== 'achat'; }, readonly: function (s) { return s.modeD === 'cbail'; } },
     { k: 'durLocD', slot: 'D', l: 'Durée du contrat', unitKey: 'durLocUD', units: U_DUREE, pos: true, vis: function (s) { return s.modeD !== 'achat'; } },
     { k: 'cbTauxD', slot: 'D', l: 'Taux annuel du crédit-bail', u: '%/an', vis: function (s) { return s.modeD === 'cbail'; } },
-    { k: 'cbMajD', slot: 'D', l: 'Loyer majoré HT', select: [['non', 'Non'], ['m1', '1er mois'], ['m6', '6e mois']], hint: 'montage non linéaire : un seul mois au choix', vis: function (s) { return s.modeD !== 'achat'; } },
-    { k: 'cbMajMontantD', slot: 'D', l: 'Montant du loyer majoré', u: '€ HT', pos: true, vis: function (s) { return s.modeD !== 'achat' && (s.cbMajD === 'm1' || s.cbMajD === 'm6'); } },
-    { k: 'cbPremierD', slot: 'D', l: 'Premier loyer majoré', select: [['non', 'Non'], ['oui', 'Oui']], vis: function (s) { return s.modeD === 'cbail' && s.cbMajD !== 'm1' && s.cbMajD !== 'm6'; } },
-    { k: 'cbPremierMontantD', slot: 'D', l: 'Montant du premier loyer majoré', unitKey: 'cbPremierUD', units: U_RES, pos: true, max: function (s) { return s.cbPremierUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD === 'cbail' && s.cbPremierD === 'oui' && s.cbMajD !== 'm1' && s.cbMajD !== 'm6'; } },
+    { k: 'cbMajD', slot: 'D', l: 'Loyer majoré', select: [['non', 'Non'], ['m1', '1er mois'], ['m6', '6e mois']], hint: 'montage non linéaire : un seul mois au choix', vis: function (s) { return s.modeD !== 'achat'; } },
+    { k: 'cbMajMontantD', slot: 'D', l: 'Montant du loyer majoré', unitKey: 'cbMajUD', units: U_MAJ, pos: true, max: function (s) { return s.cbMajUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD !== 'achat' && (s.cbMajD === 'm1' || s.cbMajD === 'm6'); } },
     { k: 'cbResD', slot: 'D', l: 'Valeur résiduelle du crédit-bail', unitKey: 'cbResUD', units: U_RES, max: function (s) { return s.cbResUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD === 'cbail'; } },
     { info: 'acqD' }
   ]},
-  { id: 'fin', on: 'fin', cx: true, req: 'achat', title: 'Financement par crédit', note: 'Intérêts d’un crédit amortissable mensuellement, pour les tracteurs achetés.', fields: [
-    { sep: V1 },
-    { k: 'finPartE', slot: 'E', l: 'Part financée', u: '%', max: 100, vis: function (s) { return s.modeE === 'achat'; } },
-    { k: 'finTauxE', slot: 'E', l: 'Taux d’intérêt annuel', u: '%/an', vis: function (s) { return s.modeE === 'achat' && posNum(s.finPartE) > 0; } },
-    { k: 'finDureeE', slot: 'E', l: 'Durée du crédit', unitKey: 'finUE', units: U_DUREE, pos: true, vis: function (s) { return s.modeE === 'achat' && posNum(s.finPartE) > 0; } },
-    { sep: V2 },
-    { k: 'finPartD', slot: 'D', l: 'Part financée', u: '%', max: 100, vis: function (s) { return s.modeD === 'achat'; } },
-    { k: 'finTauxD', slot: 'D', l: 'Taux d’intérêt annuel', u: '%/an', vis: function (s) { return s.modeD === 'achat' && posNum(s.finPartD) > 0; } },
-    { k: 'finDureeD', slot: 'D', l: 'Durée du crédit', unitKey: 'finUD', units: U_DUREE, pos: true, vis: function (s) { return s.modeD === 'achat' && posNum(s.finPartD) > 0; } }
-  ]},
-  { id: 'aides', on: 'aides', cx: true, need: 'elec', title: 'Aides', note: 'Les aides (véhicule et borne) sont des montants TTC, versés le 6e mois : elles ne comptent qu’à partir de ce moment-là. L’aide à un tracteur électrique n’est acquise que si le client le garde au moins 5 ans. En location, le loyer saisi est déjà net d’aide et n’est jamais recalculé : tu choisis seulement le calendrier (aide au client en plus des loyers ; 1er mois = l’aide ; ou 6e mois = l’aide). En crédit-bail, l’aide peut aussi recalculer le loyer (1er loyer majoré, 6e loyer = aide − TVA, ou 6e loyer = aide HT).', fields: [
+  { id: 'aides', on: 'aides', cx: true, title: 'Aides', note: 'Les aides (véhicule et borne) sont des montants TTC, versés le 6e mois : elles ne comptent qu’à partir de ce moment-là. L’aide à un tracteur électrique n’est acquise que si le client le garde au moins 5 ans. En location, le loyer saisi est déjà net d’aide et n’est jamais recalculé : tu choisis seulement le calendrier (aide au client en plus des loyers ; 1er mois = l’aide ; ou 6e mois = l’aide). En crédit-bail, l’aide peut aussi recalculer le loyer (1er loyer majoré, 6e loyer = aide − TVA, ou 6e loyer = aide HT).', fields: [
     { k: 'aideAchat', slot: 'E', l: 'Aide à l’acquisition du tracteur', u: '€ TTC', vis: function (s, o) { return !!o.achat && isElec(s, 'E'); } },
     { k: 'aideCbBenef', slot: 'E', l: 'Versement de l’aide', select: [['client', 'Au client, en une fois le 6e mois'], ['fin', '1er loyer du financement (avance de l’aide et de la TVA)'], ['fin6', '6e loyer = aide − TVA (sans avance de TVA)'], ['fin6ht', '6e loyer = aide HT (avance de la TVA seulement)']], hint: 'en achat, seul le versement au client s’applique ; en location ou crédit-bail, tu choisis le calendrier', vis: function (s, o) { return !!o.achat && isElec(s, 'E'); } },
     { info: 'aideT' },
@@ -758,6 +732,16 @@ var GROUPS = [
     { k: 'aideBorne', l: 'Aide à l’installation de la borne', u: '€ TTC', hint: 'versée le 6e mois, déduite du prix de la borne', vis: function (s, o) { return !!o.borne; } },
     { k: 'aideBorneMode', l: 'Versement de l’aide à la borne', select: [['client', 'Au client, en une fois le 6e mois'], ['fin', '1er loyer du financement (avance de l’aide et de la TVA)'], ['fin6', '6e loyer = aide − TVA (sans avance de TVA)'], ['fin6ht', '6e loyer = aide HT (avance de la TVA seulement)']], vis: function (s, o) { return !!o.borne; } },
     { info: 'aideB' }
+  ]},
+  { id: 'fin', on: 'fin', cx: true, req: 'achat', title: 'Financement par crédit', note: 'Intérêts d’un crédit amortissable mensuellement, pour les tracteurs achetés.', fields: [
+    { sep: V1 },
+    { k: 'finPartE', slot: 'E', l: 'Part financée', u: '%', max: 100, vis: function (s) { return s.modeE === 'achat'; } },
+    { k: 'finTauxE', slot: 'E', l: 'Taux d’intérêt annuel', u: '%/an', vis: function (s) { return s.modeE === 'achat' && posNum(s.finPartE) > 0; } },
+    { k: 'finDureeE', slot: 'E', l: 'Durée du crédit', unitKey: 'finUE', units: U_DUREE, pos: true, vis: function (s) { return s.modeE === 'achat' && posNum(s.finPartE) > 0; } },
+    { sep: V2 },
+    { k: 'finPartD', slot: 'D', l: 'Part financée', u: '%', max: 100, vis: function (s) { return s.modeD === 'achat'; } },
+    { k: 'finTauxD', slot: 'D', l: 'Taux d’intérêt annuel', u: '%/an', vis: function (s) { return s.modeD === 'achat' && posNum(s.finPartD) > 0; } },
+    { k: 'finDureeD', slot: 'D', l: 'Durée du crédit', unitKey: 'finUD', units: U_DUREE, pos: true, vis: function (s) { return s.modeD === 'achat' && posNum(s.finPartD) > 0; } }
   ]},
   { id: 'revente', on: 'revente', cx: true, req: 'achat', title: 'Valeur de revente', note: 'Déduite du coût total en fin de période, pour les tracteurs dont le client est propriétaire à cette date.', fields: [
     { k: 'resE', l: V1, unitKey: 'resU', units: U_RES, vis: function (s) { return ownsS(s, 'E'); } },
@@ -1002,9 +986,28 @@ function leaseMajMois(s, X) {
   var v = s['cbMaj' + X];
   return (v === 'm1' || v === 'm6') ? v : '';
 }
+function financedHT(s, X) {
+  var p = Math.max(0, num(s['prix' + X]));
+  if (p > 0) { return p; }
+  if (s['mode' + X] === 'location') { return Math.max(0, num(s['loy' + X])) * leaseMonthsS(s, X); }
+  return 0;
+}
 function leaseMajHT(s, X) {
   if (s['mode' + X] === 'achat' || !leaseMajMois(s, X)) { return 0; }
-  return Math.max(0, num(s['cbMajMontant' + X]));
+  var value = Math.max(0, num(s['cbMajMontant' + X]));
+  if (s['cbMajU' + X] === 'pct') { return financedHT(s, X) * value / 100; }
+  return value;
+}
+function locationRentsHT(s, X) {
+  var rent = num(s['loy' + X]);
+  var months = leaseMonthsS(s, X);
+  if (months <= 0) { return 0; }
+  var tot = rent * months;
+  var maj = leaseMajHT(s, X);
+  var mm = leaseMajMois(s, X);
+  if (mm === 'm1' && maj > 0) { tot += maj - rent; }
+  if (mm === 'm6' && months >= 6 && maj > 0) { tot += maj - rent; }
+  return tot;
 }
 /* Ancien premier loyer majoré du crédit-bail, en € HT (saisi en € ou en % du prix neuf) */
 function creditLeaseFirstLegacy(s, X) {
@@ -1533,8 +1536,9 @@ function acqVeh(d, on, X, ctx) {
     else if (a.benef === 'fin6') { a.t6 = tvl > 0 ? a.aideT / (1 + tvl) : a.aideT; a.maj6 = a.t6; }
     else if (a.benef === 'fin6ht') { a.t6 = a.aideT; a.maj6 = a.t6; }
   }
-  if ((mode === 'location' || mode === 'cbail') && d['cbMaj' + X] === 'm1' && d['cbMajMontant' + X] > 0) { a.first = d['cbMajMontant' + X]; }
-  if ((mode === 'location' || mode === 'cbail') && d['cbMaj' + X] === 'm6' && d['cbMajMontant' + X] > 0) { a.maj6 = d['cbMajMontant' + X]; }
+  var userMaj = leaseMajHT(d, X);
+  if ((mode === 'location' || mode === 'cbail') && d['cbMaj' + X] === 'm1' && userMaj > 0) { a.first = userMaj; }
+  if ((mode === 'location' || mode === 'cbail') && d['cbMaj' + X] === 'm6' && userMaj > 0) { a.maj6 = userMaj; }
   a.bMode = (a.bFin > 0 || a.b6 > 0) ? d.aideBorneMode : '';
   /* TVA à avancer par le client sur les loyers majorés payés par les aides */
   a.tvaM1 = ((d['aideFin' + X] || 0) + a.bFin) * tvl;
@@ -2207,9 +2211,6 @@ function effOn() {
   for (k in DEFAULT_ON) {
     if (Object.prototype.hasOwnProperty.call(DEFAULT_ON, k)) { o[k] = !!ons[k]; }
   }
-  if (state.mode === 'conso') {
-    for (i = 0; i < CONSO_OFF.length; i++) { o[CONSO_OFF[i]] = false; }
-  }
   for (i = 0; i < GROUPS.length; i++) {
     g = GROUPS[i];
     if (g.on && !needOk(g)) { o[g.on] = false; }
@@ -2230,14 +2231,13 @@ function effOn() {
 function blockReason(g) {
   var o = effOn();
   if (!g.on || !ons[g.on] || o[g.on] || !needOk(g)) { return ''; }
-  if (g.cx && state.mode === 'conso') { return ''; }
   if (g.req && !o[g.req]) { return 'Inactif : active d’abord « ' + GROUP_BY_ON[g.req].title + ' ».'; }
   if (g.on === 'aides') { return 'Inactif : ni acquisition d’un tracteur électrique ni investissement dans une borne activé.'; }
   if (g.on === 'fin') { return 'Inactif : aucun tracteur n’est en achat.'; }
   if (g.on === 'revente') { return 'Inactif : le client n’est propriétaire d’aucun tracteur en fin de période.'; }
   return '';
 }
-function isComplet() { return state.mode !== 'conso'; }
+function isComplet() { return true; }
 
 /* Encarts sans interrupteur, rattachés à un autre encart (dep) */
 function depOk(g, o) {
@@ -2284,11 +2284,11 @@ function missReason(k) {
   if (needPos && parseFloat(s) <= 0) { return 'doit être supérieur à 0'; }
   var mx = typeof f.max === 'function' ? f.max(state) : f.max;
   if (mx !== undefined && mx !== null && parseFloat(s) > mx) { return 'maximum ' + fmt(mx, 0); }
-  if (k === 'cbPremierMontantE' || k === 'cbPremierMontantD' || k === 'cbMajMontantE' || k === 'cbMajMontantD') {
+  if (k === 'cbMajMontantE' || k === 'cbMajMontantD') {
     var X = k.slice(-1);
-    if ((k === 'cbMajMontantE' || k === 'cbMajMontantD') && state['cbMaj' + X] === 'm6' && leaseMonthsS(state, X) < 6) { return 'le contrat dure moins de 6 mois'; }
+    if (state['cbMaj' + X] === 'm6' && leaseMonthsS(state, X) < 6) { return 'le contrat dure moins de 6 mois'; }
+    if (state['cbMajU' + X] === 'pct' && financedHT(state, X) <= 0) { return 'indique le montant financé'; }
     if (state['mode' + X] === 'cbail' && contractFirst(state, X) + contractMaj6(state, X) + creditLeaseResidual(state, X) >= Math.max(0, num(state['prix' + X])) && creditLeaseMonthly(state, X) <= 0) { return 'loyers majorés + valeur résiduelle trop élevés pour ce crédit-bail'; }
-    if (k.indexOf('cbPremier') === 0 && creditLeaseFirst(state, X) + aideLeaseFin(state, X) + creditLeaseResidual(state, X) >= Math.max(0, num(state['prix' + X]))) { return aideLeaseFin(state, X) > 0 ? 'premier loyer + aide + valeur résiduelle doivent rester inférieurs au prix' : 'premier loyer + valeur résiduelle doivent rester inférieurs au prix'; }
   }
   if (k === 'aideAchat' || k === 'aideAchat2') {
     var AX = k === 'aideAchat' ? 'E' : 'D';
@@ -2296,8 +2296,9 @@ function missReason(k) {
     if (av < 0) { return 'ne peut pas être négative'; }
     if (av > 0 && !aideOkDuree(state)) { return 'non acquise : moins de ' + AIDE_MIN_ANS + ' ans'; }
     if (state['mode' + AX] === 'location') {
-      var totL = num(state['loy' + AX]) * leaseMonths(state, AX);
-      if (totL > 0 && av > totL) { return 'ne peut pas dépasser le total des loyers'; }
+      var totHT = locationRentsHT(state, AX);
+      var totTTC = totHT * (1 + Math.max(0, num(state.tvaLoyer)) / 100);
+      if (totHT > 0 && av > totTTC + 0.5) { return 'ne peut pas dépasser le total des loyers TTC'; }
     } else if (av > num(state['prix' + AX])) { return 'ne peut pas dépasser le prix d’achat'; }
     else if (aideLeaseFin(state, AX) > 0 && creditLeaseFirst(state, AX) + av + creditLeaseResidual(state, AX) >= num(state['prix' + AX])) { return 'aide + premier loyer + valeur résiduelle doivent rester inférieurs au prix'; }
     else if (aideLease6(state, AX) > 0 && creditLeaseMonthly(state, AX) <= 0) { return 'aide trop élevée pour ce crédit-bail'; }
@@ -2912,8 +2913,10 @@ function reportRow(f, d) {
     if (fc + fa <= 0) { val = 'Non'; }
     else { val = eur(fc + fa) + (fa > 0 ? (fc > 0 ? ' (dont aide ' + eur(fa) + ')' : ' (payé par l’aide)') : ''); }
   } else if (f.k === 'cbMajE' || f.k === 'cbMajD') {
-    var MX = f.k.slice(-1), mm = d['cbMaj' + MX];
-    val = mm === 'm1' ? '1er mois · ' + eur(d['cbMajMontant' + MX]) + ' HT' : (mm === 'm6' ? '6e mois · ' + eur(d['cbMajMontant' + MX]) + ' HT' : 'Non');
+    var MX = f.k.slice(-1), mm = d['cbMaj' + MX], majE = leaseMajHT(d, MX);
+    if (mm !== 'm1' && mm !== 'm6') { val = 'Non'; }
+    else if (d['cbMajU' + MX] === 'pct') { val = (mm === 'm1' ? '1er mois' : '6e mois') + ' · ' + fmt(d['cbMajMontant' + MX], 1) + ' % (' + eur(majE) + ' HT)'; }
+    else { val = (mm === 'm1' ? '1er mois' : '6e mois') + ' · ' + eur(majE) + ' HT'; }
   } else {
     val = valueText(f);
   }
@@ -2923,7 +2926,7 @@ function annex1(r, d, on) {
   var cols = [[], []];
   var groups = [];
   var gi, fi, g, f, rows;
-  groups.push({ title: 'Rapport', rows: [['Type de rapport', isComplet() ? 'Étude complète' : 'Consommation seule']] });
+  groups.push({ title: 'Rapport', rows: [['Type de rapport', 'Étude complète']] });
   for (gi = 0; gi < GROUPS.length; gi++) {
     g = GROUPS[gi];
     if (!groupActive(g)) { continue; }
@@ -3647,9 +3650,9 @@ function weekChart(S, w, h, G, Wn) {
   return s;
 }
 
-/* Cadran 24 h de la journée type (lundi) */
-function dayDial(S, size) {
-  var cxy = size / 2, R = size / 2 - (S.rel ? 32 : 24), wdt = 17;
+/* Cadran 24 h de la journée type (lundi). G = semaine 1 superposée (anneau intérieur). */
+function dayDial(S, size, G) {
+  var cxy = size / 2, R = size / 2 - (S.rel ? 32 : 24) - (G ? 6 : 0), wdt = 17;
   var s = svgOpen(size, size);
   var ang = function (min) { return (min / 1440) * 2 * Math.PI - Math.PI / 2; };
   var arc = function (a0, a1, rr, col, ww) {
@@ -3667,11 +3670,18 @@ function dayDial(S, size) {
       a = i; ph = S.ph[i];
     }
   }
-  /* Anneau intérieur : niveau de charge */
+  /* Anneau intérieur : niveau de charge (plein = dernière semaine ; G = semaine 1) */
   var Ri = R - 19;
   for (i = 0; i < 288; i += 3) {
     var p = S.soc[i] / 100, c = p > 0.5 ? '#39c6f4' : (p > S.margePct / 100 ? '#5b8fd1' : '#e0642a');
     s += arc(i * WK_STEP, (i + 3) * WK_STEP, Ri, c, 4 + p * 7);
+  }
+  if (G && G.soc) {
+    var Rg = Ri - 12;
+    for (i = 0; i < 288; i += 3) {
+      var p0 = G.soc[i] / 100;
+      s += arc(i * WK_STEP, (i + 3) * WK_STEP, Rg, '#0b2f5e', 2.2 + p0 * 3);
+    }
   }
   for (i = 0; i < 24; i += 6) {
     var A = ang(i * 60), lr = R + (S.rel ? 19 : 17), tx = cxy + lr * Math.cos(A), ty = cxy + lr * Math.sin(A) + 3.5;
@@ -3679,7 +3689,7 @@ function dayDial(S, size) {
   }
   s += '<text x="' + cxy + '" y="' + (cxy - 12) + '" font-size="9.5" fill="#6b7683" text-anchor="middle" letter-spacing=".5">JOURNÉE TYPE</text>';
   s += '<text x="' + cxy + '" y="' + (cxy + 9) + '" font-size="20" font-weight="800" fill="#0b2a4a" text-anchor="middle">' + fmt(S.dailyKm, 0) + ' km</text>';
-  s += '<text x="' + cxy + '" y="' + (cxy + 24) + '" font-size="9.5" fill="#6b7683" text-anchor="middle">' + fmt(S.dayKWh, 0) + ' kWh consommés</text>';
+  s += '<text x="' + cxy + '" y="' + (cxy + 24) + '" font-size="9.5" fill="#6b7683" text-anchor="middle">' + fmt(S.dayKWh, 0) + ' kWh consommés' + (G ? ' · fin d’étude' : '') + '</text>';
   s += '</svg>';
   return s;
 }
@@ -3693,7 +3703,7 @@ function lowWhen(S, i) {
 function weekPanel(S, d, on, compact, G, Wn, r) {
   var last = S.which === 'last';
   var h = '<div class="wk">';
-  h += '<div class="wkh"><div><div class="wkt">' + (last ? 'Niveau de charge · dernière semaine, année ' + r.n : 'Niveau de charge de la batterie · semaine 1') + '</div><div class="wks">' + esc(S.name) + ' · ' + S.nDays + ' × ' + fmt(S.dailyKm, 0) + ' km · ' + fmt(S.cap, 0) + ' kWh nets' + (last ? ', santé ' + fmt(S.BS.soh, 1) + ' %' : ', neuve') + ' · borne ' + fmt(S.pDep, 0) + ' kW</div></div>';
+  h += '<div class="wkh"><div><div class="wkt">' + (G ? 'Niveau de charge · semaine 1 et dernière semaine (année ' + r.n + ')' : (last ? 'Niveau de charge · dernière semaine, année ' + r.n : 'Niveau de charge de la batterie · semaine 1')) + '</div><div class="wks">' + esc(S.name) + ' · ' + S.nDays + ' × ' + fmt(S.dailyKm, 0) + ' km · ' + (G ? fmt(G.cap, 0) + ' → ' + fmt(S.cap, 0) + ' kWh nets, santé ' + fmt(S.BS.soh, 1) + ' %' : fmt(S.cap, 0) + ' kWh nets' + (last ? ', santé ' + fmt(S.BS.soh, 1) + ' %' : ', neuve')) + ' · borne ' + fmt(S.pDep, 0) + ' kW</div></div>';
   h += '<div class="wkl"><span><i style="background:' + WK_C.drive + '"></i>Tournée</span><span><i style="background:' + WK_C.depot + '"></i>Recharge dépôt</span>' + (S.pauseE > 0 ? '<span><i style="background:' + WK_C.depot + '"></i>Appoint au dépôt</span>' : '') + (S.pubE > 0 ? '<span><i style="background:' + WK_C.pub + '"></i>Recharge en route</span>' : '') + '<span><i style="background:#e3e8ee;border:1px solid #cfd8e3"></i>À l’arrêt</span>' + (G ? '<span><i style="background:none;border-top:2px dotted #0b2f5e;height:0;width:14px"></i>Semaine 1</span>' : '') + (Wn ? '<span><i style="background:none;border-top:2px dashed #6c63d9;height:0;width:14px"></i>Hiver</span>' : '') + '</div></div>';
   h += weekChart(S, 682, compact ? 230 : 268, G, Wn);
   h += '<div class="wkk">';
@@ -3709,19 +3719,23 @@ function weekPanel(S, d, on, compact, G, Wn, r) {
 }
 
 function pageWeek(r, d, on, which) {
-  which = which || 'first';
+  which = which || 'last';
   var last = which === 'last';
   var sims = ['E', 'D'].map(function (X) { return weekSim(d, on, r, X, { which: which }); }).filter(function (x) { return !!x; });
+  if (!sims.length && last) {
+    which = 'first'; last = false;
+    sims = ['E', 'D'].map(function (X) { return weekSim(d, on, r, X, { which: 'first' }); }).filter(function (x) { return !!x; });
+  }
   if (!sims.length) { return ''; }
   var ghosts = sims.map(function (T) { return last ? weekSim(d, on, r, T.X, { which: 'first' }) : null; });
   var winters = sims.map(function (T) { return last && T.BS.winterOn ? weekSim(d, on, r, T.X, { which: 'last', winter: true }) : null; });
   var two = sims.length > 1;
   var h = '<div class="page">' + headHtml(d);
-  h += '<div class="st">' + (last ? 'Batterie · dernière semaine de l’année ' + r.n + ', heure par heure' : 'Batterie · une semaine type, heure par heure') + (two ? '' : ' · ' + esc(sims[0].name)) + '</div>';
+  h += '<div class="st">' + (last ? 'Batterie · cycles de recharge, semaine 1 et dernière semaine (année ' + r.n + ')' : 'Batterie · une semaine type, heure par heure') + (two ? '' : ' · ' + esc(sims[0].name)) + '</div>';
   var S0w = sims[0];
   h += '<div class="basis" style="margin-top:0">' + (S0w.rel
     ? 'Simulation d’une semaine en régime établi, graduée depuis le départ de chaque journée (sans heures creuses, aucune heure d’horloge n’est nécessaire) : ' + durTxt(S0w.td) + ' de tournée (' + (S0w.rule ? 'au plus, règle des ' + REPOS_MIN + ' h de repos journalier d’un chauffeur seul' : 'temps de travail du chauffeur') + '), puis ' + durTxt(1440 - S0w.td) + ' à l’arrêt au dépôt, recharge dès le retour'
-    : 'Simulation du lundi 00:00 au dimanche 23:59, en régime établi : départ à ' + hhmm(S0w.dep) + ', ' + durTxt(S0w.td) + ' de tournée, retour au dépôt à ' + hhmm(S0w.dep + S0w.td) + ', recharge ' + (S0w.plan && S0w.plan.pilot ? hcPlanTxt(S0w.plan) : 'dès le retour')) + ' jusqu’à ' + fmt(S0w.fullPct, 0) + ' %, ralentie en fin de charge. ' + (last ? 'Batterie et consommation de la fin de l’année ' + r.n + ' ; en pointillés, la semaine 1' + (winters[0] ? ' et, en tirets, la même semaine en hiver' : '') + '.' : 'Batterie neuve, consommation réelle moyenne de l’étude.') + (on.recharge && d.rechMode === 'auto' ? ' Les kWh publics du TCO sont le bilan annuel (besoin − max dépôt) : ce graphe illustre une semaine type, il ne se multiplie pas par 52 pour retrouver le chiffrage.' : '') + '</div>';
+    : 'Simulation du lundi 00:00 au dimanche 23:59, en régime établi : départ à ' + hhmm(S0w.dep) + ', ' + durTxt(S0w.td) + ' de tournée, retour au dépôt à ' + hhmm(S0w.dep + S0w.td) + ', recharge ' + (S0w.plan && S0w.plan.pilot ? hcPlanTxt(S0w.plan) : 'dès le retour')) + ' jusqu’à ' + fmt(S0w.fullPct, 0) + ' %, ralentie en fin de charge. ' + (last ? 'Trait plein : dernière semaine (batterie vieillie). Pointillés : semaine 1 (batterie neuve)' + (winters[0] ? ' ; tirets : même semaine en hiver' : '') + '.' : 'Batterie neuve, consommation réelle moyenne de l’étude.') + (on.recharge && d.rechMode === 'auto' ? ' Les kWh publics du TCO sont le bilan annuel (besoin − max dépôt) : ce graphe illustre une semaine type, il ne se multiplie pas par 52 pour retrouver le chiffrage.' : '') + '</div>';
   var i;
   for (i = 0; i < sims.length; i++) { h += weekPanel(sims[i], d, on, two, ghosts[i], winters[i], r); }
   var S = sims[0];
@@ -3750,10 +3764,10 @@ function pageWeek(r, d, on, which) {
       }
       tA = tB;
     }
-    h += '<div class="dial"><div>' + dayDial(S, last ? 180 : 214) + '</div><div class="dtx"><div class="dtt">' + (S.rel ? 'Le lundi, du départ au départ suivant' : 'Le lundi, heure par heure') + (last ? ' (année ' + r.n + ')' : '') + '</div>' + (last ? '<div class="dli"><i style="background:#00529b"></i><b>Cycle</b><span>même enchaînement tournée → recharge dépôt → arrêt, batterie à ' + fmt(S.BS.soh, 1) + ' % de santé</span></div>' : items.join('')) + '<div class="dlg">Anneau extérieur : activité · anneau intérieur : niveau de charge (plus il est épais, plus la batterie est pleine).</div></div></div>';
+    h += '<div class="dial"><div>' + dayDial(S, last ? 180 : 214, ghosts[0]) + '</div><div class="dtx"><div class="dtt">' + (S.rel ? 'Le lundi, du départ au départ suivant' : 'Le lundi, heure par heure') + (last ? ' · superposition semaine 1 / année ' + r.n : '') + '</div>' + (last ? '<div class="dli"><i style="background:#00529b"></i><b>Cycle</b><span>même enchaînement tournée → recharge dépôt → arrêt. Anneau cyan : dernière semaine (santé ' + fmt(S.BS.soh, 1) + ' %). Anneau bleu foncé : semaine 1.</span></div>' : items.join('')) + '<div class="dlg">Anneau extérieur : activité · anneau intérieur : niveau de charge (plus il est épais, plus la batterie est pleine)' + (ghosts[0] ? ' · le plus petit anneau = semaine 1' : '') + '.</div></div></div>';
   } else {
     for (i = 0; i < sims.length; i++) {
-      h += '<div class="dial" style="margin-top:10px"><div>' + dayDial(sims[i], 180) + '</div><div class="dtx"><div class="dtt">Cycle de recharge · ' + esc(sims[i].name) + (last ? ' · année ' + r.n : ' · semaine 1') + '</div><div class="dlg">Anneau extérieur : activité · anneau intérieur : niveau de charge.</div></div></div>';
+      h += '<div class="dial" style="margin-top:10px"><div>' + dayDial(sims[i], 180, ghosts[i]) + '</div><div class="dtx"><div class="dtt">Cycle de recharge · ' + esc(sims[i].name) + (last ? ' · semaine 1 et année ' + r.n : ' · semaine 1') + '</div><div class="dlg">Anneau extérieur : activité · anneau intérieur : dernière semaine' + (ghosts[i] ? ' · anneau bleu : semaine 1' : '') + '.</div></div></div>';
     }
   }
   if (last) {
@@ -3829,7 +3843,17 @@ function pileSvg(o) {
     }
     s += '</g>';
   }
-  /* Repères dans la pile */
+  /* Superposition semaine 1 (échelle du net neuf, en pointillés) */
+  if (o.depPct0 != null && o.retPct0 != null) {
+    var yOf0 = function (pct) { return yNB - Math.max(0, Math.min(100, pct)) / 100 * o.net * kpx; };
+    var yDep0 = yOf0(o.depPct0), yRet0 = yOf0(o.retPct0);
+    if (yRet0 - yDep0 > 2) {
+      s += '<rect x="' + XL + '" y="' + yDep0.toFixed(1) + '" width="' + W + '" height="' + (yRet0 - yDep0).toFixed(1) + '" fill="none" stroke="#0b2f5e" stroke-width="2" stroke-dasharray="4,3" opacity=".85"/>';
+    }
+    s += '<line x1="' + XL + '" x2="' + (XL + W) + '" y1="' + yDep0.toFixed(1) + '" y2="' + yDep0.toFixed(1) + '" stroke="#0b2f5e" stroke-width="1.4" stroke-dasharray="3,2" opacity=".9"/>';
+    s += '<line x1="' + XL + '" x2="' + (XL + W) + '" y1="' + yRet0.toFixed(1) + '" y2="' + yRet0.toFixed(1) + '" stroke="#0b2f5e" stroke-width="1.4" stroke-dasharray="3,2" opacity=".9"/>';
+  }
+  /* Repères dans la pile (dernière semaine) */
   s += '<line x1="' + XL + '" x2="' + (XL + W) + '" y1="' + yRet.toFixed(1) + '" y2="' + yRet.toFixed(1) + '" stroke="#0b2f5e" stroke-width="2" stroke-dasharray="3,2"/>';
   s += '<line x1="' + XL + '" x2="' + (XL + W) + '" y1="' + yM.toFixed(1) + '" y2="' + yM.toFixed(1) + '" stroke="#e0642a" stroke-width="2" stroke-dasharray="5,3"/>';
   /* Éclair sur la séparation la plus proche du centre de la tournée */
@@ -3863,13 +3887,18 @@ function pileSvg(o) {
   return s;
 }
 
-function pilePanel(r, d, on, X, which, S, K) {
+function pilePanel(r, d, on, X, which, S, K, G) {
   var ev = r.V[X], bat = ev.bat, sp = bat.spec, BS = S.BS;
   var last = which === 'last';
   var lost = bat.cap - BS.cap;
   var depPct = Math.min(S.depSoc, startPct(d));
   var used = K.tourE - K.tourPauseE;
   var retPct = depPct - used / BS.cap * 100;
+  var depPct0 = null, retPct0 = null, K0 = bat.K[0];
+  if (G && K0) {
+    depPct0 = Math.min(G.depSoc, startPct(d));
+    retPct0 = depPct0 - (K0.tourE - K0.tourPauseE) / Math.max(0.001, K0.cap) * 100;
+  }
   var retK = Math.max(0, retPct) * BS.cap / 100;
   var mK = K.marge * BS.cap / 100;
   var kmAfter = (retPct - K.marge) / 100 * BS.cap / K.consKm;
@@ -3880,15 +3909,18 @@ function pilePanel(r, d, on, X, which, S, K) {
   if (lost > 0.5) { labels.push({ y: (Y0 + yAT) / 2, t: ['Capacité perdue', '−' + fmt(lost, 0) + ' kWh en ' + ans(r.n)], c: '#c2410c', lc: '#e0642a' }); }
   if (yOf(depPct) - yAT > 6) { labels.push({ y: (yAT + yOf(depPct)) / 2, t: ['Non rechargé', fmt(100 - depPct, 0) + ' % au départ'], lc: '#9aa8b8' }); }
   labels.push({ y: (yOf(depPct) + yOf(retPct)) / 2, t: ['Tournée du jour', fmt(used, 0) + ' kWh · ' + fmt(K.tour, 0) + ' km', fmt(used / BS.cap * 100, 0) + ' % du net' + (K.tourPauseE > 0 ? ' (appoint déduit)' : '')], c: '#0d8a64', lc: '#16a37a', lw: 2 });
-  if (retPct >= 0 && K.okBat) { labels.push({ y: yOf(retPct), t: ['Retour au dépôt : ' + fmt(retPct, 0) + ' %', fmt(retK, 0) + ' kWh · ≈ ' + fmt(retK / K.consKm, 0) + ' km'], lc: '#0b2f5e', lw: 2, dash: '3,2' }); }
+  if (depPct0 != null && Math.abs(retPct0 - retPct) > 0.8) {
+    labels.push({ y: yNB - Math.max(0, Math.min(100, retPct0)) / 100 * sp.net * (H / sp.brut), t: ['Retour semaine 1 : ' + fmt(retPct0, 0) + ' %'], lc: '#0b2f5e', lw: 1.4, dash: '3,2' });
+  }
+  if (retPct >= 0 && K.okBat) { labels.push({ y: yOf(retPct), t: ['Retour au dépôt : ' + fmt(retPct, 0) + ' %' + (last ? ' · an ' + r.n : ''), fmt(retK, 0) + ' kWh · ≈ ' + fmt(retK / K.consKm, 0) + ' km'], lc: '#0b2f5e', lw: 2, dash: '3,2' }); }
   else { labels.push({ y: yOf(0), t: ['Batterie insuffisante', fmt(K.enRoute, 0) + ' kWh à recharger en route'], c: '#c2410c', lc: '#e0642a', lw: 2 }); }
   labels.push({ y: yOf(K.marge), t: ['Marge de sécurité ' + fmt(K.marge, 0) + ' %', kmAfter >= 0 ? '+' + fmt(kmAfter, 0) + ' km avant la marge' : 'manque ' + fmt(-kmAfter, 0) + ' km'], c: '#c2410c', c2: kmAfter >= 0 ? '#0d8a64' : '#c2410c', lc: '#e0642a', lw: 2, dash: '5,3' });
   labels.push({ y: (yNB + Y0 + H) / 2, t: ['Réserve non utilisable', fmt(100 - sp.dod, 0) + ' % · ' + fmt(sp.brut - sp.net, 0) + ' kWh'], lc: '#8fa9c8', lw: 1 });
-  var svg = pileSvg({ uid: X + which, brut: sp.brut, net: sp.net, lost: Math.max(0, lost), packs: sp.packs, depPct: depPct, retPct: retPct, marge: K.marge, which: which, labels: labels,
+  var svg = pileSvg({ uid: X + which, brut: sp.brut, net: sp.net, lost: Math.max(0, lost), packs: sp.packs, depPct: depPct, retPct: retPct, depPct0: depPct0, retPct0: retPct0, marge: K.marge, which: which, labels: labels,
     bracket: last ? 'NET ' + fmt(BS.cap, 0) + ' kWh · SANTÉ ' + fmt(BS.soh, 1) + ' %' : 'NET ' + fmt(sp.net, 0) + ' kWh · ' + fmt(sp.dod, 0) + ' %' });
   var h = '<div class="pl"><div class="pll">';
   h += '<div class="plhd">Pile de batteries LFP</div>';
-  h += '<div class="plsub">' + (sp.packs > 0 ? sp.packs + ' packs · ' : '') + fmt(sp.brut, 0) + ' kWh bruts · ' + fmt(BS.cap, 0) + ' kWh nets' + (last ? ' en année ' + r.n : '') + '</div>';
+  h += '<div class="plsub">' + (sp.packs > 0 ? sp.packs + ' packs · ' : '') + fmt(sp.brut, 0) + ' kWh bruts · ' + (depPct0 != null ? fmt(sp.net, 0) + ' → ' + fmt(BS.cap, 0) + ' kWh nets' : fmt(BS.cap, 0) + ' kWh nets' + (last ? ' en année ' + r.n : '')) + (depPct0 != null ? ' · cadre pointillé = semaine 1' : '') + '</div>';
   h += svg + '</div><div class="plr">';
   h += '<div><div class="plhd">' + nm + (sp.motNom ? ' · ' + esc(sp.motNom) : '') + '</div><div class="plsub">' + (last ? 'Dernière semaine de l’année ' + r.n + ' · batterie à ' + fmt(BS.soh, 1) + ' % de santé' : 'Semaine 1 · batterie neuve') + '</div></div>';
   h += '<div class="plbig"><div><b>' + fmt(sp.brut, 0) + ' kWh</b><span>capacité brute installée</span></div>';
@@ -3996,24 +4028,29 @@ function durBox(du, ev, d, on, small) {
 
 function pagePile(r, d, on, X, which) {
   var ev = r.V[X];
+  which = which || 'last';
   var BS = batState(r, d, on, X, which);
+  if (!BS || !BS.K) {
+    which = 'first';
+    BS = batState(r, d, on, X, 'first');
+  }
   if (!BS || !BS.K) { return ''; }
   var K = BS.K;
   var S0 = weekSim(d, on, r, X, { which: which });
   var S = S0 || { BS: BS, depSoc: K.start, cap: BS.cap, consKm: K.consKm };
+  var G = which === 'last' ? weekSim(d, on, r, X, { which: 'first' }) : null;
   var last = which === 'last';
   var h = '<div class="page">' + headHtml(d);
-  h += '<div class="st">' + (last ? 'Batterie en fin d’étude · année ' + r.n : 'Batterie neuve · capacité et recharge') + (cmpOf(d) === 'ee' ? ' · ' + esc(ev.name) : '') + '</div>';
-  h += '<div class="basis" style="margin-top:0">' + (last ? 'Même tournée qu’en semaine 1, batterie vieillie : santé ' + fmt(S.BS.soh, 1) + ' %, ' + fmt(S.cap, 0) + ' kWh nets, même consommation.' : 'Capacité nette = brute × part utilisable (' + fmt(ev.bat.spec.dod, 0) + ' %). Tournée de ' + fmt(K.tour, 0) + ' km à la consommation réelle de l’étude ; recharge à la puissance la plus basse entre borne et véhicule, ralentie en fin de charge, retour visé avec ' + fmt(marginPct(d), 0) + ' % de marge.') + (on.recharge && d.rechMode === 'auto' ? ' Schéma d’autonomie (dépôt plein) : les kWh publics du TCO sont le complément annuel que le dépôt ne couvre pas, pas ce dessin × 365.' : '') + '</div>';
-  h += pilePanel(r, d, on, X, which, S, K);
+  h += '<div class="st">' + (last ? 'Batterie · pile électrique, semaine 1 et fin d’étude (année ' + r.n + ')' : 'Batterie neuve · capacité et recharge') + (cmpOf(d) === 'ee' ? ' · ' + esc(ev.name) : '') + '</div>';
+  h += '<div class="basis" style="margin-top:0">' + (last ? 'Même tournée : remplissage = dernière semaine (santé ' + fmt(S.BS.soh, 1) + ' %, ' + fmt(S.cap, 0) + ' kWh nets). Cadre pointillé bleu = semaine 1, batterie neuve.' : 'Capacité nette = brute × part utilisable (' + fmt(ev.bat.spec.dod, 0) + ' %). Tournée de ' + fmt(K.tour, 0) + ' km à la consommation réelle de l’étude ; recharge à la puissance la plus basse entre borne et véhicule, ralentie en fin de charge, retour visé avec ' + fmt(marginPct(d), 0) + ' % de marge.') + (on.recharge && d.rechMode === 'auto' ? ' Schéma d’autonomie (dépôt plein) : les kWh publics du TCO sont le complément annuel que le dépôt ne couvre pas, pas ce dessin × 365.' : '') + '</div>';
+  h += pilePanel(r, d, on, X, which, S, K, G);
   var ee = cmpOf(d) === 'ee';
   h += kmBox(K, d, last ? 'Combien de kilomètres par jour en année ' + r.n + ' ?' : 'Combien de kilomètres par jour ?', last && (ee || !S0));
-  if (last && (ee || !S0)) {
+  if (last) {
     var du = durability(r, d, on, X);
-    if (du) { h += durBox(du, ev, d, on, true); }
-  } else if (!last) {
-    h += '<div class="plfoot"><b>Lecture :</b> vert = énergie de la tournée, bleu = ce qui reste au retour, orange = marge de sécurité pour l’imprévu (bouchon, surconsommation, tournée en plus), hachures = réserve jamais utilisée par le système de gestion.</div>';
+    if (du && (ee || !S0)) { h += durBox(du, ev, d, on, true); }
   }
+  h += '<div class="plfoot"><b>Lecture :</b> vert = énergie de la tournée en fin d’étude, bleu = ce qui reste au retour, orange = marge de sécurité, hachures hautes = capacité perdue, hachures basses = réserve jamais utilisée.' + (G ? ' Cadre pointillé : la même tournée en semaine 1.' : '') + '</div>';
   h += footHtml(d, '') + '</div>';
   return h;
 }
@@ -4093,10 +4130,15 @@ function pageSynth(r, d, on) {
   return h;
 }
 
-/* Pages batterie : pile et semaine, en semaine 1 puis en dernière semaine de l'étude */
+/* Pages batterie : cycles et pile, semaine 1 superposée à la dernière semaine */
 function batteryPages(r, d, on) {
-  var out = [], week1 = pageWeek(r, d, on, 'first');
-  if (week1) { out.push(week1); }
+  var out = [], week = pageWeek(r, d, on, 'last');
+  if (week) { out.push(week); }
+  ['E', 'D'].forEach(function (X) {
+    if (!(r.V[X] && r.V[X].type === 'elec' && r.V[X].bat && r.V[X].bat.cap > 0)) { return; }
+    var p = pagePile(r, d, on, X, 'last');
+    if (p) { out.push(p); }
+  });
   return out;
 }
 function batteryProofPage(r, d, on) {
@@ -4108,26 +4150,17 @@ function batteryProofPage(r, d, on) {
   return '<div class="page">' + headHtml(d) + '<div class="st" style="margin-top:0">Preuves · Batterie · lecture chiffrée année par année</div>' + blk + footHtml(d, 'Preuves batterie') + '</div>';
 }
 function buildPages(r, d, on) {
-  var pages;
+  var pages = [];
   CUR_RP = null;
-  CUR_SENS = (on.sens && r.valid) ? sensitivity(d, on, isComplet(), r) : null;
-  if (isComplet()) {
-    pages = [];
-    if (r.valid) { pages.push(pageSynth(r, d, on)); }
-    pages.push(pageComplet1(r, d, on));
-    pages = pages.concat(batteryPages(r, d, on));
-    if (CUR_SENS) { pages.push(pageSens(r, d, on, CUR_SENS)); }
-  } else {
-    pages = [pageConso1(r, d, on), pageConso2(r, d, on)];
-    if (CUR_SENS) { pages.push(pageSens(r, d, on, CUR_SENS)); }
-    pages = pages.concat(batteryPages(r, d, on));
-  }
-  if (isComplet()) {
-    pages.push(pageComplet2(r, d, on));
-    pages.push(pageComplet3(r, d, on));
-    var batP = batteryProofPage(r, d, on);
-    if (batP) { pages.push(batP); }
-  }
+  CUR_SENS = (on.sens && r.valid) ? sensitivity(d, on, true, r) : null;
+  if (r.valid) { pages.push(pageSynth(r, d, on)); }
+  pages.push(pageComplet1(r, d, on));
+  pages = pages.concat(batteryPages(r, d, on));
+  if (CUR_SENS) { pages.push(pageSens(r, d, on, CUR_SENS)); }
+  pages.push(pageComplet2(r, d, on));
+  pages.push(pageComplet3(r, d, on));
+  var batP = batteryProofPage(r, d, on);
+  if (batP) { pages.push(batP); }
   pages = pages.concat(annex1(r, d, on));
   pages = pages.concat(annex2(r, d, on));
   pages = pages.concat(annex4(r, d, on));
@@ -4166,17 +4199,22 @@ function migrateValues(v) {
   if (typeof m.chargeDeltaT !== 'string') { m.chargeDeltaT = '0'; }
   if (typeof m.borneLoy !== 'string') { m.borneLoy = ''; }
   ['E', 'D'].forEach(function (X) {
-    if (typeof m['cbMaj' + X] !== 'string') {
-      if (m['cbPremier' + X] === 'oui') {
-        m['cbMaj' + X] = 'm1';
-        if (typeof m['cbMajMontant' + X] !== 'string') {
-          var p0 = Math.max(0, num(m['prix' + X])), pv0 = num(m['cbPremierMontant' + X]);
-          m['cbMajMontant' + X] = String(m['cbPremierU' + X] === 'pct' ? Math.round(p0 * pv0 / 100) : pv0).replace('.', ',');
-        }
-      } else { m['cbMaj' + X] = 'non'; }
+    if (typeof m['cbMajU' + X] !== 'string') { m['cbMajU' + X] = 'eur'; }
+    if (m['cbPremier' + X] === 'oui' && m['cbMaj' + X] !== 'm1' && m['cbMaj' + X] !== 'm6') {
+      m['cbMaj' + X] = 'm1';
+      if (typeof m['cbMajMontant' + X] !== 'string' || m['cbMajMontant' + X] === '') {
+        m['cbMajMontant' + X] = String(m['cbPremierMontant' + X] || '');
+        m['cbMajU' + X] = m['cbPremierU' + X] === 'pct' ? 'pct' : 'eur';
+      }
+      m['cbPremier' + X] = 'non';
     }
+    if (typeof m['cbMaj' + X] !== 'string') { m['cbMaj' + X] = 'non'; }
     if (typeof m['cbMajMontant' + X] !== 'string') { m['cbMajMontant' + X] = ''; }
   });
+  m.mode = 'complet';
+  /* Ancienne spec DAF LFP : 88 % utilisables (462 kWh nets sur 525) → 95 % (499 kWh) */
+  if (Math.abs(num(m.dod) - 88) < 0.05) { m.dod = '95'; }
+  if (Math.abs(num(m.dod2) - 88) < 0.05) { m.dod2 = '95'; }
   if (!String(m.nom1 || '').replace(/^\s+|\s+$/g, '')) { m.nom1 = DEF_NAMES[cmpOf(m)].E; }
   if (!String(m.nom2 || '').replace(/^\s+|\s+$/g, '')) { m.nom2 = DEF_NAMES[cmpOf(m)].D; }
   /* Plage de conduite : listes d'heures entières (anciennes saisies arrondies à l'heure) */
@@ -4252,12 +4290,53 @@ function fieldHtml(f, gid, idx) {
   return h;
 }
 
+function loadFold() {
+  folded = {};
+  try {
+    var raw = localStorage.getItem(FOLD_KEY);
+    var o = raw ? JSON.parse(raw) : null;
+    var k;
+    if (o && typeof o === 'object') {
+      for (k in o) { if (Object.prototype.hasOwnProperty.call(o, k) && o[k]) { folded[k] = 1; } }
+    }
+  } catch (e) { folded = {}; }
+}
+function saveFold() {
+  try { localStorage.setItem(FOLD_KEY, JSON.stringify(folded)); } catch (e) {}
+}
+function isFolded(id) { return !!folded[id]; }
+function applyCardClass(card, g, inactive) {
+  if (!card || !g) { return; }
+  if (inactive === null || inactive === undefined) { inactive = /\boff\b/.test(card.className); }
+  card.className = 'card' + (inactive ? ' off' : '') + (isFolded(g.id) ? ' folded' : '');
+  var btn = document.getElementById('fold_' + g.id);
+  if (btn) {
+    btn.setAttribute('aria-expanded', isFolded(g.id) ? 'false' : 'true');
+    btn.setAttribute('aria-label', (isFolded(g.id) ? 'Développer' : 'Réduire') + ' : ' + g.title);
+  }
+}
+function groupById(id) {
+  var i;
+  for (i = 0; i < GROUPS.length; i++) { if (GROUPS[i].id === id) { return GROUPS[i]; } }
+  return null;
+}
+function setFolded(id, on) {
+  if (on) { folded[id] = 1; } else { delete folded[id]; }
+  saveFold();
+  applyCardClass(document.getElementById('card_' + id), groupById(id), null);
+}
+function unfoldForKey(k) {
+  var g = GROUP_OF[k];
+  if (g && isFolded(g.id)) { setFolded(g.id, false); }
+}
+
 function buildForm() {
   var h = '';
   var gi, fi, g;
   for (gi = 0; gi < GROUPS.length; gi++) {
     g = GROUPS[gi];
-    h += '<div class="card" id="card_' + g.id + '"><div class="chead"><h2>' + esc(g.title) + '</h2>';
+    h += '<div class="card' + (isFolded(g.id) ? ' folded' : '') + '" id="card_' + g.id + '"><div class="chead">';
+    h += '<button type="button" class="cflip" data-action="fold" data-id="' + g.id + '" id="fold_' + g.id + '" aria-expanded="' + (isFolded(g.id) ? 'false' : 'true') + '" aria-controls="body_' + g.id + '" aria-label="' + (isFolded(g.id) ? 'Développer' : 'Réduire') + ' : ' + esc(g.title) + '"><span class="chev" aria-hidden="true"></span><span class="ctitle">' + esc(g.title) + '</span></button>';
     if (g.on && !g.fixed) {
       h += '<button type="button" class="sw" role="switch" data-action="toggle" data-on="' + g.on + '" id="sw_' + g.on + '" aria-label="Activer ou désactiver : ' + esc(g.title) + '"><span></span></button>';
     }
@@ -4284,40 +4363,32 @@ function fillInputs() {
   }
 }
 
-function applyModeUI() {
-  var sl = document.querySelectorAll('.mslider');
-  var i, j, opts;
-  for (i = 0; i < sl.length; i++) {
-    sl[i].className = 'mslider' + (isComplet() ? ' right' : '');
-    opts = sl[i].querySelectorAll('.mopt');
-    for (j = 0; j < opts.length; j++) {
-      opts[j].className = 'mopt' + (((opts[j].getAttribute('data-mode') === 'conso') === !isComplet()) ? ' on' : '');
-    }
-  }
-}
-
 function applyVisibility() {
   var eo = effOn();
   var gi, fi, g, f, card, sw, userOn, active, inputs, i, w, blk, reason, sepEl, sepAny, vis;
   for (gi = 0; gi < GROUPS.length; gi++) {
     g = GROUPS[gi];
     card = document.getElementById('card_' + g.id);
+    if (!card) { continue; }
     card.style.display = groupShown(g) ? 'block' : 'none';
     blk = document.getElementById('blk_' + g.id);
+    if (!blk) { continue; }
     if (!g.on && g.dep) {
       active = depOk(g, eo);
-      card.className = 'card' + (active ? '' : ' off');
+      applyCardClass(card, g, !active);
       inputs = document.getElementById('body_' + g.id).querySelectorAll('input,select');
       for (i = 0; i < inputs.length; i++) { inputs[i].disabled = !active; }
       blk.textContent = active ? '' : 'Inactif : active ' + depTitles(g) + '.';
       blk.style.display = active ? 'none' : 'block';
+    } else if (!g.on) {
+      applyCardClass(card, g, false);
     }
     if (g.on) {
       if (g.fixed) { ons[g.on] = true; }
       userOn = !!ons[g.on];
       active = !!eo[g.on];
       sw = document.getElementById('sw_' + g.on);
-      card.className = 'card' + (active ? '' : ' off');
+      applyCardClass(card, g, !active);
       if (sw) {
         sw.className = 'sw' + (userOn ? ' on' : '');
         sw.setAttribute('aria-checked', userOn ? 'true' : 'false');
@@ -4361,7 +4432,7 @@ function refreshMissing() {
       w = document.getElementById('fw_' + k);
       if (w) {
         w.className = 'field' + (set[k] ? ' miss' : '');
-        if (set[k]) { w.querySelector('.mbadge').textContent = missReason(k); }
+        if (set[k]) { var mb = w.querySelector('.mbadge'); if (mb) { mb.textContent = missReason(k); } }
       }
     }
   }
@@ -4512,12 +4583,6 @@ function updateLive() {
   var consoBox = '<div class="lbox"><div class="t">Consommation ' + esc(N1(state)) + '</div><div class="v">' + fmt(v1.cReal, 1) + ' ' + unit100(v1) + '</div></div>';
   if (!r.valid) {
     h += '<div style="margin-top:6px;font-size:14px;opacity:.9">Renseigne le kilométrage et les consommations (ou désactive l’énergie) pour obtenir les résultats.</div>';
-  } else if (!isComplet()) {
-    h += '<div class="lgrid">' + consoBox + liveTourBox(r, on) + liveMixBox(r, on);
-    h += '<div class="lbox"><div class="t">CO₂ évité par an</div><div class="v">' + (on.co2 ? fmtT(r.co2Year) + ' t' : '–') + '</div></div>';
-    h += '<div class="lbox"><div class="t">Économie annuelle</div><div class="v">' + eur(r.an.ecoHT) + '</div></div>';
-    h += '<div class="lbox"><div class="t">Économie ' + ans(r.n) + '</div><div class="v">' + eur(r.totEneHT) + '</div></div>';
-    h += '</div>';
   } else {
     h += '<div class="lgrid">' + consoBox + liveTourBox(r, on) + liveMixBox(r, on);
     h += '<div class="lbox"><div class="t">Économie énergie année 1</div><div class="v">' + eur(r.an.ecoHT) + '</div></div>';
@@ -4544,7 +4609,6 @@ function refreshAll() {
     bl.readOnly = true;
     state.borneLoy = bl.value;
   }
-  applyModeUI();
   applyVisibility();
   refreshMissing();
   updateLive();
@@ -4573,6 +4637,7 @@ function goToFirstMissing() {
   var miss = missingKeys();
   showTab('saisie');
   if (miss.length > 0) {
+    unfoldForKey(miss[0]);
     var w = document.getElementById('fw_' + miss[0]);
     if (w) {
       setTimeout(function () {
@@ -4947,11 +5012,9 @@ document.addEventListener('click', function (e) {
     saveState();
     refreshAll();
   }
-  else if (action === 'mode') {
-    state.mode = el.getAttribute('data-mode');
-    saveState();
-    refreshAll();
-    if (reportVisible()) { renderReport(); }
+  else if (action === 'fold') {
+    var fid = el.getAttribute('data-id');
+    if (fid) { setFolded(fid, !isFolded(fid)); }
   }
   else if (action === 'first-miss') { goToFirstMissing(); }
   else if (action === 'reset') {
@@ -5397,6 +5460,7 @@ window.addEventListener('orientationchange', function () { setTimeout(fitPages, 
 
 buildMaps();
 loadState();
+loadFold();
 dosLoad();
 buildForm();
 
