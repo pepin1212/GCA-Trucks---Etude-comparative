@@ -570,7 +570,40 @@ var U_BASE_KWH = [['ttc', '€/kWh TTC'], ['ht', '€/kWh HT']];
 var U_BASE_L = [['ttc', '€/L TTC'], ['ht', '€/L HT']];
 var U_AN_MOIS = [['an', '€ par an'], ['mois', '€ par mois']];
 var U_DUREE = [['ans', 'ans'], ['mois', 'mois']];
-var U_RES = [['pct', '% du prix'], ['eur', '€ HT']];
+var U_RES = [['pct', '% du prix'], ['eur', '€ HT'], ['auto', 'Automatique (grille)']];
+/* Grille de valeur résiduelle (% du prix neuf) en fin d’année N, à 100 000 km/an.
+   Ajustement km : ±1 point de % par tranche de 10 000 km/an au-dessus / en-dessous de 100 000, plafonné à ±8 pts. */
+var RES_KM_REF = 100000, RES_KM_STEP = 10000, RES_KM_PTS = 1, RES_KM_CAP = 8;
+var RES_AUTO = {
+  1: { t: 80, e: 70 }, 2: { t: 66, e: 55 }, 3: { t: 55, e: 44 }, 4: { t: 46, e: 36 }, 5: { t: 38, e: 30 },
+  6: { t: 32, e: 25 }, 7: { t: 27, e: 21 }, 8: { t: 23, e: 18 }, 9: { t: 19, e: 15 }, 10: { t: 16, e: 12 }
+};
+function resAutoRow(n) {
+  n = Math.max(1, Math.min(10, Math.round(n) || 1));
+  return RES_AUTO[n] || RES_AUTO[10];
+}
+function resKmAdjPts(kmAn) {
+  if (!(kmAn > 0)) { return 0; }
+  var pts = -((kmAn - RES_KM_REF) / RES_KM_STEP) * RES_KM_PTS;
+  return Math.max(-RES_KM_CAP, Math.min(RES_KM_CAP, pts));
+}
+function resAutoPct(d, X) {
+  var row = resAutoRow(d.annees), base = isElec(d, X) ? row.e : row.t;
+  var pct = base + resKmAdjPts(annualKm(d));
+  if (d.resAutoFactor) { pct *= d.resAutoFactor; }
+  return Math.max(0, pct);
+}
+function resEuro(d, X) {
+  var prix = Math.max(0, d['prix' + X] || 0);
+  if (d.resU === 'eur') { return Math.max(0, d['res' + X] || 0); }
+  if (d.resU === 'auto') { return prix * resAutoPct(d, X) / 100; }
+  return prix * Math.max(0, d['res' + X] || 0) / 100;
+}
+function resPctUsed(d, X) {
+  if (d.resU === 'eur') { return d['prix' + X] > 0 ? (d['res' + X] || 0) / d['prix' + X] * 100 : 0; }
+  if (d.resU === 'auto') { return resAutoPct(d, X); }
+  return Math.max(0, d['res' + X] || 0);
+}
 /* Catégories de camions : fourchette de consommation électrique indicative DAF (kWh/100 km) et taux de suramortissement (art. 39 decies A CGI : 115 % de 3,5 à 16 t, 75 % au-dessus de 16 t) */
 var CATS = {
   tr46: { l: 'Tracteur ou porteur remorquant 46 t', lo: 100, hi: 150, rate: 0.75 },
@@ -821,9 +854,10 @@ var GROUPS = [
     { k: 'finTauxD', slot: 'D', l: 'Taux d’intérêt annuel', u: '%/an', vis: function (s) { return s.modeD === 'achat' && posNum(s.finPartD) > 0; } },
     { k: 'finDureeD', slot: 'D', l: 'Durée du crédit', unitKey: 'finUD', units: U_DUREE, pos: true, vis: function (s) { return s.modeD === 'achat' && posNum(s.finPartD) > 0; } }
   ]},
-  { id: 'revente', on: 'revente', cx: true, req: 'achat', title: 'Valeur de revente', note: 'Déduite du coût total en fin de période, pour les tracteurs dont le client est propriétaire à cette date.', fields: [
-    { k: 'resE', l: V1, unitKey: 'resU', units: U_RES, vis: function (s) { return ownsS(s, 'E'); } },
-    { k: 'resD', l: V2, unitKey: 'resU', units: U_RES, vis: function (s) { return ownsS(s, 'D'); } }
+  { id: 'revente', on: 'revente', cx: true, req: 'achat', title: 'Valeur de revente', note: 'Déduite du coût total en fin de période, pour les tracteurs dont le client est propriétaire à cette date. Mode automatique : grille marché (thermique / électrique) selon la durée de l’étude, corrigée si le kilométrage annuel s’écarte de 100 000 km/an.', fields: [
+    { k: 'resE', l: V1, unitKey: 'resU', units: U_RES, hint: 'en automatique : % calculé, non modifiable', vis: function (s) { return ownsS(s, 'E'); }, readonly: function (s) { return s.resU === 'auto'; } },
+    { k: 'resD', l: V2, unitKey: 'resU', units: U_RES, hint: 'en automatique : % calculé, non modifiable', vis: function (s) { return ownsS(s, 'D'); }, readonly: function (s) { return s.resU === 'auto'; } },
+    { info: 'resAuto' }
   ]},
   { id: 'suram', on: 'suram', cx: true, show: function (s) { return cmpOf(s) === 'ed'; }, title: 'Suramortissement fiscal (information)', note: 'Pour information seulement : ce montant n’entre ni dans le coût total ni dans les résultats. Il est calculé avec les prix saisis et les valeurs de revente de la carte précédente. L’économie d’impôt réelle dépend du taux d’imposition de l’entreprise.', fields: [
     { info: 'suram' }
@@ -1642,7 +1676,8 @@ function acqVeh(d, on, X, ctx) {
   a.net = a.cap - a.aideA;
   a.own = acqOn && ownsAtEnd(mode, a.lm, n);
   var resOn = !!(on.revente && acqOn);
-  a.res = (resOn && a.own) ? (d.resU === 'eur' ? d['res' + X] : d['prix' + X] * d['res' + X] / 100) : 0;
+  a.res = (resOn && a.own) ? resEuro(d, X) : 0;
+  a.resPct = (resOn && a.own) ? resPctUsed(d, X) : 0;
   var finOn = !!(on.fin && acqOn);
   a.loanP = (finOn && mode === 'achat') ? a.cap * d['finPart' + X] / 100 : 0;
   a.int = loanInterestByYear(a.loanP, d['finTaux' + X], d['finDuree' + X], d['finU' + X], n);
@@ -1963,7 +1998,8 @@ function prudentData(d) {
   p.pPublic = d.pPublic * (1 + d.scElec / 100);
   p.kmPer = d.kmPer * (1 + d.scKm / 100);
   p.batDegPlus = Math.max(0, d.scBatDegP);
-  p.resE = d.resE * (1 + d.scRes / 100);
+  if (d.resU === 'auto') { p.resAutoFactor = 1 + d.scRes / 100; }
+  else { p.resE = d.resE * (1 + d.scRes / 100); p.resD = d.resD * (1 + d.scRes / 100); }
   return p;
 }
 
@@ -2068,7 +2104,12 @@ function sensitivity(d, on, complet, r) {
       addVar('Entretien ' + N1, function (dc, f) { dc.entE *= f; });
       addVar('Entretien ' + N2, function (dc, f) { dc.entD *= f; });
     }
-    if (on.revente && r.ownE) { addVar('Revente ' + N1, function (dc, f) { dc.resE *= f; }); }
+    if (on.revente && r.ownE) {
+      addVar('Revente ' + N1, function (dc, f) {
+        if (dc.resU === 'auto') { dc.resAutoFactor = (dc.resAutoFactor || 1) * f; }
+        else { dc.resE *= f; }
+      });
+    }
   }
   vars.sort(function (a, b) { return b.spread - a.spread; });
   var kept = [];
@@ -2392,8 +2433,8 @@ function suramCalc(d) {
   if (!(pE > 0) || !(pD > 0) || !(n > 0)) { S.msg = 'Renseigne les prix d’achat des deux camions pour obtenir ce calcul.'; return S; }
   var an0 = num(state.anneeDebut);
   S.late = an0 > SURAM_FIN;
-  S.vrE = d.resU === 'eur' ? d.resE : pE * d.resE / 100;
-  S.vrD = d.resU === 'eur' ? d.resD : pD * d.resD / 100;
+  S.vrE = resEuro(d, 'E');
+  S.vrD = resEuro(d, 'D');
   if (!(S.vrE >= 0)) { S.vrE = 0; }
   if (!(S.vrD >= 0)) { S.vrD = 0; }
   S.pE = pE; S.pD = pD;
@@ -2415,13 +2456,17 @@ function suramHtml(S, d, rep) {
   h += 'Surcoût d’achat <b>' + F(eur(S.delta), fmt(S.pE, 0) + FXM + fmt(S.pD, 0)) + '</b> (' + eur(S.pE) + ' − ' + eur(S.pD) + ', avant aides) × <b>' + fmt(S.rate * 100, 0) + ' %</b> (' + esc(S.cat.l) + ') = <b>' + F(eur(S.sur), fmt(S.delta, 0) + ' × ' + fmt(S.rate * 100, 0) + ' %') + '</b> de déduction supplémentaire, soit <b>' + F(eur(S.surYr), fmt(S.sur, 0) + ' ÷ ' + S.n, 'b') + ' par an</b> sur ' + ans(S.n) + '.';
   h += '<table class="t sm" style="margin-top:6px"><tr><th></th><th>' + n1 + '</th><th>' + n2 + '</th></tr>';
   h += '<tr><td>Prix d’achat</td><td>' + eur(S.pE) + '</td><td>' + eur(S.pD) + '</td></tr>';
-  var fvr = function (p0, q) { return d.resU === 'eur' ? 'montant saisi' : fmt(p0, 0) + ' × ' + fmt(q, 0) + ' %'; };
-  h += '<tr><td>Valeur de revente estimée, fin d’année ' + S.n + '</td><td>' + F('– ' + eur(S.vrE), fvr(S.pE, d.resE)) + '</td><td>' + F('– ' + eur(S.vrD), fvr(S.pD, d.resD)) + '</td></tr>';
+  var fvr = function (X, p0) {
+    if (d.resU === 'eur') { return 'montant saisi'; }
+    if (d.resU === 'auto') { return 'auto ' + fmt(resAutoPct(d, X), 1) + ' % × ' + fmt(p0, 0); }
+    return fmt(p0, 0) + ' × ' + fmt(d['res' + X], 0) + ' %';
+  };
+  h += '<tr><td>Valeur de revente estimée, fin d’année ' + S.n + '</td><td>' + F('– ' + eur(S.vrE), fvr('E', S.pE)) + '</td><td>' + F('– ' + eur(S.vrD), fvr('D', S.pD)) + '</td></tr>';
   h += '<tr><td>Amortissement classique par an</td><td>' + F(eur(S.baseE / S.n), '(' + fmt(S.pE, 0) + FXM + fmt(S.vrE, 0) + ') ÷ ' + S.n) + '</td><td>' + F(eur(S.baseD / S.n), '(' + fmt(S.pD, 0) + FXM + fmt(S.vrD, 0) + ') ÷ ' + S.n) + '</td></tr>';
   h += '<tr><td>Suramortissement par an</td><td>' + F(eur(S.surYr), fmt(S.sur, 0) + ' ÷ ' + S.n) + '</td><td>–</td></tr>';
   h += '<tr class="hl"><td>Total déduit par an</td><td>' + F(eur(S.yrE), fmt(S.baseE / S.n, 0) + ' + ' + fmt(S.surYr, 0)) + '</td><td>' + eur(S.yrD) + '</td></tr>';
   h += '<tr><td>Total à amortir sur ' + ans(S.n) + '</td><td>' + F(eur(S.totE), fmt(S.baseE, 0) + ' + ' + fmt(S.sur, 0)) + '</td><td>' + F(eur(S.totD), fmt(S.pD, 0) + FXM + fmt(S.vrD, 0)) + '</td></tr></table>';
-  h += '<div class="basis" style="margin-top:6px">Déduction du résultat imposable, pas un gain en trésorerie : l’économie d’impôt réelle est cette déduction × le taux d’imposition de l’entreprise. Valeurs de revente = % saisi dans la carte « Valeur de revente » appliqué à chaque prix. Dispositif prévu pour les camions électriques neufs mis en service jusqu’au 31/12/' + SURAM_FIN + ' ; son maintien peut évoluer avec les lois de finances à venir. À valider avec le comptable du client.';
+  h += '<div class="basis" style="margin-top:6px">Déduction du résultat imposable, pas un gain en trésorerie : l’économie d’impôt réelle est cette déduction × le taux d’imposition de l’entreprise. Valeurs de revente = celles de la carte « Valeur de revente » (saisie ou grille automatique). Dispositif prévu pour les camions électriques neufs mis en service jusqu’au 31/12/' + SURAM_FIN + ' ; son maintien peut évoluer avec les lois de finances à venir. À valider avec le comptable du client.';
   if (S.late) { h += ' <b>Année de mise en service saisie postérieure à ' + SURAM_FIN + ' : dispositif non prévu à cette date.</b>'; }
   h += '</div>';
   return h;
@@ -2798,9 +2843,18 @@ FXB.aideB = function (r, d, on) {
   return { t: 'Aide à la borne', l: L };
 };
 FXB.revente = function (r, d, on, X) {
-  var nm = esc(r.V[X].name), res = X === 'E' ? r.resE : r.resD, L = [];
+  var nm = esc(r.V[X].name), res = X === 'E' ? r.resE : r.resD, L = [], pct, row, adj, km;
   if (!(res > 0)) { return null; }
-  L.push(d.resU === 'eur' ? fSrc('Valeur de revente', nm) + ' = montant saisi ' + eur(d['res' + X]) : 'Prix d’achat ' + eur(d['prix' + X]) + ' × ' + fSrc('Valeur de revente', nm) + ' ' + fmt(d['res' + X], 1) + ' % = <b>' + eur(res) + '</b>');
+  if (d.resU === 'eur') {
+    L.push(fSrc('Valeur de revente', nm) + ' = montant saisi ' + eur(d['res' + X]));
+  } else if (d.resU === 'auto') {
+    pct = resAutoPct(d, X); row = resAutoRow(d.annees); adj = resKmAdjPts(annualKm(d)); km = annualKm(d);
+    L.push('Mode automatique · grille année ' + Math.min(10, Math.max(1, Math.round(d.annees))) + ' : ' + (isElec(d, X) ? 'électrique ' + fmt(row.e, 0) : 'thermique ' + fmt(row.t, 0)) + ' %');
+    L.push('Kilométrage ' + fmt(km, 0) + ' km/an (réf. ' + fmt(RES_KM_REF, 0) + ') → ajustement ' + (adj >= 0 ? '+' : '') + fmt(adj, 1) + ' pt' + (Math.abs(adj) > 1 ? 's' : '') + ' (±' + fmt(RES_KM_PTS, 0) + ' pt / ' + fmt(RES_KM_STEP, 0) + ' km, plafond ±' + fmt(RES_KM_CAP, 0) + ')');
+    L.push('Prix d’achat ' + eur(d['prix' + X]) + ' × ' + fmt(pct, 1) + ' % = <b>' + eur(res) + '</b>');
+  } else {
+    L.push('Prix d’achat ' + eur(d['prix' + X]) + ' × ' + fSrc('Valeur de revente', nm) + ' ' + fmt(d['res' + X], 1) + ' % = <b>' + eur(res) + '</b>');
+  }
   L.push('Déduite du coût total en fin d’année ' + r.n + ', car le client est propriétaire à cette date');
   return { t: 'Valeur de revente · ' + nm, l: L };
 };
@@ -3344,7 +3398,11 @@ function pageComplet1(r, d, on) {
   if (aB1 > 0 || aB2 > 0) { h += '<tr><td>Aide à la borne (déduite, part de ce camion)</td><td>' + fx(ded(aB1), aB1 > 0 ? fxTag('aideB') + eur(r.aideB) + ' ÷ ' + fmt(r.oc.nb, 0) + ' camion' + (r.oc.nb > 1 ? 's' : '') : '') + '</td><td>' + fx(ded(aB2), aB2 > 0 ? fxTag('aideB') + eur(r.aideB) + ' ÷ ' + fmt(r.oc.nb, 0) + ' camion' + (r.oc.nb > 1 ? 's' : '') : '') + '</td><td>' + fx(eur(aB1 - aB2), aB1 !== aB2 ? 'E ' + fmt(aB1, 0) + FXM + 'D ' + fmt(aB2, 0) : '') + '</td></tr>'; }
   if (on.fisc && recAny) { h += '<tr><td>Avantages fiscaux et certificats (déduits)</td><td>' + fx(ded(r.cE.recettes), r.cE.recettes > 0 ? 'économie d’impôt ' + eur(d.fiscGain) + ' + certificats' : '') + '</td><td>' + fx(ded(r.cD.recettes), r.cD.recettes > 0 ? 'économie d’impôt ' + eur(d.fiscGain) + ' + certificats' : '') + '</td><td>' + eur(r.cE.recettes - r.cD.recettes) + '</td></tr>'; }
   if (resOn) {
-    var fRes = function (X) { return d.resU === 'eur' ? 'montant saisi' : eur(d['prix' + X]) + ' × ' + fmt(d['res' + X], 0) + ' %'; };
+    var fRes = function (X) {
+      if (d.resU === 'eur') { return 'montant saisi'; }
+      if (d.resU === 'auto') { return 'auto ' + fmt(resAutoPct(d, X), 1) + ' % × ' + eur(d['prix' + X]); }
+      return eur(d['prix' + X]) + ' × ' + fmt(d['res' + X], 0) + ' %';
+    };
     h += '<tr><td>Valeur de revente (déduite)</td><td>' + (r.ownE ? fx('– ' + eur(r.resE), fxTag('revente', 'E') + fRes('E')) : '–') + '</td><td>' + (r.ownD ? fx('– ' + eur(r.resD), fxTag('revente', 'D') + fRes('D')) : '–') + '</td><td>' + fx(eur(r.resE - r.resD), 'E ' + fmt(r.ownE ? r.resE : 0, 0) + FXM + 'D ' + fmt(r.ownD ? r.resD : 0, 0)) + '</td></tr>';
   }
   h += '<tr class="hl"><td>Coût total de possession</td><td>' + fx(eur(r.tcoE), fxTco(r, 'E')) + '</td><td>' + fx(eur(r.tcoD), fxTco(r, 'D')) + '</td><td>' + fx(eur(r.tcoSav), fxTag('sav') + fxAdv(r.tcoE, r.tcoD)) + '</td></tr>';
@@ -3398,7 +3456,14 @@ function pageComplet3(r, d, on) {
   else if (r.be === null && r.beRes === null) { msg = 'Dans cette simulation, ' + a + ' ne rattrape pas ' + b + ' au bout de ' + ans(r.n) + (resOn ? ', même revente comprise.' : '.'); }
   else if (r.be === null) { msg = 'Le surcoût initial de ' + a + ' n’est compensé qu’en fin de période (année ' + r.n + '), grâce à la valeur de revente.'; }
   else { msg = 'Le surcoût initial de ' + a + ' est rattrapé après environ <b>' + fx(fmt(r.be, 1) + ' ans', fxTag('be') + 'mois où cumul E ≤ cumul D, ÷ 12') + '</b> (flux de trésorerie, hors revente).'; }
-  if (resOn) { msg += ' Valeur de revente déduite en fin de période : ' + a + ' ' + fx(eur(r.resE), fxTag('revente', 'E') + (d.resU === 'eur' ? 'montant saisi' : fmt(d.prixE, 0) + ' × ' + fmt(d.resE, 0) + ' %')) + ', ' + b + ' ' + fx(eur(r.resD), fxTag('revente', 'D') + (d.resU === 'eur' ? 'montant saisi' : fmt(d.prixD, 0) + ' × ' + fmt(d.resD, 0) + ' %'), 'b') + '.'; }
+  if (resOn) {
+    var rTxt = function (X, p, v) {
+      if (d.resU === 'eur') { return 'montant saisi'; }
+      if (d.resU === 'auto') { return 'auto ' + fmt(resAutoPct(d, X), 1) + ' % × ' + fmt(p, 0); }
+      return fmt(p, 0) + ' × ' + fmt(v, 0) + ' %';
+    };
+    msg += ' Valeur de revente déduite en fin de période : ' + a + ' ' + fx(eur(r.resE), fxTag('revente', 'E') + rTxt('E', d.prixE, d.resE)) + ', ' + b + ' ' + fx(eur(r.resD), fxTag('revente', 'D') + rTxt('D', d.prixD, d.resD), 'b') + '.';
+  }
   h += '<div class="callout">' + msg + '</div>';
   h += '<div class="st">Cumul année par année · HT</div>';
   h += '<table class="t sm">' + th2(d, 'Économie cumulée');
@@ -3836,7 +3901,11 @@ function annex2(r, d, on) {
       var fT = function (X) { return d['mode' + X] === 'achat' ? fmt(d['finPart' + X], 0) + ' % à ' + fmt(d['finTaux' + X], 2) + ' % sur ' + fmt(d['finDuree' + X], 0) + ' ' + d['finU' + X] : 'sans crédit'; };
       add('Intérêts des crédits', esc(N1(d)) + ' : ' + fT('E') + ' ; ' + esc(N2(d)) + ' : ' + fT('D'), pair(d, eur(r.cE.fin), eur(r.cD.fin)));
     }
-    if (on.revente) { add('Valeur de revente', (d.resU === 'eur' ? 'Montants forfaitaires saisis' : 'Prix neuf × % résiduel saisi, sans modèle de marché ni état de batterie') + ', déduite en fin d’année ' + n + ' si le client est propriétaire', pair(d, eur(r.resE), eur(r.resD))); }
+    if (on.revente) {
+      var resHow = d.resU === 'eur' ? 'Montants forfaitaires saisis'
+        : (d.resU === 'auto' ? 'Grille automatique (thermique / électrique) selon la durée, corrigée si le km/an ≠ 100 000' : 'Prix neuf × % résiduel saisi');
+      add('Valeur de revente', resHow + ', déduite en fin d’année ' + n + ' si le client est propriétaire', pair(d, eur(r.resE), eur(r.resD)));
+    }
     if (on.regl) { add('Taxes à venir', (on.energie && anyTherm(d) ? (state.carbOn === 'non' ? 'taxe carbone neutralisée ; ' : 'Gazole × ' + fmt(d.carbP, 3) + ' €/L à partir de ' + fmt(d.carbAnnee, 0) + ' (année ' + fmt(d.carbYear, 0) + ' de l’étude, mise en service ' + fmt(d.anneeDebut, 0) + ') ; ') : '') + 'péages ' + eur(d.pegE) + ' et ' + eur(d.pegD) + '/an', pair(d, eur(r.cE.taxes), eur(r.cD.taxes))); }
     if (on.fisc) { add('Avantages fiscaux', 'Économie d’impôt ' + eur(d.fiscGain) + (on.energie ? ' + kWh au dépôt × ' + fmt(d.certif, 3) + ' €' : '') + ', par camion électrique', pair(d, '– ' + eur(r.cE.recettes), '– ' + eur(r.cD.recettes))); }
     if (Xs.some(function (X) { return r.V[X].bat && r.V[X].bat.K[0]; })) {
@@ -5080,9 +5149,15 @@ function migrateValues(v) {
   /* Études enregistrées avant le choix de la chimie : elles gardent leur réglage manuel, donc les mêmes résultats */
   if (typeof m.batChim !== 'string') { m.batChim = 'manuel'; }
   if (typeof m.batChim2 !== 'string') { m.batChim2 = 'manuel'; }
-  /* Ancienne aide unique : reprise comme « autre aide », pour conserver exactement les mêmes résultats */
+  /* Ancienne aide unique → « Autre » si les 3 lignes sont vides (ou absentes), même si aideCEE/EDF/Autre existent déjà à 0 */
   ['', '2'].forEach(function (sx) {
-    if (typeof m['aideAchat' + sx] === 'string' && typeof m['aideCEE' + sx] !== 'string' && num(m['aideAchat' + sx]) > 0) { m['aideAutre' + sx] = m['aideAchat' + sx]; }
+    var oldA = m['aideAchat' + sx];
+    if (typeof oldA !== 'string' || !(num(oldA) > 0)) { return; }
+    var lineSum = (num(m['aideCEE' + sx]) || 0) + (num(m['aideEDF' + sx]) || 0) + (num(m['aideAutre' + sx]) || 0);
+    if (lineSum > 0) { return; }
+    m['aideAutre' + sx] = oldA;
+    if (typeof m['aideCEE' + sx] !== 'string') { m['aideCEE' + sx] = '0'; }
+    if (typeof m['aideEDF' + sx] !== 'string') { m['aideEDF' + sx] = '0'; }
   });
   /* Ancienne taxe carbone « à partir de l'année n° » : convertie en année civile */
   if (typeof m.carbYear === 'string' && typeof m.anneeDebut !== 'string') { m.anneeDebut = '2027'; m.carbAnnee = String(2027 + Math.max(1, Math.round(num(m.carbYear) || 2)) - 1); }
@@ -5400,6 +5475,19 @@ function updateInfos(r) {
   setInfo('consCheck', cc, !!cc);
   var SU = suramCalc(r.d);
   setInfo('suram', SU ? suramHtml(SU, r.d, false) : '', !!(SU && !SU.ok));
+  var resAutoTxt = '';
+  if (eo.revente && state.resU === 'auto') {
+    var rowA = resAutoRow(r.n), adjA = resKmAdjPts(r.kmAn), bits = [];
+    bits.push('Grille année ' + Math.min(10, r.n) + ' (réf. ' + fmt(RES_KM_REF, 0) + ' km/an) : thermique <b>' + fmt(rowA.t, 0) + ' %</b>, électrique <b>' + fmt(rowA.e, 0) + ' %</b>');
+    bits.push('Ton kilométrage : <b>' + fmt(r.kmAn, 0) + ' km/an</b> → ' + (adjA === 0 ? 'aucun ajustement' : ('ajustement <b>' + (adjA > 0 ? '+' : '') + fmt(adjA, 1) + ' pt' + (Math.abs(adjA) > 1 ? 's' : '') + '</b> (±1 pt / 10 000 km, plafond ±8)')));
+    ['E', 'D'].forEach(function (X) {
+      if (!ownsS(state, X)) { return; }
+      var p = resAutoPct(r.d, X), eu = resEuro(r.d, X);
+      bits.push(esc(r.V[X].name) + ' : <b>' + fmt(p, 1) + ' %</b> → <b>' + eur(eu) + '</b>');
+    });
+    resAutoTxt = bits.join('. ') + '.';
+  }
+  setInfo('resAuto', resAutoTxt, false);
   var W = depotWin(state);
   setInfo('rechWin', anyElec(state) ? (W.rule ? 'Temps de travail non renseigné : règle du repos journalier d’un chauffeur seul (au moins ' + REPOS_MIN + ' h, règlement européen 561/2006), soit une journée de <b>13 h au plus</b> et <b>au moins ' + REPOS_MIN + ' h à l’arrêt au dépôt</b> pour recharger.' : 'Journée de ' + durTxt(W.D * 60) + ' (départ → retour) · à l’arrêt au dépôt et en recharge <b>' + durTxt(W.hours * 60) + ' par jour</b>.' + (W.D > 24 - REPOS_MIN + 1e-9 ? ' Au-delà de 13 h, un chauffeur seul n’a plus ses ' + REPOS_MIN + ' h de repos journalier : double équipage ?' : '')) + (W.clock ? ' Avec les heures creuses : départ à ' + hTxtClock(W.depM) + ', retour à ' + hTxtClock(W.retM) + '.' : '') : '', false);
   if (state.kmUnit === 'an') { s = 'Kilométrage annuel d’étude : <b>' + fmt(r.kmAn, 0) + ' km par an</b>'; }
@@ -5509,6 +5597,24 @@ function refreshAll() {
     bl.readOnly = true;
     state.borneLoy = bl.value;
   }
+  if (state.resU === 'auto') {
+    var dRes = readData(state);
+    ['E', 'D'].forEach(function (X) {
+      var elR = document.getElementById('f_res' + X);
+      if (!elR) { return; }
+      if (ownsS(state, X)) {
+        var pctR = resAutoPct(dRes, X);
+        elR.value = fmt(pctR, 1).replace(/\u202f/g, ' ');
+        elR.readOnly = true;
+        state['res' + X] = elR.value;
+      } else { elR.readOnly = true; }
+    });
+  } else {
+    ['E', 'D'].forEach(function (X) {
+      var elR = document.getElementById('f_res' + X);
+      if (elR) { elR.readOnly = false; elR.value = state['res' + X]; }
+    });
+  }
   applyVisibility();
   refreshMissing();
   updateLive();
@@ -5569,7 +5675,13 @@ function modelWarnings(d, on, r) {
     if (on.batterie && d.bornePuis > 0 && bats.some(function (b) { return b.cap > 0 && !b.okWindow; })) { w.push('Le temps de recharge estimé au dépôt dépasse la fenêtre disponible ; une borne plus puissante ou une recharge complémentaire peut être nécessaire.'); }
     if (on.batterie && (d.socFin > 100 || d.socFin <= marginPct(d))) { w.push('Les niveaux de charge sont incohérents : le niveau de recharge visé doit être compris entre 1 et 100 %.'); }
     if (on.recharge && (d.rechPow <= 0 || (d.rechMode === 'dur' && d.rechDur <= 0))) { w.push('Les paramètres de puissance ou de durée de recharge publique ne permettent pas d’estimer une recharge exploitable.'); }
-    if (on.revente) { w.push('La valeur de revente est une estimation forfaitaire saisie par l’utilisateur ; elle n’est pas prédite à partir du kilométrage, de l’âge ou de l’état de santé de la batterie.'); }
+    if (on.revente) {
+      if (d.resU === 'auto') {
+        w.push('Valeur de revente en mode automatique : grille indicative (thermique / électrique) selon la durée de l’étude, ajustée de ±1 point de % par tranche de 10 000 km/an autour de 100 000 km/an (plafond ±8 pts). Ce n’est pas une cote de marché individuelle ni un modèle d’état de batterie.');
+      } else {
+        w.push('La valeur de revente est une estimation forfaitaire saisie par l’utilisateur ; elle n’est pas prédite à partir du kilométrage, de l’âge ou de l’état de santé de la batterie.');
+      }
+    }
   }
   ['E', 'D'].forEach(function (X) { if (r.A[X].aideBlocked) { w.push('Aide au tracteur ' + r.V[X].name + ' non prise en compte : elle n’est acquise que si le client garde le véhicule au moins ' + AIDE_MIN_ANS + ' ans, or l’étude porte sur ' + ans(r.n) + '.'); } });
   if (anyElec(d) && d.win.hcWait && on.contrat && hcRanges(state)) { w.push('Heures creuses activées sans heure de retour au dépôt : la recharge est comptée au prix des heures pleines.'); }
