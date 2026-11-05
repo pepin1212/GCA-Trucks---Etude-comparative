@@ -1,4 +1,4 @@
-const CACHE = 'mastertco-v9-2026-11-05-res-auto';
+const CACHE = 'mastertco-v10-2026-11-05-netfirst';
 const PRECACHE = [
   './',
   './index.html',
@@ -9,6 +9,12 @@ const PRECACHE = [
   'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
+
+function isHTMLRequest(req) {
+  if (req.mode === 'navigate') { return true; }
+  var url = req.url || '';
+  return /\/index\.html(\?|$)/.test(url) || /\/GCA-Trucks---Etude-comparative\/?(\?|$)/.test(url);
+}
 
 self.addEventListener('install', function (event) {
   event.waitUntil(
@@ -35,6 +41,25 @@ self.addEventListener('activate', function (event) {
 self.addEventListener('fetch', function (event) {
   var req = event.request;
   if (req.method !== 'GET') { return; }
+
+  /* HTML : réseau d'abord pour voir les mises à jour (ex. mode revente auto) */
+  if (isHTMLRequest(req)) {
+    event.respondWith(
+      fetch(req).then(function (res) {
+        if (res && res.status === 200) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (cache) { cache.put(req, copy); });
+        }
+        return res;
+      }).catch(function () {
+        return caches.match(req).then(function (cached) {
+          return cached || caches.match('./index.html');
+        });
+      })
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(req).then(function (cached) {
       var net = fetch(req).then(function (res) {
