@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MasterTCO · v18</title>
-<meta name="description" content="MasterTCO version 18 (07/11/2026) — Coût total de possession électrique et diesel.">
-<meta name="apple-mobile-web-app-title" content="MasterTCO v18">
-<meta name="application-name" content="MasterTCO v18">
+<title>MasterTCO · v18.1</title>
+<meta name="description" content="MasterTCO version 18.1 (07/11/2026) — Coût total de possession électrique et diesel.">
+<meta name="apple-mobile-web-app-title" content="MasterTCO v18.1">
+<meta name="application-name" content="MasterTCO v18.1">
 <meta name="theme-color" content="#00529b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -411,7 +411,7 @@ table.a4 tr.cum td{font-weight:700;color:#00529b}
 <body>
 <div id="app">
   <header class="top">
-    <div class="brand"><div class="wm"><span class="a">Master</span><span class="b">TCO</span></div><span class="tag">Coût total de possession<br>électrique et diesel<br><span style="opacity:.7;font-size:10px">version 18 · 07/11/2026</span></span></div>
+    <div class="brand"><div class="wm"><span class="a">Master</span><span class="b">TCO</span></div><span class="tag">Coût total de possession<br>électrique et diesel<br><span style="opacity:.7;font-size:10px">version 18.1 · 07/11/2026</span></span></div>
     <div class="tabs">
       <button class="tab on" type="button" data-action="tab" data-tab="saisie" id="tab-saisie">Données</button>
       <button class="tab" type="button" data-action="tab" data-tab="rapport" id="tab-rapport">Rapport</button>
@@ -5305,7 +5305,20 @@ function applyAllFolds() {
     applyCardClass(document.getElementById('card_' + g.id), g, null);
   }
 }
-function setFolded(id, on) {
+/* Après ouverture : ramène le titre de la carte juste sous la barre sticky */
+function scrollOpenCard(id) {
+  var card = document.getElementById('card_' + id);
+  if (!card) { return; }
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      var bar = document.querySelector('.top');
+      var offset = (bar ? bar.getBoundingClientRect().height : 72) + 10;
+      var y = card.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0) - offset;
+      window.scrollTo(0, Math.max(0, y));
+    });
+  });
+}
+function setFolded(id, on, opts) {
   if (on) {
     if (openCardId === id) { openCardId = null; }
   } else {
@@ -5313,10 +5326,12 @@ function setFolded(id, on) {
   }
   saveFold();
   applyAllFolds();
+  if (!on && !(opts && opts.noScroll)) { scrollOpenCard(id); }
 }
 function unfoldForKey(k) {
   var g = GROUP_OF[k];
-  if (g) { setFolded(g.id, false); }
+  /* noScroll : goToFirstMissing gère le défilement vers le champ manquant */
+  if (g) { setFolded(g.id, false, { noScroll: true }); }
 }
 
 function buildForm() {
