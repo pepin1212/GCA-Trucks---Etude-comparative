@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MasterTCO</title>
-<meta name="description" content="Coût total de possession électrique et diesel — études TCO poids lourds.">
-<meta name="apple-mobile-web-app-title" content="MasterTCO">
-<meta name="application-name" content="MasterTCO">
+<title>MasterTCO · v18</title>
+<meta name="description" content="MasterTCO version 18 (07/11/2026) — Coût total de possession électrique et diesel.">
+<meta name="apple-mobile-web-app-title" content="MasterTCO v18">
+<meta name="application-name" content="MasterTCO v18">
 <meta name="theme-color" content="#00529b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -411,7 +411,7 @@ table.a4 tr.cum td{font-weight:700;color:#00529b}
 <body>
 <div id="app">
   <header class="top">
-    <div class="brand"><div class="wm"><span class="a">Master</span><span class="b">TCO</span></div><span class="tag">Coût total de possession<br>électrique et diesel<br><span style="opacity:.7;font-size:10px">version 17 du 05/11/2026</span></span></div>
+    <div class="brand"><div class="wm"><span class="a">Master</span><span class="b">TCO</span></div><span class="tag">Coût total de possession<br>électrique et diesel<br><span style="opacity:.7;font-size:10px">version 18 · 07/11/2026</span></span></div>
     <div class="tabs">
       <button class="tab on" type="button" data-action="tab" data-tab="saisie" id="tab-saisie">Données</button>
       <button class="tab" type="button" data-action="tab" data-tab="rapport" id="tab-rapport">Rapport</button>
@@ -515,8 +515,8 @@ table.a4 tr.cum td{font-weight:700;color:#00529b}
 <script>
 /* ===================== DONNÉES PAR DÉFAUT ===================== */
 var STORAGE_KEY = 'masterTCO_v5';
-var FOLD_KEY = 'masterTCO_fold_v1';
-var folded = {};
+var FOLD_KEY = 'masterTCO_fold_v2';
+var openCardId = null; /* accordéon : au plus une carte ouverte ; null = toutes fermées */
 var OLD_KEYS = ['masterTCO_v4', 'masterTCO_v3', 'ecoCamionData_v2'];
 
 var DEFAULTS = {
@@ -571,6 +571,8 @@ var U_BASE_L = [['ttc', '€/L TTC'], ['ht', '€/L HT']];
 var U_AN_MOIS = [['an', '€ par an'], ['mois', '€ par mois']];
 var U_DUREE = [['ans', 'ans'], ['mois', 'mois']];
 var U_RES = [['pct', '% du prix'], ['eur', '€ HT'], ['auto', 'Automatique (grille)']];
+/* Crédit-bail : valeur résiduelle contractuelle seulement (% ou €) — pas la grille marché auto */
+var U_CB_RES = [['pct', '% du prix'], ['eur', '€ HT']];
 /* Grille de valeur résiduelle (% du prix neuf) en fin d’année N, à 100 000 km/an.
    Ajustement km : ±1 point de % par tranche de 10 000 km/an au-dessus / en-dessous de 100 000, plafonné à ±8 pts. */
 var RES_KM_REF = 100000, RES_KM_STEP = 10000, RES_KM_PTS = 1, RES_KM_CAP = 8;
@@ -590,7 +592,8 @@ function resKmAdjPts(kmAn) {
 function resAutoPct(d, X) {
   var row = resAutoRow(d.annees), base = isElec(d, X) ? row.e : row.t;
   var pct = base + resKmAdjPts(annualKm(d));
-  if (d.resAutoFactor) { pct *= d.resAutoFactor; }
+  var f = d['resAutoFactor' + X] != null ? d['resAutoFactor' + X] : d.resAutoFactor;
+  if (f) { pct *= f; }
   return Math.max(0, pct);
 }
 function resEuro(d, X) {
@@ -811,7 +814,7 @@ var GROUPS = [
     { k: 'cbTauxE', slot: 'E', l: 'Taux annuel du crédit-bail', u: '%/an', vis: function (s) { return s.modeE === 'cbail'; } },
     { k: 'cbMajE', slot: 'E', l: 'Loyer majoré', select: [['non', 'Non'], ['m1', '1er mois'], ['m6', '6e mois']], hint: 'montage non linéaire : un seul mois au choix', vis: function (s) { return s.modeE !== 'achat'; } },
     { k: 'cbMajMontantE', slot: 'E', l: 'Montant du loyer majoré', unitKey: 'cbMajUE', units: U_MAJ, pos: true, max: function (s) { return s.cbMajUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE !== 'achat' && (s.cbMajE === 'm1' || s.cbMajE === 'm6'); } },
-    { k: 'cbResE', slot: 'E', l: 'Valeur résiduelle du crédit-bail', unitKey: 'cbResUE', units: U_RES, max: function (s) { return s.cbResUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE === 'cbail'; } },
+    { k: 'cbResE', slot: 'E', l: 'Valeur résiduelle du crédit-bail', unitKey: 'cbResUE', units: U_CB_RES, max: function (s) { return s.cbResUE === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeE === 'cbail'; } },
     { info: 'acqE' }
   ]},
   { id: 'achat2', dep: 'achat', cx: true, title: 'Acquisition · véhicule 2', note: '', fields: [
@@ -823,7 +826,7 @@ var GROUPS = [
     { k: 'cbTauxD', slot: 'D', l: 'Taux annuel du crédit-bail', u: '%/an', vis: function (s) { return s.modeD === 'cbail'; } },
     { k: 'cbMajD', slot: 'D', l: 'Loyer majoré', select: [['non', 'Non'], ['m1', '1er mois'], ['m6', '6e mois']], hint: 'montage non linéaire : un seul mois au choix', vis: function (s) { return s.modeD !== 'achat'; } },
     { k: 'cbMajMontantD', slot: 'D', l: 'Montant du loyer majoré', unitKey: 'cbMajUD', units: U_MAJ, pos: true, max: function (s) { return s.cbMajUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD !== 'achat' && (s.cbMajD === 'm1' || s.cbMajD === 'm6'); } },
-    { k: 'cbResD', slot: 'D', l: 'Valeur résiduelle du crédit-bail', unitKey: 'cbResUD', units: U_RES, max: function (s) { return s.cbResUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD === 'cbail'; } },
+    { k: 'cbResD', slot: 'D', l: 'Valeur résiduelle du crédit-bail', unitKey: 'cbResUD', units: U_CB_RES, max: function (s) { return s.cbResUD === 'pct' ? 100 : undefined; }, vis: function (s) { return s.modeD === 'cbail'; } },
     { info: 'acqD' }
   ]},
   { id: 'aides', on: 'aides', cx: true, title: 'Aides', note: 'Les aides (véhicule et borne) sont des montants TTC, versés le 6e mois : elles ne comptent qu’à partir de ce moment-là. L’aide à un tracteur électrique n’est acquise que si le client le garde au moins 5 ans. En location, le loyer saisi est déjà net d’aide et n’est jamais recalculé : tu choisis seulement le calendrier (aide au client en plus des loyers ; 1er mois = l’aide ; ou 6e mois = l’aide). En crédit-bail, l’aide peut aussi recalculer le loyer (1er loyer majoré, 6e loyer = aide − TVA, ou 6e loyer = aide HT).', fields: [
@@ -2106,8 +2109,14 @@ function sensitivity(d, on, complet, r) {
     }
     if (on.revente && r.ownE) {
       addVar('Revente ' + N1, function (dc, f) {
-        if (dc.resU === 'auto') { dc.resAutoFactor = (dc.resAutoFactor || 1) * f; }
+        if (dc.resU === 'auto') { dc.resAutoFactorE = (dc.resAutoFactorE || 1) * f; }
         else { dc.resE *= f; }
+      });
+    }
+    if (on.revente && r.ownD) {
+      addVar('Revente ' + N2, function (dc, f) {
+        if (dc.resU === 'auto') { dc.resAutoFactorD = (dc.resAutoFactorD || 1) * f; }
+        else { dc.resD *= f; }
       });
     }
   }
@@ -3192,7 +3201,11 @@ function scenarioText(d, on) {
   if (on.energie && anyElec(d)) { parts.push('électricité ' + sgn(d.scElec) + ' %'); }
   parts.push('kilométrage ' + sgn(d.scKm) + ' %');
   if (on.batterie) { parts.push('perte de capacité des batteries +' + fmt(d.scBatDegP, 1) + ' %/an'); }
-  if (on.revente && ownsS(state, 'E')) { parts.push('revente de ' + N1(d) + ' ' + sgn(d.scRes) + ' %'); }
+  if (on.revente && (ownsS(state, 'E') || ownsS(state, 'D'))) {
+    if (ownsS(state, 'E') && ownsS(state, 'D')) { parts.push('revente ' + sgn(d.scRes) + ' %'); }
+    else if (ownsS(state, 'E')) { parts.push('revente de ' + N1(d) + ' ' + sgn(d.scRes) + ' %'); }
+    else { parts.push('revente de ' + N2(d) + ' ' + sgn(d.scRes) + ' %'); }
+  }
   return parts.join(', ');
 }
 
@@ -5180,6 +5193,9 @@ function migrateValues(v) {
   /* Ancienne spec DAF LFP : 88 % utilisables (462 kWh nets sur 525) → 95 % (499 kWh) */
   if (Math.abs(num(m.dod) - 88) < 0.05) { m.dod = '95'; }
   if (Math.abs(num(m.dod2) - 88) < 0.05) { m.dod2 = '95'; }
+  /* Si « Automatique (grille) » a été choisi par erreur sur le crédit-bail (liste partagée un temps) → % */
+  if (m.cbResUE === 'auto') { m.cbResUE = 'pct'; }
+  if (m.cbResUD === 'auto') { m.cbResUD = 'pct'; }
   if (!String(m.nom1 || '').replace(/^\s+|\s+$/g, '')) { m.nom1 = DEF_NAMES[cmpOf(m)].E; }
   if (!String(m.nom2 || '').replace(/^\s+|\s+$/g, '')) { m.nom2 = DEF_NAMES[cmpOf(m)].D; }
   /* Plage de conduite : listes d'heures entières (anciennes saisies arrondies à l'heure) */
@@ -5256,20 +5272,17 @@ function fieldHtml(f, gid, idx) {
 }
 
 function loadFold() {
-  folded = {};
+  openCardId = null;
   try {
     var raw = localStorage.getItem(FOLD_KEY);
     var o = raw ? JSON.parse(raw) : null;
-    var k;
-    if (o && typeof o === 'object') {
-      for (k in o) { if (Object.prototype.hasOwnProperty.call(o, k) && o[k]) { folded[k] = 1; } }
-    }
-  } catch (e) { folded = {}; }
+    if (o && typeof o.open === 'string' && groupById(o.open)) { openCardId = o.open; }
+  } catch (e) { openCardId = null; }
 }
 function saveFold() {
-  try { localStorage.setItem(FOLD_KEY, JSON.stringify(folded)); } catch (e) {}
+  try { localStorage.setItem(FOLD_KEY, JSON.stringify({ open: openCardId })); } catch (e) {}
 }
-function isFolded(id) { return !!folded[id]; }
+function isFolded(id) { return openCardId !== id; }
 function applyCardClass(card, g, inactive) {
   if (!card || !g) { return; }
   if (inactive === null || inactive === undefined) { inactive = /\boff\b/.test(card.className); }
@@ -5285,14 +5298,25 @@ function groupById(id) {
   for (i = 0; i < GROUPS.length; i++) { if (GROUPS[i].id === id) { return GROUPS[i]; } }
   return null;
 }
+function applyAllFolds() {
+  var i, g;
+  for (i = 0; i < GROUPS.length; i++) {
+    g = GROUPS[i];
+    applyCardClass(document.getElementById('card_' + g.id), g, null);
+  }
+}
 function setFolded(id, on) {
-  if (on) { folded[id] = 1; } else { delete folded[id]; }
+  if (on) {
+    if (openCardId === id) { openCardId = null; }
+  } else {
+    openCardId = id;
+  }
   saveFold();
-  applyCardClass(document.getElementById('card_' + id), groupById(id), null);
+  applyAllFolds();
 }
 function unfoldForKey(k) {
   var g = GROUP_OF[k];
-  if (g && isFolded(g.id)) { setFolded(g.id, false); }
+  if (g) { setFolded(g.id, false); }
 }
 
 function buildForm() {
@@ -5603,10 +5627,9 @@ function refreshAll() {
       var elR = document.getElementById('f_res' + X);
       if (!elR) { return; }
       if (ownsS(state, X)) {
-        var pctR = resAutoPct(dRes, X);
-        elR.value = fmt(pctR, 1).replace(/\u202f/g, ' ');
+        /* Affiche le % grille sans l’écrire dans state (sinon bascule en € HT = faux montant) */
+        elR.value = fmt(resAutoPct(dRes, X), 1).replace(/\u202f/g, ' ');
         elR.readOnly = true;
-        state['res' + X] = elR.value;
       } else { elR.readOnly = true; }
     });
   } else {
